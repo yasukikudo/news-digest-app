@@ -211,6 +211,14 @@ kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--l
 .gl .ge { font: var(--fs-s) var(--font-mono); color: var(--muted); }
 .gl .gt { margin: 6px 0 0; line-height: 1.8; max-width: 40em; }
 .gl .gt.dim { color: var(--muted); }
+.gok { color: var(--accent-ink); font-weight: 600; }
+/* glossary review (admins) */
+.lab.pend { border-color: var(--accent); color: var(--accent-ink); }
+.grl .gra, .grform .gra { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.grform { display: grid; gap: 10px; margin-top: 10px; max-width: 40em; }
+.grform label { display: grid; gap: 4px; font-size: var(--fs-s); color: var(--muted); }
+.grbody .seg { margin-top: 14px; }
+.inp.grta { height: auto; width: 100%; padding: 8px 10px; line-height: 1.7; resize: vertical; font-size: var(--fs-m); color: var(--ink); }
 .gl li[aria-current="true"] { background: color-mix(in srgb, var(--accent) 10%, transparent); box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 4px; }
 /* A glossary term in a text: a dotted underline. A card with the definition opens on hover, focus or tap. */
 .gterm { text-decoration: underline dotted; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--accent) 75%, transparent); cursor: help; border-radius: 3px; }
@@ -710,7 +718,7 @@ const UI = {
   ja: {
     today: '今日', stories: 'ストーリー', browse: 'ブラウズ', countries: '国別', events: '出来事', glossary: '用語集', weekly: '週のふりかえり', library: 'ライブラリ', settings: '設定',
     listSep: '・', listDot: '　', moreN: ' ほか{n}', categories: 'カテゴリ', all: 'すべて', following: '追っているストーリー', followEmpty: '追っているストーリーはまだありません。ストーリーを開いて「追う」を押すと、ここに並びます。',
-    glossLead: 'ストーリーに出てくる用語、人物、制度・機関を、短い説明と一緒にまとめています。すべて AI の下書きです。確認の画面は、準備中です。',
+    glossLead: 'ストーリーに出てくる用語、人物、制度・機関を、短い説明と一緒にまとめています。AI が書いた下書きで、管理者が確認した項目には「確認済み」と付きます。',
     glossSearch: '名前や説明で探す', glossAll: 'すべて', gk_term: '用語', gk_person: '人物', gk_institution: '制度・機関',
     glossNoText: '説明はありません。AI が確信を持てなかったため、空にしてあります。', glossBasis_articles: '記事に基づく',
     glossBasis_memory: 'AI の記憶による。古い可能性があります', glossBasis_both: '記事と AI の記憶による', glossAsOf: '{day}時点',
@@ -745,6 +753,11 @@ const UI = {
     ph_events_lead: 'ストーリーとは別に、日付のある出来事を時間順にたどる画面です。', ph_events_1: '出来事が起きた日と名前', ph_events_2: '関係する国・機関', ph_events_3: 'その出来事が属するストーリー', ph_events_4: '月ごと、国ごとの絞り込み',
     ph_weekly_lead: '一週間の動きをまとめて振り返る画面です。', ph_weekly_1: 'その週の要点', ph_weekly_2: '動きの大きかったストーリー', ph_weekly_3: '来週の予定', ph_weekly_4: '過去の週への切り替え',
     s_display: '表示', s_digest: 'ダイジェスト', s_notify: '通知', s_interests: '関心', s_sources: '出典', s_cost: '費用', s_admin: '管理', s_about: 'このアプリについて', s_account: 'アカウント',
+    s_glossreview: '用語集の確認', grLead: 'AI が書いた用語集の説明を、確認します。決めた内容は、次の実行のあとで、みんなの画面に反映されます。「今日のダイジェストを実行」を押すと、すぐに反映されます。',
+    grTab_draft: 'AI の下書き', grTab_confirmed: '確認済み', grTab_hidden: '外した項目', grConfirm: '確認済みにする', grEdit: '直す', grHide: '外す',
+    grBack: '下書きに戻す', grRestore: '戻す', grSaveConfirm: '保存して確認済みにする', grCancel: 'やめる', grTextEn: '英語の説明', grTextJa: '日本語の説明',
+    grPending: '反映待ち', grRewritten: '直しました', grNone: 'この区分の項目は、ありません。', grStories: 'ストーリー{n}件', grNoText: '説明はありません。',
+    glossConfirmed: '確認済み', glossRewritten: '確認のうえ直しました',
     dailyPast: 'この日の要点', calendar: 'カレンダー', calPrev: '前の月', calNext: '次の月', calToday: '今日', calLegend: 'ダイジェストのある日', dayPrev: '前の日', dayNext: '次の日',
     dayOpen: 'カレンダーを開く', pastNote: '過去の日のダイジェストです。要点は、その日に書いたものです。ストーリーは、いまの版で、その日の動きを添えています。',
     acName: '表示名', acNameD: 'アプリの中で使う名前です。', acSave: '保存', acSaved: '保存しました。', acNameBad: '表示名は、1字から60字までです。',
@@ -798,7 +811,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
   en: {
     today: 'Today', stories: 'Stories', browse: 'Browse', countries: 'Countries', events: 'Events', glossary: 'Glossary', weekly: 'Weekly review', library: 'Library', settings: 'Settings',
     listSep: ', ', listDot: ' · ', moreN: ' +{n}', categories: 'Categories', all: 'All', following: 'Following', followEmpty: 'Nothing followed yet. Open a story and press Follow to list it here.',
-    glossLead: 'Terms, people and institutions from the stories, with a short explanation. Every entry is an AI draft. A screen to confirm them is not available yet.',
+    glossLead: 'Terms, people and institutions from the stories, with a short explanation. The AI writes drafts, and an entry that an admin has checked is marked "Confirmed".',
     glossSearch: 'Search names and explanations', glossAll: 'All', gk_term: 'Term', gk_person: 'Person', gk_institution: 'Institution',
     glossNoText: 'No explanation. The AI was not sure, so it is left empty.', glossBasis_articles: 'Based on the articles',
     glossBasis_memory: 'From the AI\'s memory. It may be out of date.', glossBasis_both: 'From the articles and the AI\'s memory', glossAsOf: 'as of {day}',
@@ -835,6 +848,11 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     ph_events_lead: 'A time-ordered view of dated events, separate from stories.', ph_events_1: 'The date and name of each event', ph_events_2: 'The countries and bodies involved', ph_events_3: 'The story each event belongs to', ph_events_4: 'Filters by month and country',
     ph_weekly_lead: 'A look back over the week as a whole.', ph_weekly_1: 'The week in brief', ph_weekly_2: 'The stories that moved most', ph_weekly_3: 'What is scheduled for next week', ph_weekly_4: 'A switch to earlier weeks',
     s_display: 'Display', s_digest: 'Digest', s_notify: 'Notifications', s_interests: 'Interests', s_sources: 'Sources', s_cost: 'Cost', s_admin: 'Admin', s_about: 'About', s_account: 'Account',
+    s_glossreview: 'Glossary review', grLead: 'Check the explanations the AI wrote for the glossary. What you decide shows on everyone\'s screen after the next run. Pressing "Run today\'s digest" shows it at once.',
+    grTab_draft: 'AI drafts', grTab_confirmed: 'Confirmed', grTab_hidden: 'Taken out', grConfirm: 'Confirm', grEdit: 'Edit', grHide: 'Take out',
+    grBack: 'Back to draft', grRestore: 'Put back', grSaveConfirm: 'Save and confirm', grCancel: 'Cancel', grTextEn: 'English text', grTextJa: 'Japanese text',
+    grPending: 'Waiting to be published', grRewritten: 'Rewritten', grNone: 'Nothing in this group.', grStories: '{n} stories', grNoText: 'No explanation.',
+    glossConfirmed: 'Confirmed', glossRewritten: 'Checked and rewritten',
     dailyPast: 'Summary of the day', calendar: 'Calendar', calPrev: 'Previous month', calNext: 'Next month', calToday: 'Today', calLegend: 'Days with a digest', dayPrev: 'Previous day', dayNext: 'Next day',
     dayOpen: 'Open the calendar', pastNote: 'This is the digest of a past day. The summary is the one written that day. The stories are shown as they are now, with what moved that day.',
     acName: 'Display name', acNameD: 'The name used inside the app.', acSave: 'Save', acSaved: 'Saved.', acNameBad: 'A display name has 1 to 60 characters.',
@@ -1562,8 +1580,11 @@ function termify(o, part) {
   const [full, lang] = pick(o);
   return termNodes(part != null ? part : full, lang);
 }
+/* What an entry is: an AI draft, checked by an admin, or checked and rewritten. The basis (articles, memory) describes the AI's
+   text, so it is left out once an admin has rewritten the text. */
+const glossState = x => (x.status === 'confirmed' ? t(x.edited ? 'glossRewritten' : 'glossConfirmed') : t('glossDraft'));
 function glossBasis(x) {
-  return x.basis && x.basis !== 'none' ? t('glossBasis_' + x.basis) + (x.as_of ? ' · ' + t('glossAsOf', { day: fmtDate(x.as_of, { year: 'numeric', month: 'numeric', day: 'numeric' }) }) : '') : '';
+  return x.basis && x.basis !== 'none' && !x.edited ? t('glossBasis_' + x.basis) + (x.as_of ? ' · ' + t('glossAsOf', { day: fmtDate(x.as_of, { year: 'numeric', month: 'numeric', day: 'numeric' }) }) : '') : '';
 }
 const gpop = { el: null, anchor: null, timer: null, at: 0 };
 function gpopEl() {
@@ -1589,7 +1610,7 @@ function gpopShow(anchor) {
   el.replaceChildren();
   put(el, [h('div', { class: 'gpn' }, h('b', lg(x.name), name), S.lang !== 'en' && en && name !== en && h('span', { class: 'ge', lang: 'en' }, en), h('span', { class: 'lab' }, t('gk_' + x.kind))),
     T(x.text) ? h('p', { class: 'gpt', ...lg(x.text) }, T(x.text)) : null,
-    h('div', { class: 'gpm' }, glossBasis(x) && h('span', {}, glossBasis(x)), h('span', {}, t('glossDraft')), h('a', { class: 'link', href: '#/glossary/' + x.id }, t('glossOpen')))]);
+    h('div', { class: 'gpm' }, glossBasis(x) && h('span', {}, glossBasis(x)), h('span', { class: x.status === 'confirmed' ? 'gok' : null }, glossState(x)), h('a', { class: 'link', href: '#/glossary/' + x.id }, t('glossOpen')))]);
   el.hidden = false;
   anchor.setAttribute('aria-describedby', 'gpop');
   gpop.anchor = anchor;
@@ -1812,7 +1833,7 @@ function glossRow(x) {
   return h('li', { id: 'g-' + x.id },
     h('div', { class: 'gnm' }, h('b', lg(x.name), name), S.lang !== 'en' && en && name !== en && h('span', { class: 'ge', lang: 'en' }, en), h('span', { class: 'lab' }, t('gk_' + x.kind))),
     T(x.text) ? h('p', { class: 'gt', ...lg(x.text) }, T(x.text)) : h('p', { class: 'gt dim' }, t('glossNoText')),
-    h('div', { class: 'am' }, basis && h('span', {}, basis),
+    h('div', { class: 'am' }, x.status === 'confirmed' && h('span', { class: 'gok' }, glossState(x)), basis && h('span', {}, basis),
       stories.slice(0, 3).map(sid => h('a', { class: 'link', href: '#/story/' + sid, ...lg(BY.get(sid).title) }, T(BY.get(sid).title))),
       stories.length > 3 && h('span', {}, t('glossOthers', { n: stories.length - 3 }))));
 }
@@ -1865,8 +1886,8 @@ function numInput(key, min, max, label) {
 /* ---------- account and admin (the real app only) ---------- */
 const ZONES = ['Africa/Cairo', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/New_York', 'Asia/Kolkata', 'Asia/Seoul', 'Asia/Tokyo', 'Australia/Sydney', 'Europe/London', 'Europe/Paris', 'UTC'];
 const validZone = z => { try { new Intl.DateTimeFormat('en', { timeZone: z }); return true; } catch (e) { return false; } };
-const ADMIN_ONLY = ['cost', 'admin', 'run'];
-const visibleSections = () => SECTIONS.filter(x => (!['account', 'run'].includes(x[0]) || USER) && (!USER || USER.role === 'admin' || !ADMIN_ONLY.includes(x[0])));
+const ADMIN_ONLY = ['cost', 'admin', 'glossreview', 'run'];
+const visibleSections = () => SECTIONS.filter(x => (!['account', 'run', 'glossreview'].includes(x[0]) || USER) && (!USER || USER.role === 'admin' || !ADMIN_ONLY.includes(x[0])));
 const say = (box, msg, bad) => { box.textContent = msg; box.className = 'note' + (bad ? ' bad' : ''); };
 function accountSection() {
   const api = USER.api;
@@ -1917,6 +1938,74 @@ function adminSection() {
       h('button', { type: 'button', class: 'btn primary', onclick: save }, t('acSave')))), box,
     h('h2', { class: 'sec' }, t('adUsers')), h('p', { class: 'note' }, t('adUsersD')), list,
   ];
+}
+/* Glossary review (admins, the real app only): confirm, rewrite or take out the entries the AI wrote. A decision is saved as one
+   document in glossary_review. The scripts merge it into the glossary at their next run. Until then this page shows the decision
+   on top of what was published, and marks the entry "waiting to be published". Entries taken out are published to admins only
+   (DATA.glossary_hidden), so that an admin can put one back. */
+function glossReviewSection() {
+  const api = USER.api;
+  const base = new Map();
+  for (const x of DATA.glossary || []) base.set(x.id, { ...x, pub: x.status === 'confirmed' ? 'confirmed' : 'draft' });
+  for (const x of DATA.glossary_hidden || []) base.set(x.id, { ...x, pub: 'hidden', edited: false });
+  let live = {};
+  const ui = { tab: 'draft', edit: null };
+  const box = h('p', { class: 'note', role: 'status', 'aria-live': 'polite' });
+  const body = h('div', { class: 'grbody' }, h('p', { class: 'note' }, t('adLoading')));
+  const text = (o, l) => (o && o[l]) || '';
+  const view = id => {
+    const b = base.get(id), d = live[id];
+    const pubEn = text(b.text, 'en'), pubJa = text(b.text, 'ja');
+    return { id, b, status: d ? d.status : b.pub, en: (d && d.text_en) || pubEn, ja: (d && d.text_ja) || pubJa,
+      edited: !!(b.edited || (d && (d.text_en || d.text_ja))),
+      pending: !!d && (d.status !== b.pub || (!!d.text_en && d.text_en !== pubEn) || (!!d.text_ja && d.text_ja !== pubJa)) };
+  };
+  const save = async (id, status, texts) => {
+    const d = live[id] || {}, doc = { status };
+    const en = texts && texts.en !== undefined ? texts.en : d.text_en, ja = texts && texts.ja !== undefined ? texts.ja : d.text_ja;
+    if (en) doc.text_en = en;
+    if (ja) doc.text_ja = ja;
+    try { await api.saveGlossaryReview(id, doc); live[id] = { ...doc, at: new Date().toISOString() }; ui.edit = null; say(box, t('acSaved')); paint(); }
+    catch (e) { say(box, t('acError'), true); }
+  };
+  const button = (label, onclick, cls) => h('button', { type: 'button', class: 'btn' + (cls ? ' ' + cls : ''), onclick }, label);
+  const editForm = v => {
+    const en = h('textarea', { class: 'inp grta', rows: 3, maxlength: '600', lang: 'en', 'aria-label': t('grTextEn') });
+    const ja = h('textarea', { class: 'inp grta', rows: 3, maxlength: '600', lang: 'ja', 'aria-label': t('grTextJa') });
+    en.value = v.en; ja.value = v.ja;
+    const go = () => {      // only what was changed is sent, so that an English text left alone is not given a Japanese one that does not fit
+      const e = en.value.trim(), j = ja.value.trim(), texts = {};
+      if (e && e !== v.en) texts.en = e;
+      if (j && j !== v.ja) texts.ja = j;
+      save(v.id, 'confirmed', texts);
+    };
+    return h('div', { class: 'grform' }, h('label', {}, t('grTextEn'), en), h('label', {}, t('grTextJa'), ja),
+      h('div', { class: 'gra' }, button(t('grSaveConfirm'), go, 'primary'), button(t('grCancel'), () => { ui.edit = null; paint(); })));
+  };
+  const row = v => {
+    const b = v.b, name = T(b.name), en = b.name.en;
+    const actions = v.status === 'hidden' ? [button(t('grRestore'), () => save(v.id, 'draft'))]
+      : [v.status === 'draft' ? button(t('grConfirm'), () => save(v.id, 'confirmed'), 'primary') : button(t('grBack'), () => save(v.id, 'draft')),
+         button(t('grEdit'), () => { ui.edit = v.id; paint(); }), button(t('grHide'), () => save(v.id, 'hidden'))];
+    return h('li', { 'data-id': v.id },
+      h('div', { class: 'gnm' }, h('b', lg(b.name), name), S.lang !== 'en' && en && name !== en && h('span', { class: 'ge', lang: 'en' }, en), h('span', { class: 'lab' }, t('gk_' + b.kind)),
+        v.edited && h('span', { class: 'lab' }, t('grRewritten')), v.pending && h('span', { class: 'lab pend' }, t('grPending'))),
+      v.en ? h('p', { class: 'gt', lang: 'en' }, v.en) : h('p', { class: 'gt dim' }, t('grNoText')),
+      v.ja ? h('p', { class: 'gt', lang: 'ja' }, v.ja) : null,
+      h('div', { class: 'am' }, b.basis && b.basis !== 'none' && !v.edited ? h('span', {}, t('glossBasis_' + b.basis)) : null,
+        (b.stories || []).length ? h('span', {}, t('grStories', { n: b.stories.length })) : null),
+      ui.edit === v.id ? editForm(v) : h('div', { class: 'gra' }, actions));
+  };
+  function paint() {
+    const views = [...base.keys()].map(view), counts = { draft: 0, confirmed: 0, hidden: 0 };
+    for (const v of views) counts[v.status] = (counts[v.status] || 0) + 1;
+    const shown = views.filter(v => v.status === ui.tab).sort((a, b) =>      // in the drafts, what the AI wrote from memory comes first
+      (ui.tab === 'draft' ? (b.b.basis === 'memory') - (a.b.basis === 'memory') : 0) || String(T(a.b.name)).localeCompare(String(T(b.b.name))));
+    body.replaceChildren(seg(['draft', 'confirmed', 'hidden'].map(k => [k, t('grTab_' + k) + ' ' + num(counts[k])]), ui.tab, v => { ui.tab = v; ui.edit = null; paint(); }, t('s_glossreview')),
+      shown.length ? h('ul', { class: 'gl grl' }, shown.map(row)) : h('p', { class: 'note' }, t('grNone')));
+  }
+  api.listGlossaryReview().then(d => { live = d || {}; paint(); }, () => { say(box, t('acError'), true); paint(); });
+  return [h('p', { class: 'note' }, t('grLead')), box, body];
 }
 /* ---------- run now (administrators only; the GitHub token stays in this browser) ---------- */
 const GH_WORKFLOW = 'digest.yml', GH_REF = 'main';
@@ -2070,6 +2159,7 @@ const SECTIONS = [
     srow(t('adMembers'), t('adMembersD'), h('span', { class: 'none' }, '—'), t('notBuilt')),
     srow(t('adJournals'), t('adJournalsD'), h('span', { class: 'none' }, '—'), t('notBuilt')),
     srow(t('adLangs'), t('adLangsD'), h('div', { class: 'chips2' }, LANGS.map(l => { const cv = coverage(l.code); return h('span', { class: 'chip', title: cv == null ? t('base') : t('coverage') + ' ' + cv + '%' }, h('span', { lang: l.code }, l.name), h('small', {}, cv == null ? t('base') : cv + '%')); })))]],
+  ['glossreview', () => USER ? glossReviewSection() : []],
   ['run', () => USER ? runSection() : []],
   ['about', () => {
     const st = DATA.stats;
@@ -2258,9 +2348,10 @@ async function enter(user) {
     const me = meSnap.data();
     if (me.active !== true) return showMessage(W.stopped, outButton());
     const admin = me.role === 'admin';
-    const [appSnap, costsSnap, mapRes, prefsSnap, settingsSnap] = await Promise.all([
+    const [appSnap, costsSnap, hiddenSnap, mapRes, prefsSnap, settingsSnap] = await Promise.all([
       getDocs(collection(db, 'app')),
       admin ? getDoc(doc(db, 'app_admin', 'costs')) : null,
+      admin ? getDoc(doc(db, 'app_admin', 'glossary_hidden')) : null,      // the glossary entries an admin took out
       fetch('world_map.json', { cache: 'no-cache' }),
       getDoc(doc(db, 'users', user.uid, 'settings', 'prefs')),
       getDoc(doc(db, 'settings', 'app')),
@@ -2268,7 +2359,10 @@ async function enter(user) {
     const parts = {};
     appSnap.forEach(d => { parts[d.id] = JSON.parse(d.data().json); });
     if (!parts.core) return showMessage(W.noData, outButton());
-    const data = assemble(parts, admin && costsSnap && costsSnap.exists() ? { costs: JSON.parse(costsSnap.data().json) } : {}, mapRes.ok ? { map: await mapRes.json() } : {});
+    const adminParts = {};
+    if (admin && costsSnap && costsSnap.exists()) adminParts.costs = JSON.parse(costsSnap.data().json);
+    if (admin) adminParts.glossary_hidden = hiddenSnap && hiddenSnap.exists() ? JSON.parse(hiddenSnap.data().json) : [];
+    const data = assemble(parts, adminParts, mapRes.ok ? { map: await mapRes.json() } : {});
     applyPrefs(prefsSnap.exists() ? prefsSnap.data() : {});
     const shared = settingsSnap.exists() ? settingsSnap.data() : {};
     start(data, user, me, { digest_time: shared.digest_time || data.settings.digest_time, timezone: shared.timezone || data.settings.timezone });
@@ -2316,6 +2410,15 @@ function start(data, user, me, shared) {
         return snap.docs.map(d => Object.assign({ uid: d.id }, d.data())).sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
       },
       setActive: (otherUid, active) => updateDoc(doc(db, 'users', otherUid), { active }),
+      // What an admin decided about glossary entries: one plain document per entry (status, optional texts, time). The scripts
+      // read these at their next run and publish the result. The rules accept only this shape and only from an admin.
+      async listGlossaryReview() {
+        const snap = await getDocs(collection(db, 'glossary_review'));
+        const out = {};
+        snap.forEach(d => { out[d.id] = d.data(); });
+        return out;
+      },
+      saveGlossaryReview: (entryId, fields) => setDoc(doc(db, 'glossary_review', entryId), Object.assign({}, fields, { at: new Date().toISOString() })),
     },
   };
   let hiddenAt = 0;
