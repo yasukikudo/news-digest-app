@@ -507,6 +507,35 @@ td.wrap { white-space: normal; min-width: 14em; }
 }
 @media (hover: none) { .row:hover, .crow:hover { background: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+/* the calendar and the day arrows */
+.cal { padding: 10px 8px 8px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface) 55%, transparent); }
+.calhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.calhead b { font-size: var(--fs-s); }
+.calnav { width: 28px; height: 28px; border: 0; border-radius: 6px; background: none; color: var(--ink); font-size: 18px; line-height: 1; }
+.calnav:hover:not(:disabled) { background: var(--hover); }
+.calnav:disabled { opacity: .3; }
+.calgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.cw { font-size: 10.5px; color: var(--muted); padding: 2px 0; }
+.cd { position: relative; display: block; height: 30px; line-height: 30px; font-size: 12.5px; border-radius: 8px; color: var(--muted); text-decoration: none; }
+.cd.off { opacity: .45; }
+.cd.pad { visibility: hidden; }
+a.cd { color: var(--ink); }
+a.cd:hover { background: var(--hover); }
+.cd.has::after { content: ''; position: absolute; left: 50%; bottom: 3px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent); }
+.cd.tdy { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.cd.sel { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+.calfoot { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: var(--fs-xs); color: var(--muted); }
+.calfoot .leg { display: inline-flex; align-items: center; gap: 6px; }
+.calfoot .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.daynav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 2px; }
+.dn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); text-decoration: none; font-size: 20px; line-height: 1; }
+a.dn:hover { background: var(--hover); }
+.dn.off { opacity: .35; }
+.pastnote { margin: 8px 0 0; font-size: var(--fs-xs); color: var(--muted); line-height: 1.7; }
+.calpanel { margin: 10px 0 14px; }
+.daynav .link { display: inline-flex; align-items: center; align-self: center; min-height: 34px; padding: 0 4px; }
+.calpanel[hidden] { display: none; }
+@media (max-width: 859px) { .cd { height: 40px; line-height: 40px; font-size: 14px; } .dn { width: 44px; height: 44px; } .calnav { width: 40px; height: 40px; } .daynav .link { min-height: 44px; } }
 /* sign-in and the account forms (the real app only) */
 #login { min-height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 24px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); background: var(--ground); }
 #login[hidden] { display: none; }
@@ -655,6 +684,13 @@ const S = {
   sumOpen: false, group: 'rank', mapRegion: 'world', todayView: oneOf(store.get('todayView'), ['list', 'map'], 'list'),
 };
 const BY = new Map(DATA.stories.map(s => [s.id, s]));
+/* The days that have a digest, for the calendar. DATA.day is today. viewDate is null for today, or the date of a past day that was opened
+   from the calendar (#/day/DATE). DAY() is the day that the screen shows: its summary, its counts, its quiet mark. */
+const DAYS = DATA.days || [];
+const DAY_BY = new Map(DAYS.map(d => [d.date, d]));
+let viewDate = null, calMonth = null;
+const DAY = () => (viewDate && DAY_BY.get(viewDate)) || DATA.day;
+const dayHref = d => (d === DATA.day.date ? '#/today' : '#/day/' + d);
 function applyTheme() {
   const r = document.documentElement;
   if (S.theme === 'light' || S.theme === 'dark') r.setAttribute('data-theme', S.theme); else r.removeAttribute('data-theme');
@@ -705,6 +741,8 @@ const UI = {
     ph_events_lead: 'ストーリーとは別に、日付のある出来事を時間順にたどる画面です。', ph_events_1: '出来事が起きた日と名前', ph_events_2: '関係する国・機関', ph_events_3: 'その出来事が属するストーリー', ph_events_4: '月ごと、国ごとの絞り込み',
     ph_weekly_lead: '一週間の動きをまとめて振り返る画面です。', ph_weekly_1: 'その週の要点', ph_weekly_2: '動きの大きかったストーリー', ph_weekly_3: '来週の予定', ph_weekly_4: '過去の週への切り替え',
     s_display: '表示', s_digest: 'ダイジェスト', s_notify: '通知', s_interests: '関心', s_sources: '出典', s_cost: '費用', s_admin: '管理', s_about: 'このアプリについて', s_account: 'アカウント',
+    dailyPast: 'この日の要点', calendar: 'カレンダー', calPrev: '前の月', calNext: '次の月', calToday: '今日', calLegend: 'ダイジェストのある日', dayPrev: '前の日', dayNext: '次の日',
+    dayOpen: 'カレンダーを開く', pastNote: '過去の日のダイジェストです。要点は、その日に書いたものです。ストーリーは、いまの版で、その日の動きを添えています。',
     acName: '表示名', acNameD: 'アプリの中で使う名前です。', acSave: '保存', acSaved: '保存しました。', acNameBad: '表示名は、1字から60字までです。',
     acError: '保存できませんでした。通信を確かめて、もう一度お試しください。', acRole: '役割', role_admin: '管理者', role_member: '一般の利用者',
     acPin: 'PIN の変更', acPinD: '6桁の数字です。変えるには、いまの PIN が要ります。', acPinNow: 'いまの PIN', acPinNew: '新しい PIN', acPinChange: 'PIN を変える',
@@ -793,6 +831,8 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     ph_events_lead: 'A time-ordered view of dated events, separate from stories.', ph_events_1: 'The date and name of each event', ph_events_2: 'The countries and bodies involved', ph_events_3: 'The story each event belongs to', ph_events_4: 'Filters by month and country',
     ph_weekly_lead: 'A look back over the week as a whole.', ph_weekly_1: 'The week in brief', ph_weekly_2: 'The stories that moved most', ph_weekly_3: 'What is scheduled for next week', ph_weekly_4: 'A switch to earlier weeks',
     s_display: 'Display', s_digest: 'Digest', s_notify: 'Notifications', s_interests: 'Interests', s_sources: 'Sources', s_cost: 'Cost', s_admin: 'Admin', s_about: 'About', s_account: 'Account',
+    dailyPast: 'Summary of the day', calendar: 'Calendar', calPrev: 'Previous month', calNext: 'Next month', calToday: 'Today', calLegend: 'Days with a digest', dayPrev: 'Previous day', dayNext: 'Next day',
+    dayOpen: 'Open the calendar', pastNote: 'This is the digest of a past day. The summary is the one written that day. The stories are shown as they are now, with what moved that day.',
     acName: 'Display name', acNameD: 'The name used inside the app.', acSave: 'Save', acSaved: 'Saved.', acNameBad: 'A display name has 1 to 60 characters.',
     acError: 'It could not be saved. Check the connection and try again.', acRole: 'Role', role_admin: 'Administrator', role_member: 'Member',
     acPin: 'Change PIN', acPinD: 'Six digits. You need the current PIN to change it.', acPinNow: 'Current PIN', acPinNew: 'New PIN', acPinChange: 'Change PIN',
@@ -885,7 +925,7 @@ function cname(code) {
   return regionName(code) || c.en || code;
 }
 const countryHay = code => { const c = DATA.countries[code] || {}; return (allText(c) + ' ' + cname(code) + ' ' + code).toLowerCase(); };
-const isQuiet = () => S.quiet || DATA.day.quiet;
+const isQuiet = () => S.quiet || DAY().quiet;
 const PLACE_TYPES = ['region', 'strait', 'sea', 'site', 'city'];
 const PLACES = DATA.places || {};
 const pname = id => (PLACES[id] ? T(PLACES[id].names) : id);
@@ -1033,9 +1073,9 @@ function worldMap(opt) {
 const mapCounts = pool => { const m = {}; pool.forEach(s => s.countries.forEach(c => { m[c] = (m[c] || 0) + 1; })); return m; };
 /* The page address of the Today list with one country picked (the same one again clears it). */
 function countryHref(code) {
-  const q = new URLSearchParams(parse().name === 'today' ? parse().q : {});
+  const p = parse(), q = new URLSearchParams(p.name === 'today' || p.name === 'day' ? p.q : {});
   if (q.get('country') === code) q.delete('country'); else q.set('country', code);
-  return '#/today' + (q.toString() ? '?' + q : '');
+  return (p.name === 'day' ? '#/day/' + p.a : '#/today') + (q.toString() ? '?' + q : '');
 }
 function mapCard(pool, selected, shown) {
   const counts = mapCounts(pool);
@@ -1074,13 +1114,17 @@ function seedDemo(r) {
 }
 function route(keep) {
   const r = parse();
+  if (r.name === 'day' && (!DAY_BY.has(r.a) || r.a === DATA.day.date)) { location.replace('#/today'); return; }      // no digest that day, or today
   seedDemo(r);
   if (!$('#ask').hidden) closeAsk();
   document.body.dataset.route = r.name;
   if (prevName !== 'story' && r.name === 'story') listY = window.scrollY;
-  const views = { today: listView, browse: listView, story: storyView, countries: countriesView, places: r => (r.a ? placeView(r) : placesIndex()), library: libraryView, settings: settingsView, events: phView, glossary: glossaryView, weekly: phView };
-  if (['today', 'browse', 'library'].includes(r.name) || (r.name === 'countries' && r.a) || (r.name === 'places' && PLACES[r.a])) ctxHash = location.hash || '#/today';
+  const views = { today: listView, day: listView, browse: listView, story: storyView, countries: countriesView, places: r => (r.a ? placeView(r) : placesIndex()), library: libraryView, settings: settingsView, events: phView, glossary: glossaryView, weekly: phView };
+  if (['today', 'day', 'browse', 'library'].includes(r.name) || (r.name === 'countries' && r.a) || (r.name === 'places' && PLACES[r.a])) ctxHash = location.hash || '#/today';
   else if (r.name === 'story' && prevName === null && BY.get(r.a)) ctxHash = BY.get(r.a).shown_today ? '#/today' : '#/browse';
+  const was = viewDate, ctx = r.name === 'story' ? ctxRoute() : r;      // a story opened from a past day keeps that day's list beside it
+  viewDate = ctx.name === 'day' && DAY_BY.has(ctx.a) && ctx.a !== DATA.day.date ? ctx.a : null;
+  if (was !== viewDate) calMonth = null;
   document.title = 'News Digest';
   renderSide(r); renderTabs(r);
   (views[r.name] || listView)(r);
@@ -1112,7 +1156,7 @@ function setLang(v) {
 
 /* ---------- shell: sidebar and tabs ---------- */
 function todayPool() {
-  let a = DATA.stories.filter(s => s.shown_today).slice(0, S.max);
+  let a = (viewDate ? DAY().story_ids.map(id => BY.get(id)).filter(Boolean) : DATA.stories.filter(s => s.shown_today)).slice(0, S.max);
   if (isQuiet()) a = a.slice(0, 3);
   return a;
 }
@@ -1122,7 +1166,7 @@ function catCounts(scope) {
   return Object.fromEntries(DATA.categories.map(c => [c.id, c.n_stories]));
 }
 function catHref(id) {
-  const c = ctxRoute(), base = c.name === 'today' ? 'today' : 'browse';
+  const c = ctxRoute(), base = c.name === 'day' ? 'day/' + c.a : c.name === 'today' ? 'today' : 'browse';
   const q = new URLSearchParams(base === 'browse' && c.name === 'browse' ? c.q : {}); q.delete('q');
   if (id) q.set('cat', id); else q.delete('cat');
   return '#/' + base + (q.toString() ? '?' + q : '');
@@ -1131,9 +1175,9 @@ const STAGES = { events: 'hold', weekly: '5' };     // 'hold' is a feature that 
 const stageShort = id => (STAGES[id] === 'hold' ? t('navHold') : STAGES[id]);
 function renderSide(r) {
   const c = r.name === 'story' ? ctxRoute() : r;
-  const counts = catCounts(c.name === 'today' ? 'today' : 'all'), active = (c.name === 'today' || c.name === 'browse') ? (c.q.cat || '') : '';
+  const counts = catCounts(c.name === 'today' || c.name === 'day' ? 'today' : 'all'), active = (c.name === 'today' || c.name === 'day' || c.name === 'browse') ? (c.q.cat || '') : '';
   const nav = [['today', todayPool().length], ['browse', DATA.stories.length], ['countries', Object.keys(DATA.countries).length], ['places', Object.values(PLACES).filter(p => p.n_stories > 0).length], ['events'], ['glossary', (DATA.glossary || []).length], ['weekly'], ['library', S.follow.length + S.save.length || ''], ['settings', '']];
-  const navEls = nav.map(([id, n]) => h('a', { class: 'ni', href: '#/' + id, 'aria-current': r.name === id || (r.name === 'story' && id === ctxRoute().name) ? 'page' : null, title: STAGES[id] ? (STAGES[id] === 'hold' ? t('stageHold') : t('navStage', { s: STAGES[id] })) : null },
+  const navEls = nav.map(([id, n]) => h('a', { class: 'ni', href: '#/' + id, 'aria-current': (r.name === 'day' ? 'today' : r.name) === id || (r.name === 'story' && id === (ctxRoute().name === 'day' ? 'today' : ctxRoute().name)) ? 'page' : null, title: STAGES[id] ? (STAGES[id] === 'hold' ? t('stageHold') : t('navStage', { s: STAGES[id] })) : null },
     icon(id), h('span', { class: 'nl' }, t(id)), STAGES[id] ? h('span', { class: 'nstage' }, stageShort(id)) : h('span', { class: 'nc' }, n === '' ? '' : num(n))));
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const catEls = [h('a', { class: 'ci', href: catHref(''), 'aria-current': active ? null : 'true' }, h('span', { class: 'nl' }, t('all')), h('span', { class: 'nc' }, num(total)))]
@@ -1146,12 +1190,13 @@ function renderSide(r) {
   $('#side').replaceChildren(
     h('div', { class: 'brand' }, brandMark(), h('div', {}, h('b', {}, 'News Digest'), h('small', {}, dLong(DATA.day.date)))),
     h('nav', { 'aria-label': t('navMain') }, navEls),
+    calendarBox(),
     h('div', {}, h('h2', {}, t('categories')), h('nav', { 'aria-label': t('categories') }, catEls)),
     h('div', {}, h('h2', {}, t('following')), h('nav', { 'aria-label': t('following') }, folEls)),
     h('div', { class: 'side-gap' }),
     h('div', { class: 'side-foot' }, h('span', {}, t('updated') + ' ' + fmtStamp(DATA.built_at)), langSeg(true)));
 }
-const TAB_OF = { events: 'browse', glossary: 'browse', weekly: 'browse', places: 'countries' };
+const TAB_OF = { day: 'today', events: 'browse', glossary: 'browse', weekly: 'browse', places: 'countries' };
 function renderTabs(r) {
   const active = TAB_OF[r.name] || r.name;
   $('#tabbar').setAttribute('aria-label', t('navMain'));
@@ -1168,6 +1213,7 @@ function listDef(r) {
   if (r.name === 'countries') return { kind: 'country', q: {}, sig: 'c|' + r.a, title: cname(r.a), pool: () => DATA.stories.filter(s => s.countries.includes(r.a)) };
   if (r.name === 'places') return { kind: 'place', q: {}, sig: 'p|' + r.a, title: pname(r.a), pool: () => DATA.stories.filter(s => (s.places || []).includes(r.a)) };
   if (r.name === 'library') return { kind: 'library', q: {}, sig: 'l|' + (r.a || 'follow'), title: t('library'), pool: () => S[r.a === 'save' ? 'save' : 'follow'].map(id => BY.get(id)).filter(Boolean) };
+  if (r.name === 'day') return { kind: 'today', day: r.a, q, sig: 'day|' + r.a + '|' + q.cat + '|' + q.country, title: fmtDate(r.a, { month: 'long', day: 'numeric', weekday: 'short' }), pool: todayPool };
   return { kind: 'today', q, sig: 'today|' + q.cat + '|' + q.country, title: t('today'), pool: todayPool };
 }
 function hay(s) {
@@ -1180,14 +1226,19 @@ function visible(def, ui) {
   if (def.q.country) a = a.filter(s => s.countries.includes(def.q.country));
   if (ui.q) a = a.filter(s => hay(s).includes(ui.q.toLowerCase()));
   const by = { recent: (x, y) => y.last_day.localeCompare(x.last_day) || x.rank - y.rank, articles: (x, y) => y.n_articles - x.n_articles, sources: (x, y) => y.n_sources - x.n_sources, rank: (x, y) => x.rank - y.rank };
+  if (def.day && !def.q.sort) {      // a past day keeps the order in which its stories were shown that day
+    const pos = new Map(((DAY_BY.get(def.day) || {}).story_ids || []).map((id, i) => [id, i]));
+    return a.slice().sort((x, y) => pos.get(x.id) - pos.get(y.id));
+  }
   return a.slice().sort(by[def.q.sort] || by.rank);
 }
 function row(s, withCat) {
   return h('a', { class: 'row', href: '#/story/' + s.id, 'data-id': s.id },
-    h('span', { class: 'rk' }, s.rank),
+    h('span', { class: 'rk' }, viewDate ? DAY().story_ids.indexOf(s.id) + 1 : s.rank),
     h('div', {},
       h('div', { class: 'rt', ...lg(s.title) }, s.top_score >= 3 && keyMark(false), T(s.title)),
-      h('div', { class: 'rs', ...lg(T(s.status_line) ? s.status_line : s.one_line) }, T(s.status_line) || T(s.one_line)),
+      (line => h('div', { class: 'rs', ...lg(line ? line.text : (T(s.status_line) ? s.status_line : s.one_line)) }, line ? T(line.text) : (T(s.status_line) || T(s.one_line))))(
+        viewDate && (s.timeline || []).find(x => x.date === viewDate && T(x.text))),
       h('div', { class: 'rm' }, h('span', { class: 'cs' }, withCat ? catName(s.category) + t('listDot') : '', countryText(s.countries, 3)), labelCounts(s), h('span', {}, t('cnt_article', { n: s.n_articles })))));
 }
 /* The daily summary is one point per line. An older one-paragraph summary becomes one point per sentence. */
@@ -1196,27 +1247,74 @@ function points(text) {
   return lines.length > 1 ? lines : paras(text, 1);
 }
 /* A real quiet day has a summary written for it. The Settings switch only simulates one, so it keeps two points. */
-const dayPoints = () => { const p = points(T(DATA.day.summary)); return S.quiet && !DATA.day.quiet ? p.slice(0, 2) : p; };
-const pointList = (items, extra) => h('ul', { class: 'points', ...extra }, items.map(x => h('li', {}, termNodes(x, pick(DATA.day.summary)[1]))));
-const digestList = () => pointList(dayPoints(), { ...lg(DATA.day.summary), class: 'points digest' });
+const dayPoints = () => { const p = points(T(DAY().summary)); return S.quiet && !DAY().quiet ? p.slice(0, 2) : p; };
+const pointList = (items, extra) => h('ul', { class: 'points', ...extra }, items.map(x => h('li', {}, termNodes(x, pick(DAY().summary)[1]))));
+const digestList = () => pointList(dayPoints(), { ...lg(DAY().summary), class: 'points digest' });
 function dateBlock(cls) {
-  const d = Number(DATA.day.date.split('-')[2]);
+  const d = Number(DAY().date.split('-')[2]);
   return h('div', { class: 'dateblock ' + (cls || '') }, h('span', { class: 'dnum' }, d),
-    h('span', { class: 'dtxt' }, h('b', {}, fmtDate(DATA.day.date, { weekday: 'long' })), h('span', {}, fmtDate(DATA.day.date, { year: 'numeric', month: 'long' }))));
+    h('span', { class: 'dtxt' }, h('b', {}, fmtDate(DAY().date, { weekday: 'long' })), h('span', {}, fmtDate(DAY().date, { year: 'numeric', month: 'long' }))));
 }
+/* ---------- the calendar: the days that have a digest ---------- */
+const ymd = (y, m, d) => y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+const shiftMonth = (ym, n) => { const [y, m] = ym.split('-').map(Number), d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0'); };
+function calendarBox() {
+  const have = new Set(DAYS.map(d => d.date)), today = DATA.day.date, sel = viewDate || today;
+  const months = [...have, today].map(d => d.slice(0, 7)).sort(), first = months[0], last = months[months.length - 1];
+  const box = h('section', { class: 'cal', 'aria-label': t('calendar') });
+  const paint = () => {
+    const ym = calMonth || sel.slice(0, 7), [y, m] = ym.split('-').map(Number);
+    const lead = new Date(Date.UTC(y, m - 1, 1)).getUTCDay(), count = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push(h('span', { class: 'cd pad', 'aria-hidden': 'true' }));
+    for (let d = 1; d <= count; d++) {
+      const date = ymd(y, m, d), cls = 'cd' + (date === sel ? ' sel' : '') + (date === today ? ' tdy' : '') + (have.has(date) ? ' has' : '');
+      cells.push(have.has(date) || date === today
+        ? h('a', { class: cls, href: dayHref(date), 'data-date': date, 'aria-current': date === sel ? 'date' : null, title: dLong(date) }, d)
+        : h('span', { class: cls + ' off', 'data-date': date }, d));
+    }
+    box.replaceChildren(
+      h('div', { class: 'calhead' },
+        h('button', { type: 'button', class: 'calnav', 'aria-label': t('calPrev'), disabled: ym <= first, onclick: () => { calMonth = shiftMonth(ym, -1); paint(); } }, '‹'),
+        h('b', {}, fmtDate(ym + '-01', { year: 'numeric', month: 'long' })),
+        h('button', { type: 'button', class: 'calnav', 'aria-label': t('calNext'), disabled: ym >= last, onclick: () => { calMonth = shiftMonth(ym, 1); paint(); } }, '›')),
+      h('div', { class: 'calgrid' }, [0, 1, 2, 3, 4, 5, 6].map(i => h('span', { class: 'cw', 'aria-hidden': 'true' }, fmtDate(ymd(2023, 1, 1 + i), { weekday: 'narrow' }))), cells),
+      h('div', { class: 'calfoot' }, h('span', { class: 'leg' }, h('i', { class: 'dot' }), t('calLegend')), h('a', { class: 'link', href: '#/today' }, t('calToday'))));
+  };
+  paint();
+  return box;
+}
+/* The arrows to the days before and after, and (on a phone) a button that opens the calendar. */
+function dayNav(withCal) {
+  const order = [...new Set(DAYS.map(d => d.date).concat(DATA.day.date))].sort(), here = viewDate || DATA.day.date, i = order.indexOf(here);
+  const arrow = (d, label, glyph) => (d ? h('a', { class: 'dn', href: dayHref(d), 'aria-label': label, title: label }, glyph) : h('span', { class: 'dn off', 'aria-hidden': 'true' }, glyph));
+  const row = h('div', { class: 'daynav' }, arrow(i > 0 ? order[i - 1] : null, t('dayPrev'), '‹'), arrow(i >= 0 && i < order.length - 1 ? order[i + 1] : null, t('dayNext'), '›'));
+  const out = [row];
+  if (withCal) {
+    const panel = h('div', { class: 'calpanel', hidden: true }, calendarBox());
+    const open = h('button', { type: 'button', class: 'btn', 'aria-expanded': 'false', onclick: () => { panel.hidden = !panel.hidden; open.setAttribute('aria-expanded', String(!panel.hidden)); } }, icon('events', 16), t('calendar'));
+    row.append(open);
+    out.push(panel);
+  }
+  if (viewDate) row.append(h('a', { class: 'link', href: '#/today' }, t('calToday')));
+  return out;
+}
+const pastNote = () => (viewDate ? h('p', { class: 'pastnote' }, t('pastNote')) : null);
 function hero(def) {
   const p = dayPoints(), head = p.slice(0, 3), rest = p.slice(3);
-  const wrap = h('section', { class: 'hero-sum', 'aria-label': t('daily'), ...lg(DATA.day.summary) });
+  const wrap = h('section', { class: 'hero-sum', 'aria-label': viewDate ? t('dailyPast') : t('daily'), ...lg(DAY().summary) });
   const moreBox = h('div', { id: 'sum-rest', hidden: !S.sumOpen }, pointList(rest));
   const btn = h('button', { type: 'button', class: 'link', 'aria-controls': 'sum-rest' });
   const paint = () => { moreBox.hidden = !S.sumOpen; btn.textContent = S.sumOpen ? t('collapse') : t('readMore'); btn.setAttribute('aria-expanded', String(S.sumOpen)); };
   btn.addEventListener('click', () => { S.sumOpen = !S.sumOpen; paint(); });
   paint();
-  put(wrap, [h('h2', {}, t('daily')), p.length ? pointList(head) : null, rest.length ? moreBox : null, rest.length ? btn : null]);
+  put(wrap, [h('h2', {}, viewDate ? t('dailyPast') : t('daily')), p.length ? pointList(head) : null, rest.length ? moreBox : null, rest.length ? btn : null]);
   return h('header', { class: 'hero' },
     h('div', { class: 'hero-top' }, h('b', { class: 'brandline' }, brandMark(24), 'News Digest'), langSeg(true)),
     dateBlock('hero-date'),
-    h('p', { class: 'hero-meta' }, isQuiet() ? t('quietCap', { n: todayPool().length }) : t('movedLine', { n: DATA.day.moved_count, shown: DATA.day.n_shown })),
+    dayNav(true),
+    h('p', { class: 'hero-meta' }, isQuiet() ? t('quietCap', { n: todayPool().length }) : t('movedLine', { n: DAY().moved_count, shown: DAY().n_shown })),
+    pastNote(),
     foldJump('hero-meta', def),
     p.length ? wrap : null);
 }
@@ -1227,7 +1325,7 @@ function quietBlock() {
 function catHrefFor(def, id) {
   const q = new URLSearchParams(def.q); q.delete('q');
   if (id) q.set('cat', id); else q.delete('cat');
-  return '#/' + (def.kind === 'browse' ? 'browse' : 'today') + (q.toString() ? '?' + q : '');
+  return '#/' + (def.kind === 'browse' ? 'browse' : def.day ? 'day/' + def.day : 'today') + (q.toString() ? '?' + q : '');
 }
 function buildList(def, asH1) {
   const ui = { q: def.q.q || '' };
@@ -1300,10 +1398,12 @@ function homePane(def) {
   const up = DATA.stories.filter(s => T(s.next_step));
   return h('div', { class: 'home' },
     dateBlock(),
-    h('p', { class: 'cap' }, isQuiet() ? t('quietCap', { n: todayPool().length }) : t('movedLine', { n: DATA.day.moved_count, shown: DATA.day.n_shown })),
+    dayNav(false),
+    h('p', { class: 'cap' }, isQuiet() ? t('quietCap', { n: todayPool().length }) : t('movedLine', { n: DAY().moved_count, shown: DAY().n_shown })),
+    pastNote(),
     foldJump('cap', def),
     MAP && def.kind === 'today' && [h('h2', {}, t('map')), mapCard(todayPool().filter(s => !def.q.cat || s.category === def.q.cat), def.q.country, 6)],
-    T(DATA.day.summary) && [h('h2', {}, t('daily')), digestList()],
+    T(DAY().summary) && [h('h2', {}, viewDate ? t('dailyPast') : t('daily')), digestList()],
     up.length > 0 && [h('h2', {}, t('upcoming')), h('ul', {}, up.map(s => h('li', {}, h('a', { href: '#/story/' + s.id }, h('b', lg(s.title), T(s.title)), h('span', lg(s.next_step), T(s.next_step))))))],
     h('div', { class: 'keys' }, h('span', {}, h('kbd', {}, 'j'), ' ', h('kbd', {}, 'k'), ' ' + t('kMove')), h('span', {}, h('kbd', {}, 'f'), ' ' + t('kFollow')), h('span', {}, h('kbd', {}, 's'), ' ' + t('kSave')), h('span', {}, h('kbd', {}, '/'), ' ' + t('kSearch'))));
 }
@@ -1337,7 +1437,7 @@ function otherRow(a) {
     T(a.reason_text) && h('div', { class: 'why', ...lg(a.reason_text) }, T(a.reason_text)));
 }
 /* Items left alone have no category and no country, so the block is hidden while either filter is on. */
-const foldOn = def => def.kind === 'today' && !def.q.cat && !def.q.country && (DATA.standalone_fold || []).length > 0;
+const foldOn = def => def.kind === 'today' && !def.day && !def.q.cat && !def.q.country && (DATA.standalone_fold || []).length > 0;
 /* A short way to the block, because it sits at the end of a long list. */
 function foldJump(cls, def) {
   if (!foldOn(def)) return null;
@@ -1991,7 +2091,7 @@ function settingsView(r) {
 function step(d) {
   const idsNow = cur.list ? cur.list.ids : [];
   const r = parse();
-  if (!idsNow.length || (r.name !== 'story' && !['today', 'browse'].includes(r.name))) return;
+  if (!idsNow.length || (r.name !== 'story' && !['today', 'day', 'browse'].includes(r.name))) return;
   const i = r.name === 'story' ? idsNow.indexOf(r.a) : -1;
   const n = idsNow[Math.max(0, Math.min(idsNow.length - 1, i + d))];
   if (n) location.hash = '#/story/' + n;
@@ -2089,7 +2189,7 @@ function assemble(parts, admin, extra) {      // the same as news_digest/publish
   const data = Object.assign({}, parts.core);
   const counts = data.parts || {};
   delete data.parts;
-  for (const key of ['stories', 'standalone', 'glossary']) {
+  for (const key of ['stories', 'standalone', 'glossary', 'days']) {
     let list = [];
     for (let i = 0; i < (counts[key] || 0); i++) list = list.concat(parts[key + '_' + i] || []);
     data[key] = list;
