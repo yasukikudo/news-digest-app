@@ -81,8 +81,12 @@ button { cursor: pointer; }
 svg { flex: none; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* shell */
-.app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); height: 100dvh; overflow: hidden; }
+/* shell. On a wide screen the three panes fill the window and the window itself never scrolls (each pane scrolls inside).
+   The box is fixed to the window, not given a height in viewport units, for two reasons. A fixed box is measured against the
+   window again at every zoom step and resize. And it is the containing block of the absolutely placed texts inside it (the
+   hidden "attention" labels of the list rows), so overflow: hidden clips them. Without that, they stuck out below the window,
+   the page scrolled as a whole when zooming, and a blank strip showed under the panes (2026-11-16). */
+.app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); position: fixed; inset: 0; overflow: hidden; }
 .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--surface); }
 #view { flex: 1; min-height: 0; display: flex; flex-direction: column; outline: none; }
 .tabbar, .navbar, .actionbar, .hero, .catchips, .bseg { display: none; }
@@ -396,7 +400,7 @@ td.wrap { white-space: normal; min-width: 14em; }
 
 /* narrow screens: tabs at the bottom, full-screen pages */
 @media (max-width: 859px) {
-  .app { display: block; height: auto; overflow: visible; }
+  .app { display: block; position: static; inset: auto; height: auto; overflow: visible; }
   .main { min-height: 100dvh; padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 8px); }
   body[data-route="story"] .main { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
   #view { display: block; }
