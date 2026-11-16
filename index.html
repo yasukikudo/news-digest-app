@@ -46,7 +46,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --ground: #0e1117; --surface: #151a22; --ink: #e4e8ef; --muted: #959fb1; --line: #262d38; --accent: #8ea4d8; --mark: #cfa65a;
-    --r1: 20%; --r2: 32%; --r3: 48%; --r4: 68%; --land: color-mix(in srgb, var(--ink) 13%, var(--sea));
+    --r1: 31%; --r2: 43%; --r3: 57%; --r4: 75%; --land: color-mix(in srgb, var(--ink) 13%, var(--sea));
     color-scheme: dark;
   }
   :root:not([data-theme="light"])[data-palette="koke"] { --ground: #0f1411; --surface: #161c18; --ink: #e4e9e4; --muted: #96a199; --line: #262f29; --accent: #86b09c; --mark: #d29a76; }
@@ -54,7 +54,7 @@
 }
 :root[data-theme="dark"] {
   --ground: #0e1117; --surface: #151a22; --ink: #e4e8ef; --muted: #959fb1; --line: #262d38; --accent: #8ea4d8; --mark: #cfa65a;
-  --r1: 20%; --r2: 32%; --r3: 48%; --r4: 68%; --land: color-mix(in srgb, var(--ink) 13%, var(--sea));
+  --r1: 31%; --r2: 43%; --r3: 57%; --r4: 75%; --land: color-mix(in srgb, var(--ink) 13%, var(--sea));
   color-scheme: dark;
 }
 :root[data-theme="dark"][data-palette="koke"] { --ground: #0f1411; --surface: #161c18; --ink: #e4e9e4; --muted: #96a199; --line: #262f29; --accent: #86b09c; --mark: #d29a76; }
@@ -264,7 +264,7 @@ kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--l
 .home .digest { font-size: 16px; line-height: 2; }
 .home li a { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
 .home li a:hover b { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
-.home li span { display: block; color: var(--muted); font-size: 13px; }
+.home li a > span { display: block; color: var(--muted); font-size: 13px; }
 .home .keys { margin-top: 28px; color: var(--muted); font-size: var(--fs-s); display: flex; flex-wrap: wrap; gap: 8px 14px; }
 
 /* pages (library, placeholders) */
@@ -749,7 +749,7 @@ const UI = {
     acPinDone: 'PIN を変えました。', acPinBad: '新しい PIN は、6桁の数字にしてください。', acPinWrong: 'いまの PIN が違います。',
     acPinRecent: 'いったんログアウトして、ログインし直してから、もう一度お試しください。', acOut: 'ログアウト',
     adTime: '毎朝のダイジェストの時刻', adTimeD: '時刻と時間帯です。決めた時刻を過ぎると、その日の分が作られます。変更は、次の朝から効きます。', adTimeZone: '時間帯',
-    adTimeBad: '時刻は 05:00 のように、時間帯は America/Chicago のように入れてください。',
+    adTimeBad: '時刻は 05:00 のように、時間帯は Europe/London のように入れてください。',
     adUsers: '利用者', adUsersD: 'オンの人が使えます。オフにすると、その人は、ログインしても何も読めません。', adSelf: '（あなた）', adLoading: '読み込んでいます…',
     s_run: '今すぐ実行', runLead: '決まった時刻に、ダイジェストは自動で作られます。作られていないときは、ここから実行を頼めます。',
     runHave: '今日のダイジェストは、できています（{time}）。', runLate: '今日のダイジェストは、まだできていません。予定の時刻（{time}）を過ぎています。',
@@ -839,7 +839,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     acPinDone: 'The PIN was changed.', acPinBad: 'The new PIN must be six digits.', acPinWrong: 'The current PIN is wrong.',
     acPinRecent: 'Sign out, sign in again, and then try once more.', acOut: 'Sign out',
     adTime: 'Time of the morning digest', adTimeD: 'The time and the time zone. Once the time has passed, the day is made. A change takes effect from the next morning.', adTimeZone: 'Time zone',
-    adTimeBad: 'Enter the time like 05:00 and the time zone like America/Chicago.',
+    adTimeBad: 'Enter the time like 05:00 and the time zone like Europe/London.',
     adUsers: 'People', adUsersD: 'People who are on can use the app. Someone who is off can sign in but reads nothing.', adSelf: '(you)', adLoading: 'Loading…',
     s_run: 'Run now', runLead: 'The digest is made automatically at the set time. When it has not been made, you can ask for it here.',
     runHave: 'Today\'s digest is ready ({time}).', runLate: 'Today\'s digest has not been made yet. The set time ({time}) has passed.',
@@ -1859,7 +1859,7 @@ function numInput(key, min, max, label) {
   } });
 }
 /* ---------- account and admin (the real app only) ---------- */
-const ZONES = ['America/Chicago', 'America/New_York', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo', 'UTC'];
+const ZONES = ['Africa/Cairo', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/New_York', 'Asia/Kolkata', 'Asia/Seoul', 'Asia/Tokyo', 'Australia/Sydney', 'Europe/London', 'Europe/Paris', 'UTC'];
 const validZone = z => { try { new Intl.DateTimeFormat('en', { timeZone: z }); return true; } catch (e) { return false; } };
 const ADMIN_ONLY = ['cost', 'admin', 'run'];
 const visibleSections = () => SECTIONS.filter(x => (!['account', 'run'].includes(x[0]) || USER) && (!USER || USER.role === 'admin' || !ADMIN_ONLY.includes(x[0])));
@@ -1968,7 +1968,7 @@ function runSection() {
       }
     } finally { watching = false; }
   }
-  const repoIn = h('input', { class: 'inp gh gh-repo', type: 'text', placeholder: 'owner/news-digest', autocapitalize: 'off', spellcheck: 'false', 'aria-label': t('runRepo') });
+  const repoIn = h('input', { class: 'inp gh gh-repo', type: 'text', placeholder: 'owner/repository', autocapitalize: 'off', spellcheck: 'false', 'aria-label': t('runRepo') });
   const tokIn = h('input', { class: 'inp gh gh-token', type: 'password', autocomplete: 'off', placeholder: t('runToken'), 'aria-label': t('runToken') });
   const expIn = h('input', { class: 'inp gh gh-expiry', type: 'date', 'aria-label': t('runExpiry'), title: t('runExpiry') });
   const connect = async () => {
