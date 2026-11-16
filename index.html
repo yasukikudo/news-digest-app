@@ -216,6 +216,12 @@ kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--l
 .sgl { list-style: none; margin: 8px 0 0; padding: 0; }
 .sgl li { padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); line-height: 1.7; }
 .sgl .sm { font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+.sgl .sgdone { margin: 0; }
+.sgl .sgact { margin-top: 6px; }
+.sgl .sgwhat { margin: 0; font-size: var(--fs-s); color: var(--muted); line-height: 1.7; max-width: 40em; }
+.sgl .gra { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.sgl .sgpend { margin: 0; font-size: var(--fs-s); color: var(--accent-ink); font-weight: 600; }
+.sgl .sgfail { margin: 8px 0 0; font-size: var(--fs-s); color: color-mix(in srgb, #b3261e 82%, var(--ink)); }
 /* weekly review */
 .wkspan { font-size: var(--fs-l); font-weight: 600; margin: 14px 0 0; }
 .wkbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 4px; }
@@ -779,11 +785,25 @@ const UI = {
     wkNone: '最初のふりかえりは、{date}の朝に作られます。', wkNoneGeneric: 'まだ、ふりかえりはありません。',
     wkFew: 'この週は、ダイジェストが{n}日分しかないため、まとめていません。', wkSummary: 'その週の要点', wkMoved: '動きの大きかったストーリー',
     wkNext: '来週の予定', wkNextNone: '次の予定が書かれたストーリーは、ありません。', wkPrev: '前の週', wkNextWeek: '次の週',
-    s_suggest: 'ストーリーの提案', sgLead: '毎朝、自動で調べた候補です。ストーリーが大きくなりすぎていないか、同じ話が2つに分かれていないか、見送った記事がストーリーに入るべきではないか、を見ます。言葉の重なりで見つけているので、当たりは半分ほどです。見るだけで、直す道具は、まだありません。',
+    s_suggest: 'ストーリーの提案', sgLead: '毎朝、自動で調べた候補です。ストーリーが大きくなりすぎていないか、同じ話が2つに分かれていないか、見送った記事がストーリーに入るべきではないか、を見ます。言葉の重なりで見つけているので、当たりは半分ほどです。どうするかは、人が決めます。決めた内容は、次の実行のはじめに反映されます。「今日のダイジェストを実行」を押すと、すぐに反映されます。',
     sgLarge: '大きくなったストーリー', sgLargeD: '記事が多いストーリーです。経緯の行が、一部の記事しか根拠にしていないものは、いくつかの話が混ざっているかもしれません。',
     sgPairs: '同じ話かもしれない組', sgPairsD: '題名と状態の言葉、国、日付が近いストーリーの組です。', sgNear: '見送った記事のうち、ストーリーに入るかもしれないもの',
     sgNearD: '単発の記事のうち、見出しの言葉が、あるストーリーと重なるものです。', sgNone: '候補は、ありません。', sgCited: '経緯{lines}行が、記事{cited}件を根拠にしています',
     sgScore: '近さ {s}', sgShared: '共通の言葉：{w}', sgTimes: '同じ記事が{n}件', sgNotYet: 'まだ、データがありません。次の実行のあとで、出ます。', sgDays: '日ごとの記事の数',
+    sgApprove: '許可する', sgReject: '許可しない', sgKeep: 'このままにする', sgUndo: '戻す',
+    sgWhatPair: '許可すると、『{from}』の記事を、すべて『{into}』に移します。『{from}』は残り、「併合済み」の印が付きます。',
+    sgWhatNear: '許可すると、この記事を、ストーリー『{story}』に入れます。',
+    sgWhatLarge: 'ストーリーを分ける機能は、まだありません。「このままにする」を押すと、このストーリーの記事が10件増えるまで、この提案を隠します。',
+    sgPending: '決定を送りました。次の実行のあとに反映されます。', sgSaveFail: '決定を送れませんでした。通信を確かめて、もう一度お試しください。',
+    sgLoadFail: '決めた内容を読めませんでした。通信を確かめて、このページを開き直してください。',
+    sgDecided: '決めた提案', sgDecidedD: '許可した提案、許可しなかった提案、できなかった提案です。「戻す」を押すと、決める前の状態に戻ります。', sgDecNone: 'まだありません。',
+    sgDecMerge_other: '『{from}』を『{into}』に併合しました（記事{n}件を移しました）。', sgDecMergeDone: '『{from}』を『{into}』に併合しました。',
+    sgDecMergeNo: '『{from}』と『{into}』の併合は、許可しませんでした。', sgDecMergeSkip: '『{from}』と『{into}』について、決定のとおりにはできませんでした。',
+    sgDecMove: '記事『{title}』を、ストーリー『{story}』に入れました。', sgSameTitle_other: '（同じ題名の記事{n}件）',
+    sgDecMoveNo: '記事『{title}』を、ストーリー『{story}』に入れることは、許可しませんでした。', sgDecMoveSkip: '記事『{title}』と、ストーリー『{story}』について、決定のとおりにはできませんでした。',
+    sgDecLargeNo_other: '『{story}』は、このままにしました（そのとき記事{n}件）。', sgDecLargeNoN: '『{story}』は、このままにしました。', sgDecLargeSkip: '『{story}』について、決定のとおりにはできませんでした。',
+    sgReason_story_missing: 'ストーリーが、もうありません。', sgReason_story_not_active: 'ストーリーが、併合済みなどで、使えません。', sgReason_same_story: '同じストーリーどうしでした。',
+    sgReason_article_not_alone: '記事が、もう単独ではありません。', sgReason_into_merged: '戻そうとしましたが、併合先が、さらに別のストーリーに併合されていました。', sgReasonOther: '理由の符号は {code} です。',
     wkMeta: 'ダイジェストは{days}日分。動いたストーリーは{moved}件です。', wkNote: 'この要点は、その週に書いたものです。ストーリーは、いまの版で、その週の経緯の行を添えています。',
     dailyPast: 'この日の要点', calendar: 'カレンダー', calPrev: '前の月', calNext: '次の月', calToday: '今日', calLegend: 'ダイジェストのある日', dayPrev: '前の日', dayNext: '次の日',
     dayOpen: 'カレンダーを開く', pastNote: '過去の日のダイジェストです。要点は、その日に書いたものです。ストーリーは、いまの版で、その日の動きを添えています。',
@@ -884,11 +904,26 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     wkNone: 'The first review will be made on the morning of {date}.', wkNoneGeneric: 'There is no review yet.',
     wkFew: 'This week has digests for only {n} days, so it was not summarised.', wkSummary: 'The week in brief', wkMoved: 'The stories that moved most',
     wkNext: 'What is scheduled next', wkNextNone: 'No story has a next step written.', wkPrev: 'Earlier week', wkNextWeek: 'Later week',
-    s_suggest: 'Story suggestions', sgLead: 'Candidates found automatically every morning: stories that have grown too large, stories that may be one, and items left alone that may belong to a story. They come from overlaps of words, so about half are right. This is a list to read. There is no tool to change anything yet.',
+    s_suggest: 'Story suggestions', sgLead: 'Candidates found automatically every morning: stories that have grown too large, stories that may be one, and items left alone that may belong to a story. They come from overlaps of words, so about half are right. A person decides what to do. A decision takes effect at the start of the next run. Pressing "Run today\'s digest" applies it at once.',
     sgLarge: 'Stories that grew large', sgLargeD: 'Stories with many articles. When the lines of the timeline rest on only some of the articles, several topics may be mixed.',
     sgPairs: 'Stories that may be one', sgPairsD: 'Pairs of stories that are close in the words of their titles and status, in countries and in dates.', sgNear: 'Items left alone that may belong to a story',
     sgNearD: 'Single articles whose headline shares words with a story.', sgNone: 'There are no candidates.', sgCited: 'The {lines} timeline lines rest on {cited} articles',
     sgScore: 'closeness {s}', sgShared: 'shared words: {w}', sgTimes: 'the same article {n} times', sgNotYet: 'There is no data yet. It appears after the next run.', sgDays: 'articles per day',
+    sgApprove: 'Approve', sgReject: 'Reject', sgKeep: 'Leave as it is', sgUndo: 'Undo',
+    sgWhatPair: 'Approving moves all the articles of "{from}" into "{into}". "{from}" is kept and marked as merged.',
+    sgWhatNear: 'Approving puts this article into the story "{story}".',
+    sgWhatLarge: 'Splitting a story is not available yet. "Leave as it is" hides this suggestion until the story has grown by 10 more articles.',
+    sgPending: 'Your decision has been sent. It will show after the next run.', sgSaveFail: 'The decision could not be sent. Check the connection and try again.',
+    sgLoadFail: 'The earlier decisions could not be read. Check the connection and open this page again.',
+    sgDecided: 'Decided suggestions', sgDecidedD: 'Suggestions that were approved, rejected, or could not be carried out. Undo puts one back to how it was before the decision.', sgDecNone: 'None yet.',
+    sgDecMerge_one: 'Merged "{from}" into "{into}" ({n} article moved).', sgDecMerge_other: 'Merged "{from}" into "{into}" ({n} articles moved).', sgDecMergeDone: 'Merged "{from}" into "{into}".',
+    sgDecMergeNo: 'The merge of "{from}" and "{into}" was not approved.', sgDecMergeSkip: 'The decision about "{from}" and "{into}" could not be carried out.',
+    sgDecMove: 'Put the article "{title}" into the story "{story}".', sgSameTitle_other: ' ({n} articles with the same title)',
+    sgDecMoveNo: 'Putting the article "{title}" into the story "{story}" was not approved.', sgDecMoveSkip: 'The decision about the article "{title}" and the story "{story}" could not be carried out.',
+    sgDecLargeNo_one: 'Left "{story}" as it is (it had {n} article then).', sgDecLargeNo_other: 'Left "{story}" as it is (it had {n} articles then).', sgDecLargeNoN: 'Left "{story}" as it is.',
+    sgDecLargeSkip: 'The decision about "{story}" could not be carried out.',
+    sgReason_story_missing: 'The story is no longer there.', sgReason_story_not_active: 'The story has been merged or is otherwise no longer in use.', sgReason_same_story: 'Both sides were the same story.',
+    sgReason_article_not_alone: 'The article is no longer on its own.', sgReason_into_merged: 'Undo was tried, but the story it had been merged into has itself been merged into another one.', sgReasonOther: 'The reason code is {code}.',
     wkMeta: 'Digests for {days} days. Stories that moved: {moved}.', wkNote: 'This summary was written in that week. The stories are shown as they are now, with their lines for that week.',
     dailyPast: 'Summary of the day', calendar: 'Calendar', calPrev: 'Previous month', calNext: 'Next month', calToday: 'Today', calLegend: 'Days with a digest', dayPrev: 'Previous day', dayNext: 'Next day',
     dayOpen: 'Open the calendar', pastNote: 'This is the digest of a past day. The summary is the one written that day. The stories are shown as they are now, with what moved that day.',
@@ -1171,9 +1206,19 @@ function seedDemo(r) {
   S.follow = [top[0], top[2], top[3]].filter(Boolean); S.save = [top[1], top[4]].filter(Boolean);
   store.set('follow', S.follow); store.set('save', S.save);
 }
+/* A story that was merged into another keeps its address. DATA.merged is {merged id: surviving id}: the address leads to the story that remains.
+   A chain is followed for at most five steps. Nothing happens when the story that remains is not in the data, or when the chain does not end. */
+const MERGED = DATA.merged && typeof DATA.merged === 'object' ? DATA.merged : {};
+const isMerged = id => Object.prototype.hasOwnProperty.call(MERGED, id) && typeof MERGED[id] === 'string';
+function mergedTo(id) {
+  let to = id;
+  for (let i = 0; i < 5 && isMerged(to); i++) to = MERGED[to];
+  return to !== id && !isMerged(to) && BY.has(to) ? to : null;
+}
 function route(keep) {
   const r = parse();
   if (r.name === 'day' && (!DAY_BY.has(r.a) || r.a === DATA.day.date)) { location.replace('#/today'); return; }      // no digest that day, or today
+  if (r.name === 'story' && r.a) { const to = mergedTo(r.a); if (to) { location.replace('#/story/' + encodeURIComponent(to)); return; } }      // replace, so that Back does not come back here
   seedDemo(r);
   if (!$('#ask').hidden) closeAsk();
   document.body.dataset.route = r.name;
@@ -1895,23 +1940,79 @@ function glossaryView(r) {
   if (hit) { hit.setAttribute('aria-current', 'true'); hit.scrollIntoView({ block: 'center' }); }
 }
 
-/* Story suggestions (admins, the real app only): read only. Candidates from news_digest/suggest.py, made every morning. */
+/* Story suggestions (admins, the real app only). Candidates from news_digest/suggest.py, made every morning. An admin decides on each one
+   (docs/story-review-design.md). A decision is one document, story_review/{key}, and the scripts apply it at the start of their next run.
+   Until then (the document's `at` is not the one the scripts have read, see DATA.story_suggestions.reviewed) the entry says "sent" and has no
+   buttons. The key, and the direction of a merge, come from the published data: this screen never computes them. */
 function suggestSection() {
   const sg = DATA.story_suggestions;
   if (!sg) return [h('p', { class: 'note' }, t('sgNotYet'))];
+  const api = USER.api, reviewed = sg.reviewed || {};
+  const ui = { state: 'loading', live: {}, busy: {}, err: {} };      // state: loading, ok, or fail (the decisions could not be read: then there are no buttons)
+  const box = h('p', { class: 'note', role: 'status', 'aria-live': 'polite' });
+  const body = h('div', { class: 'sgbody' });
+  const name = st => { const s = st && BY.get(st.id); return s ? T(s.title) : (st && (st.title || st.id)) || ''; };
   const story = st => { const s = BY.get(st.id); return h('a', { class: 'link', href: '#/story/' + st.id, ...(s ? lg(s.title) : {}) }, s ? T(s.title) : st.title); };
+  const title = st => () => { const s = st && BY.get(st.id); return s ? h('a', { class: 'link', href: '#/story/' + st.id, ...lg(s.title) }, T(s.title)) : h('span', {}, name(st)); };      // a link only when the story is in the data
+  const fill = (text, nodes) => text.split(/\{(\w+)\}/).map((p, i) => (i % 2 ? (nodes[p] ? nodes[p]() : '{' + p + '}') : p));      // {from} and so on become nodes
   const srcName = id => { const s = (DATA.sources || []).find(x => x.id === id); return s ? srcLabel(s)[0] : id; };
-  const block = (title, desc, items) => [h('h2', { class: 'sec' }, title), h('p', { class: 'note' }, desc), items.length ? h('ul', { class: 'sgl' }, items) : h('p', { class: 'note' }, t('sgNone'))];
-  const large = (sg.large || []).map(x => h('li', {}, story(x), h('div', { class: 'sm' }, t('cnt_article', { n: x.n_articles }), ' · ', dShort(x.first_day) + '–' + dShort(x.last_day), ' · ', t('sgCited', { lines: x.n_lines, cited: x.cited_articles })),
-    h('div', { class: 'sm' }, t('sgDays') + '：' + Object.keys(x.per_day || {}).sort().map(d => dShort(d) + ' ' + num(x.per_day[d])).join('、') + ' · ' + (x.top_sources || []).map(([id, n]) => srcName(id) + ' ' + num(n)).join('、'))));
-  const pairs = (sg.pairs || []).map(x => h('li', {}, story(x.a), ' (' + num(x.a.n_articles) + ')  ⇄  ', story(x.b), ' (' + num(x.b.n_articles) + ')',
-    h('div', { class: 'sm' }, t('sgScore', { s: x.score.toFixed(2) }), ' · ', t('sgShared', { w: (x.shared_words || []).slice(0, 6).join(', ') }), (x.shared_countries || []).length ? ' · ' + countryText(x.shared_countries, 4) : '')));
-  const near = (sg.near || []).map(x => {
-    const a = (DATA.standalone || []).find(y => y.id === x.article_id);
-    return h('li', {}, a ? ext(a.url, a.title, a.lang) : h('span', {}, x.title), '  →  ', story(x.story),
-      h('div', { class: 'sm' }, (a ? srcLabel(a)[0] : x.source_id) + ' · ' + dShort(x.day) + ' · ' + t('sgScore', { s: x.score.toFixed(2) }) + ' · ' + t('sgShared', { w: (x.shared_words || []).slice(0, 5).join(', ') }) + (x.count > 1 ? ' · ' + t('sgTimes', { n: x.count }) : '')));
-  });
-  return [h('p', { class: 'note' }, t('sgLead')), ...block(t('sgLarge'), t('sgLargeD'), large), ...block(t('sgPairs'), t('sgPairsD'), pairs), ...block(t('sgNear'), t('sgNearD'), near)];
+  const pending = key => !!ui.live[key] && ui.live[key].at !== reviewed[key];
+  async function decide(key, decision, n) {
+    if (ui.busy[key]) return;
+    ui.busy[key] = true; delete ui.err[key]; paint();
+    let doc = null;
+    try {
+      const sent = await api.saveStoryReview(key, decision, n);
+      doc = sent && typeof sent === 'object' && typeof sent.at === 'string' ? sent : { decision, at: new Date().toISOString(), ...(typeof n === 'number' ? { n } : {}) };
+    } catch (e) { doc = null; }
+    delete ui.busy[key];
+    if (doc) ui.live[key] = doc; else ui.err[key] = true;
+    paint();
+    if (doc) load();      // the pending state is already on the screen; this brings in what was saved
+  }
+  const load = () => Promise.resolve().then(() => api.listStoryReview()).then(
+    d => { ui.live = d && typeof d === 'object' ? d : {}; ui.state = 'ok'; paint(); },
+    () => { if (ui.state === 'loading') ui.state = 'fail'; paint(); });
+  const button = (key, decision, label, n) => h('button', { type: 'button', class: 'btn', 'data-act': decision, disabled: !!ui.busy[key], onclick: () => decide(key, decision, n) }, label);
+  /* What follows an entry: a sentence on what approving does, then the buttons. Or "sent", without buttons, while a decision waits for the next run. */
+  const act = (key, what, buttons) => (!key || ui.state !== 'ok' ? null : h('div', { class: 'sgact' },
+    pending(key) ? h('p', { class: 'sgpend' }, t('sgPending')) : [what && h('p', { class: 'sgwhat' }, what), h('div', { class: 'gra' }, buttons)],
+    ui.err[key] && h('p', { class: 'sgfail', role: 'alert' }, t('sgSaveFail'))));
+  const block = (head, desc, items, none) => [h('h2', { class: 'sec' }, head), h('p', { class: 'note' }, desc), items.length ? h('ul', { class: 'sgl' }, items) : h('p', { class: 'note' }, none || t('sgNone'))];
+  /* One line on what happened to a decided suggestion, by kind and status. */
+  const decidedItem = x => {
+    const i = x.info || {}, k = x.kind + '_' + x.status;
+    const nodes = { from: title(i.from), into: title(i.into), story: title(i.story), title: () => h('span', {}, (i.article && i.article.title) || '') };
+    const text = { merge_applied: typeof i.moved === 'number' ? 'sgDecMerge' : 'sgDecMergeDone', merge_rejected: 'sgDecMergeNo', merge_skipped: 'sgDecMergeSkip',
+      move_applied: 'sgDecMove', move_rejected: 'sgDecMoveNo', move_skipped: 'sgDecMoveSkip',
+      large_rejected: typeof i.n === 'number' ? 'sgDecLargeNo' : 'sgDecLargeNoN', large_skipped: 'sgDecLargeSkip' }[k];
+    return h('li', { 'data-key': x.key, 'data-kind': x.kind, 'data-status': x.status },
+      h('p', { class: 'sgdone' }, text ? fill(t(text, { n: x.kind === 'merge' ? i.moved : i.n }), nodes) : (x.key || ''), x.kind === 'move' && x.status === 'applied' && i.count > 1 && t('sgSameTitle', { n: i.count })),
+      x.reason && h('div', { class: 'sm sgreason' }, UI.en['sgReason_' + x.reason] ? t('sgReason_' + x.reason) : t('sgReasonOther', { code: String(x.reason) })),
+      x.day && h('div', { class: 'sm' }, dLong(x.day)),
+      act(x.key, null, [button(x.key, 'reset', t('sgUndo'))]));
+  };
+  function paint() {
+    say(box, ui.state === 'loading' ? t('adLoading') : ui.state === 'fail' ? t('sgLoadFail') : '', ui.state === 'fail');
+    const large = (sg.large || []).map(x => h('li', { 'data-key': x.key }, story(x), h('div', { class: 'sm' }, t('cnt_article', { n: x.n_articles }), ' · ', dShort(x.first_day) + '–' + dShort(x.last_day), ' · ', t('sgCited', { lines: x.n_lines, cited: x.cited_articles })),
+      h('div', { class: 'sm' }, t('sgDays') + '：' + Object.keys(x.per_day || {}).sort().map(d => dShort(d) + ' ' + num(x.per_day[d])).join('、') + ' · ' + (x.top_sources || []).map(([id, n]) => srcName(id) + ' ' + num(n)).join('、')),
+      act(x.key, t('sgWhatLarge'), [button(x.key, 'reject', t('sgKeep'), Number.isInteger(x.n_articles) ? x.n_articles : undefined)])));      // sends n: the number of articles now
+    const pairs = (sg.pairs || []).map(x => h('li', { 'data-key': x.key }, story(x.a), ' (' + num(x.a.n_articles) + ')  ⇄  ', story(x.b), ' (' + num(x.b.n_articles) + ')',
+      h('div', { class: 'sm' }, t('sgScore', { s: x.score.toFixed(2) }), ' · ', t('sgShared', { w: (x.shared_words || []).slice(0, 6).join(', ') }), (x.shared_countries || []).length ? ' · ' + countryText(x.shared_countries, 4) : ''),
+      x.from && x.into && act(x.key, t('sgWhatPair', { from: name(x.from), into: name(x.into) }), [button(x.key, 'approve', t('sgApprove')), button(x.key, 'reject', t('sgReject'))])));
+    const near = (sg.near || []).map(x => {
+      const a = (DATA.standalone || []).find(y => y.id === x.article_id);
+      return h('li', { 'data-key': x.key }, a ? ext(a.url, a.title, a.lang) : h('span', {}, x.title), '  →  ', story(x.story),
+        h('div', { class: 'sm' }, (a ? srcLabel(a)[0] : x.source_id) + ' · ' + dShort(x.day) + ' · ' + t('sgScore', { s: x.score.toFixed(2) }) + ' · ' + t('sgShared', { w: (x.shared_words || []).slice(0, 5).join(', ') }) + (x.count > 1 ? ' · ' + t('sgTimes', { n: x.count }) : '')),
+        act(x.key, t('sgWhatNear', { story: name(x.story) }), [button(x.key, 'approve', t('sgApprove')), button(x.key, 'reject', t('sgReject'))]));
+    });
+    const decided = (Array.isArray(sg.decided) ? sg.decided : []).filter(x => x && typeof x === 'object').map(decidedItem);
+    body.replaceChildren(...block(t('sgLarge'), t('sgLargeD'), large), ...block(t('sgPairs'), t('sgPairsD'), pairs), ...block(t('sgNear'), t('sgNearD'), near),
+      ...block(t('sgDecided'), t('sgDecidedD'), decided, t('sgDecNone')));
+  }
+  paint();
+  load();
+  return [h('p', { class: 'note' }, t('sgLead')), box, body];
 }
 
 /* ---------- the weekly review (docs/weekly-review-design.md) ---------- */
@@ -2524,6 +2625,21 @@ function start(data, user, me, shared) {
         return out;
       },
       saveGlossaryReview: (entryId, fields) => setDoc(doc(db, 'glossary_review', entryId), Object.assign({}, fields, { at: new Date().toISOString() })),
+      // What an admin decided about a story suggestion (docs/story-review-design.md): one plain document per suggestion, story_review/{key}.
+      // decision is approve, reject or reset. n (the number of articles then) is sent only for a large story that is left as it is.
+      // The scripts read these at the start of their next run. The rules accept only this shape and only from an admin.
+      async listStoryReview() {
+        const snap = await getDocs(collection(db, 'story_review'));
+        const out = {};
+        snap.forEach(d => { out[d.id] = d.data(); });
+        return out;
+      },
+      async saveStoryReview(key, decision, n) {
+        const fields = { decision, at: new Date().toISOString() };
+        if (typeof n === 'number') fields.n = n;
+        await setDoc(doc(db, 'story_review', key), fields);      // replaces the document, no merge
+        return fields;      // what was written: the screen shows "sent" from it at once
+      },
     },
   };
   let hiddenAt = 0;
