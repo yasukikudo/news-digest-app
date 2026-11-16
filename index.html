@@ -1,0 +1,2236 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="国際政治と国際政治経済のニュースを、続いているストーリーにまとめる朝のダイジェスト。広い画面では三つの窓、iPhoneでは下のタブ。">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="News Digest">
+<title>News Digest</title>
+<style>
+/* Layout idea: one app in two shapes. Wide: sidebar | story list | story detail, like a mail app.
+   Narrow: bottom tabs and full-screen pages, like a phone app. Colour is kept quiet. Surfaces and text are a cool
+   grey with a slight blue bias, the accent (indigo) marks only the place you are, what you follow and the map,
+   and one muted ochre marks the key flag. Three palettes can be tried in Settings during the mockup. */
+:root {
+  --ground: #eceff3;   /* sidebar and app frame */
+  --surface: #fbfbfd;  /* reading surface */
+  --ink: #1a2130;
+  --muted: #5b6578;
+  --line: #dde1e8;
+  --accent: #3a4f8a;   /* indigo: the place you are, links, the followed state, the map */
+  --mark: #8c6420;     /* ochre: the key flag and nothing else */
+  --ff-en: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --ff-ja: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, system-ui, sans-serif;
+  --ff-zh: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --fs-xs: 11.5px; --fs-s: 12.5px; --fs-m: 14px; --fs-l: 16px; --fs-xl: 24px; --fs-read: 15px; --fs-title: 14.5px;
+  --pane: color-mix(in srgb, var(--surface) 55%, var(--ground));
+  --well: color-mix(in srgb, var(--ink) 3.5%, var(--surface));      /* quiet panels */
+  --track: color-mix(in srgb, var(--ink) 6%, var(--surface));       /* the bed of a segmented control */
+  --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  --accent-ink: color-mix(in srgb, var(--accent) 86%, var(--ink));
+  --on-accent: var(--surface);
+  --hover: color-mix(in srgb, var(--ink) 5%, transparent);
+  --lift: 0 1px 2px color-mix(in srgb, var(--ink) 14%, transparent);
+  --sea: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  --land: color-mix(in srgb, var(--ink) 10%, var(--sea));
+  --r1: 26%; --r2: 44%; --r3: 64%; --r4: 86%;                       /* map: how much accent in each step */
+  --side-w: 240px; --list-w: clamp(330px, 29vw, 420px); --tab-h: 56px;
+  color-scheme: light;
+}
+:root[data-palette="koke"] { --ground: #edf0ec; --surface: #fbfcfa; --ink: #1c231e; --muted: #5c675f; --line: #dce1db; --accent: #45695a; --mark: #9b5b3a; }
+:root[data-palette="sumi"] { --ground: #efeeed; --surface: #fcfcfb; --ink: #1d1d1f; --muted: #62625f; --line: #e0dfdc; --accent: #2d3748; --mark: #a1472e; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0e1117; --surface: #151a22; --ink: #e4e8ef; --muted: #959fb1; --line: #262d38; --accent: #8ea4d8; --mark: #cfa65a;
+    --r1: 20%; --r2: 32%; --r3: 48%; --r4: 68%; --land: color-mix(in srgb, var(--ink) 13%, var(--sea));
+    color-scheme: dark;
+  }
+  :root:not([data-theme="light"])[data-palette="koke"] { --ground: #0f1411; --surface: #161c18; --ink: #e4e9e4; --muted: #96a199; --line: #262f29; --accent: #86b09c; --mark: #d29a76; }
+  :root:not([data-theme="light"])[data-palette="sumi"] { --ground: #111111; --surface: #181818; --ink: #e8e6e3; --muted: #9c9a96; --line: #2b2a28; --accent: #c9ccd3; --mark: #d9825f; }
+}
+:root[data-theme="dark"] {
+  --ground: #0e1117; --surface: #151a22; --ink: #e4e8ef; --muted: #959fb1; --line: #262d38; --accent: #8ea4d8; --mark: #cfa65a;
+  --r1: 20%; --r2: 32%; --r3: 48%; --r4: 68%; --land: color-mix(in srgb, var(--ink) 13%, var(--sea));
+  color-scheme: dark;
+}
+:root[data-theme="dark"][data-palette="koke"] { --ground: #0f1411; --surface: #161c18; --ink: #e4e9e4; --muted: #96a199; --line: #262f29; --accent: #86b09c; --mark: #d29a76; }
+:root[data-theme="dark"][data-palette="sumi"] { --ground: #111111; --surface: #181818; --ink: #e8e6e3; --muted: #9c9a96; --line: #2b2a28; --accent: #c9ccd3; --mark: #d9825f; }
+@media (max-width: 859px) {
+  :root { --fs-xs: 12.5px; --fs-s: 13.5px; --fs-m: 16px; --fs-l: 17px; --fs-xl: 26px; --fs-read: 17px; --fs-title: 17px; }
+}
+
+/* Each language picks its own type stack. Text that carries its own lang attribute (an English headline on a
+   Japanese page) gets the right glyphs too. A new language needs one line here. */
+:lang(en) { font-family: var(--ff-en); }
+:lang(ja) { font-family: var(--ff-ja); line-break: strict; }
+:lang(zh) { font-family: var(--ff-zh); }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--surface); color: var(--ink); font-size: var(--fs-m); line-height: 1.65; font-variant-numeric: tabular-nums; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+h1, h2, h3, p, ul, ol, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+svg { flex: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* shell */
+.app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); height: 100dvh; overflow: hidden; }
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--surface); }
+#view { flex: 1; min-height: 0; display: flex; flex-direction: column; outline: none; }
+.tabbar, .navbar, .actionbar, .hero, .catchips, .bseg { display: none; }
+
+/* sidebar */
+.side { display: flex; flex-direction: column; gap: 22px; padding: 16px 10px 12px; overflow-y: auto; background: var(--ground); border-right: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 2px 10px; }
+.brand b { font-size: 15px; letter-spacing: .01em; display: block; line-height: 1.25; }
+.brand small { display: block; font-size: var(--fs-xs); color: var(--muted); line-height: 1.3; }
+.side h2 { font-size: var(--fs-xs); font-weight: 600; color: var(--muted); padding: 0 10px 5px; letter-spacing: .05em; }
+.ni, .ci, .fi { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 13.5px; min-height: 30px; }
+.ni:hover, .ci:hover, .fi:hover { background: var(--hover); }
+.side [aria-current] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.nl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nc { font-size: var(--fs-xs); color: var(--muted); font-weight: 400; }
+.nstage { font: 10.5px/1 var(--font-mono); color: var(--muted); border: 1px dashed var(--muted); border-radius: 3px; padding: 2px 4px; }
+.side-gap { flex: 1; }
+.fi .nl { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; font-size: 13px; padding: 1px 0; }
+.fnote { padding: 2px 10px; font-size: var(--fs-s); color: var(--muted); line-height: 1.55; }
+.side-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 10px 0; border-top: 1px solid var(--line); font-size: var(--fs-xs); color: var(--muted); }
+.side-foot > span { white-space: nowrap; }
+
+/* shared bits */
+.seg { display: inline-flex; border-radius: 8px; padding: 2px; background: var(--track); max-width: 100%; }
+.seg button { border: 0; background: none; font-size: var(--fs-s); padding: 0 11px; height: 26px; border-radius: 6px; color: var(--muted); white-space: nowrap; }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--lift); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); font-size: 13px; white-space: nowrap; text-decoration: none; }
+.btn:hover { background: var(--hover); border-color: color-mix(in srgb, var(--ink) 25%, var(--line)); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn[aria-pressed="true"] svg.fillable { fill: currentColor; }
+.btn.icon { width: 32px; padding: 0; }
+.btn:disabled { opacity: .4; cursor: default; }
+.link { border: 0; background: none; padding: 0; color: var(--accent-ink); font-size: var(--fs-s); text-decoration: underline; text-underline-offset: 3px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; font-size: var(--fs-xs); line-height: 1; text-decoration: none; white-space: nowrap; background: var(--surface); }
+a.chip:hover { border-color: var(--accent); color: var(--accent-ink); }
+.chip.dim { border-style: dashed; color: var(--muted); }
+.sh { display: inline-block; width: 8px; height: 8px; flex: none; background: currentColor; }
+.sh.official { background: none; border: 1.6px solid currentColor; }
+.sh.news { border-radius: 50%; }
+.sh.analysis { transform: rotate(45deg) scale(.82); }
+.lab { display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 7px; border: 1px solid var(--line); border-radius: 4px; font-size: var(--fs-xs); white-space: nowrap; }
+.lang { font: 10.5px/1 var(--font-mono); padding: 2px 4px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); }
+.key { display: inline-flex; align-items: center; gap: 4px; color: var(--mark); vertical-align: -2px; margin-right: 5px; }
+.key svg { width: 14px; height: 14px; }
+.key .kt { font-size: var(--fs-s); font-weight: 600; }
+.none { color: var(--muted); }
+.mono { font-family: var(--font-mono); }
+kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); }
+
+/* list pane */
+.split { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--list-w) minmax(0, 1fr); }
+.listpane { background: var(--pane); border-right: 1px solid var(--line); overflow-y: auto; min-width: 0; }
+.detailpane { overflow-y: auto; min-width: 0; background: var(--surface); }
+.lh { position: sticky; top: 0; z-index: 3; background: var(--pane); border-bottom: 1px solid var(--line); padding: 14px 16px 10px; display: grid; gap: 10px; }
+.lh-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.lt { font-size: var(--fs-l); font-weight: 600; line-height: 1.3; display: block; }
+.lt small { font-size: var(--fs-s); font-weight: 400; color: var(--muted); margin-left: 8px; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+.sbox { position: relative; flex: 1 1 100%; }
+.sbox svg { position: absolute; left: 9px; top: 8px; color: var(--muted); pointer-events: none; z-index: 1; }
+.sbox .lsearch, .sbox .inp { padding-left: 30px; width: 100%; }
+.lh input, .lh select, .inp { height: 32px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); padding: 0 8px; font-size: 13px; min-width: 0; }
+.lh select { flex: 1 1 0; }
+.quiet { display: flex; gap: 12px; margin: 14px 16px 0; padding: 12px 14px; border: 1px dashed var(--muted); border-radius: 8px; font-size: 13px; line-height: 1.7; }
+.quiet svg { margin-top: 3px; color: var(--accent-ink); }
+.quiet p { color: var(--muted); }
+.gh { position: sticky; top: 54px; z-index: 2; background: var(--pane); font-size: var(--fs-xs); font-weight: 600; color: var(--muted); letter-spacing: .05em; padding: 12px 16px 4px; }
+.row { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 15px 18px 15px 12px; border-bottom: 1px solid var(--line); text-decoration: none; }
+.row:hover { background: var(--hover); }
+.row[aria-current] { background: var(--accent-soft); }
+.row:focus-visible { outline-offset: -2px; }
+.rk { font: var(--fs-xs)/1.9 var(--font-mono); color: var(--muted); text-align: right; }
+.rt { font-size: var(--fs-title); font-weight: 600; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rs { font-size: var(--fs-s); line-height: 1.6; color: var(--muted); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rm { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 12px; margin-top: 7px; font-size: var(--fs-xs); color: var(--muted); }
+.rm .cs { flex: 1 1 100%; color: color-mix(in srgb, var(--ink) 72%, var(--muted)); font-size: var(--fs-s); line-height: 1.5; }
+.lc { display: inline-flex; align-items: center; gap: 4px; }
+.rows .end { padding: 14px 16px 30px; font-size: var(--fs-s); color: var(--muted); }
+.noresult { padding: 28px 16px; color: var(--muted); font-size: 13px; }
+.crow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 10px; padding: 8px 16px; border-bottom: 1px solid var(--line); text-decoration: none; }
+.crow:hover { background: var(--hover); }
+.crow[aria-current] { background: var(--accent-soft); font-weight: 600; color: var(--accent-ink); }
+.crow .cc { font: var(--fs-xs) var(--font-mono); color: var(--muted); margin-left: 8px; font-weight: 400; }
+.crow .cn { font-size: var(--fs-s); color: var(--muted); font-weight: 400; }
+.cbar { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.cbar i { display: block; height: 100%; width: var(--w); border-radius: 2px; background: color-mix(in srgb, var(--accent) 70%, var(--surface)); }
+
+/* detail pane */
+.dtool { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.dtool .pos { font: var(--fs-xs) var(--font-mono); color: var(--muted); margin: 0 6px 0 2px; }
+.dtool .sp { flex: 1; }
+.detail { max-width: 760px; margin: 0 auto; padding: 28px 40px 80px; }
+.kick { font-size: var(--fs-s); color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; }
+.kick b { font-weight: 600; color: var(--ink); }
+.kick .key { margin: 0; }
+.detail h1 { font-size: var(--fs-xl); line-height: 1.45; font-weight: 600; margin: 10px 0 8px; letter-spacing: .01em; }
+.lede { color: var(--muted); font-size: var(--fs-read); line-height: 1.8; }
+.facts { display: grid; grid-template-columns: 6em minmax(0, 1fr); gap: 14px 16px; margin: 24px 0 0; padding: 18px 22px; background: var(--well); border-radius: 12px; }
+.facts dt { font-size: var(--fs-s); font-weight: 600; color: var(--muted); padding-top: 3px; }
+.facts dd.st { font-size: var(--fs-l); font-weight: 600; line-height: 1.75; }
+.sec { font-size: var(--fs-s); font-weight: 600; color: var(--muted); letter-spacing: .06em; margin: 40px 0 14px; display: flex; align-items: baseline; gap: 8px; }
+.sec span { font-weight: 400; font-family: var(--font-mono); font-size: var(--fs-xs); }
+.summary { font-size: var(--fs-read); line-height: 2; max-width: 40em; }
+.summary p + p { margin-top: .7em; }
+.points li { position: relative; padding-left: 18px; }
+.points li + li { margin-top: .6em; }
+.points li::before { content: ""; position: absolute; left: 1px; top: .9em; width: 7px; height: 2px; background: var(--muted); }
+.tl li { position: relative; padding: 0 0 18px 24px; }
+.tl li::before { content: ""; position: absolute; left: 0; top: 7px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--accent); background: var(--surface); }
+.tl li::after { content: ""; position: absolute; left: 4px; top: 20px; bottom: -2px; width: 1px; background: var(--line); }
+.tl li:last-child::after { display: none; }
+.tl .d { font: var(--fs-s) var(--font-mono); color: var(--muted); }
+.tl p { line-height: 1.85; max-width: 40em; }
+.tl .ev { font-size: var(--fs-xs); color: var(--muted); }
+.gl { list-style: none; margin: 14px 0 0; padding: 0; }
+.gl li { padding: 14px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.gl .gnm { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.gl .gnm b { font-size: var(--fs-m); }
+.gl .ge { font: var(--fs-s) var(--font-mono); color: var(--muted); }
+.gl .gt { margin: 6px 0 0; line-height: 1.8; max-width: 40em; }
+.gl .gt.dim { color: var(--muted); }
+.gl li[aria-current="true"] { background: color-mix(in srgb, var(--accent) 10%, transparent); box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 4px; }
+/* A glossary term in a text: a dotted underline. A card with the definition opens on hover, focus or tap. */
+.gterm { text-decoration: underline dotted; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--accent) 75%, transparent); cursor: help; border-radius: 3px; }
+.gterm:hover, .gterm[aria-describedby] { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.gterm:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.chip.gterm { text-decoration: none; }
+#gpop { position: fixed; z-index: 80; width: min(340px, calc(100vw - 16px)); padding: 12px 14px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--lift); font-size: var(--fs-s); line-height: 1.7; }
+#gpop[hidden] { display: none; }
+#gpop .gpn { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+#gpop .gpn b { font-size: var(--fs-m); }
+#gpop .gpn .ge { font: var(--fs-s) var(--font-mono); color: var(--muted); }
+#gpop .gpt { margin: 6px 0 0; }
+#gpop .gpm { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin-top: 8px; font-size: var(--fs-xs); color: var(--muted); }
+.tlnote { margin: 0 0 10px; font-size: var(--fs-s); color: var(--muted); }
+.tlgrp > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-s); font-weight: 600; }
+.tlgrp > summary::-webkit-details-marker { display: none; }
+.tlgrp > summary span, .tlhead span { font: var(--fs-xs) var(--font-mono); font-weight: 400; color: var(--muted); }
+.tlgrp .tl { padding-top: 14px; }
+.tlgrp { margin-bottom: 10px; }
+.tlhead { display: flex; align-items: center; gap: 8px; margin: 18px 0 14px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-s); font-weight: 600; }
+/* The mark in front of a folded block: a small chevron that points right when closed and down when open. */
+.foldbox > summary::before, .daygrp > summary::before, .tlgrp > summary::before { content: ""; flex: none; width: 6px; height: 6px; margin: 0 3px 0 1px; border-right: 1.6px solid var(--muted); border-bottom: 1.6px solid var(--muted); transform: rotate(-45deg); }
+.foldbox[open] > summary::before, .daygrp[open] > summary::before, .tlgrp[open] > summary::before { transform: rotate(45deg); }
+.chips2 { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips2 .chip { height: 26px; padding: 0 10px; font-size: 13px; }
+.chips2 .chip small { font: 10.5px var(--font-mono); color: var(--muted); }
+.grp { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin: 20px 0 4px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.grp span { font-weight: 400; color: var(--muted); font-family: var(--font-mono); font-size: var(--fs-xs); }
+.art { padding: 9px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.art a { font-size: 13.5px; line-height: 1.6; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--ink) 30%, transparent); }
+.art a:hover { color: var(--accent-ink); text-decoration-color: currentColor; }
+.am { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; margin-top: 2px; font-size: var(--fs-xs); color: var(--muted); }
+.art .why { font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+.art .jl { color: var(--accent-ink); }
+.more { margin-top: 8px; }
+/* Items left alone: the closed block under the Today list, and the day groups in the Library. */
+.foldbox { margin: 10px 16px 28px; padding-top: 12px; border-top: 1px solid var(--line); }
+.foldbox > summary, .daygrp > summary { cursor: pointer; list-style: none; }
+.foldbox > summary::-webkit-details-marker, .daygrp > summary::-webkit-details-marker { display: none; }
+.foldbox > summary { display: flex; align-items: center; gap: 6px; font-size: var(--fs-s); color: var(--muted); }
+.foldbox[open] > summary { color: var(--ink); }
+.foldbox > summary small { font: var(--fs-xs) var(--font-mono); }
+.foldbox .pl { margin: 8px 0 2px; font-size: var(--fs-s); }
+.otherbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
+.otherbar .sbox { flex: 1 1 14em; max-width: 24em; }
+
+/* home pane (wide Today with no story open): the daily summary, in full */
+.home { max-width: 660px; margin: 0 auto; padding: 60px 40px 80px; }
+.dateblock { display: flex; align-items: center; gap: 16px; }
+.dnum { font-size: 64px; font-weight: 300; line-height: 1; letter-spacing: -.02em; }
+.dtxt b { display: block; font-size: 19px; font-weight: 600; line-height: 1.3; }
+.dtxt span { display: block; color: var(--muted); font-size: var(--fs-m); }
+.home .cap { color: var(--muted); margin-top: 14px; }
+.home h2 { font-size: var(--fs-s); font-weight: 600; color: var(--muted); letter-spacing: .06em; margin: 26px 0 8px; }
+.home .digest { font-size: 16px; line-height: 2; }
+.home li a { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+.home li a:hover b { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 3px; }
+.home li span { display: block; color: var(--muted); font-size: 13px; }
+.home .keys { margin-top: 28px; color: var(--muted); font-size: var(--fs-s); display: flex; flex-wrap: wrap; gap: 8px 14px; }
+
+/* pages (library, placeholders) */
+.page { flex: 1; overflow-y: auto; min-height: 0; }
+.pagein { max-width: 780px; margin: 0 auto; padding: 32px 40px 80px; }
+.ph1 { font-size: var(--fs-xl); font-weight: 600; line-height: 1.4; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pl { color: var(--muted); margin-top: 6px; max-width: 38em; line-height: 1.85; }
+.tabs { display: flex; gap: 2px; margin: 22px 0 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs a { padding: 8px 14px; text-decoration: none; font-size: 13.5px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; }
+.tabs a:hover { color: var(--ink); }
+.tabs a[aria-current] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+.tabs small { font: var(--fs-xs) var(--font-mono); margin-left: 6px; }
+.bare { border-top: 1px solid var(--line); }
+.bare .row { padding-left: 4px; }
+.empty { margin-top: 28px; padding: 22px 24px; border: 1px dashed var(--muted); border-radius: 8px; }
+.empty h2 { font-size: var(--fs-l); font-weight: 600; }
+.empty ol { margin: 10px 0 14px 1.4em; list-style: decimal; line-height: 1.95; color: var(--muted); }
+.stage { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: 2px 8px; border: 1px dashed var(--accent); border-radius: 4px; color: var(--accent-ink); vertical-align: 2px; }
+.phgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; margin-top: 30px; }
+.phgrid h2 { font-size: var(--fs-s); font-weight: 600; color: var(--muted); letter-spacing: .06em; margin-bottom: 8px; }
+.phgrid li { padding: 8px 0 8px 18px; border-bottom: 1px solid var(--line); position: relative; line-height: 1.7; }
+.phgrid li::before { content: ""; position: absolute; left: 2px; top: 17px; width: 7px; height: 7px; border: 1.5px solid var(--muted); border-radius: 2px; }
+.ghost { margin-top: 34px; padding: 18px; border: 1px dashed var(--line); border-radius: 8px; display: grid; gap: 12px; }
+.ghost .gr { display: flex; gap: 14px; align-items: center; }
+.ghost i { display: block; height: 10px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.ghost .bx { width: 46px; height: 46px; flex: none; border-radius: 6px; background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.ghost .gcol { flex: 1; display: grid; gap: 8px; }
+.gcap { font-size: var(--fs-xs); color: var(--muted); letter-spacing: .05em; }
+.cs-head { padding: 22px 28px 14px; border-bottom: 1px solid var(--line); }
+.cs-head h1 { font-size: 20px; line-height: 1.4; }
+.cs-head p { color: var(--muted); font-size: 13px; }
+.cstories { max-width: 760px; }
+
+/* settings */
+.settings { flex: 1; min-height: 0; display: grid; grid-template-columns: 224px minmax(0, 1fr); }
+.snav { background: var(--pane); border-right: 1px solid var(--line); padding: 20px 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.snav h1 { font-size: var(--fs-l); padding: 0 10px 12px; }
+.snav a { padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 13.5px; display: flex; justify-content: space-between; gap: 8px; }
+.snav a:hover { background: var(--hover); }
+.snav a[aria-current] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.sbody { overflow-y: auto; min-width: 0; }
+.sin { max-width: 720px; padding: 30px 40px 80px; margin: 0 auto 0 0; }
+.sin.wide { max-width: 940px; }
+.sin h2 { font-size: 20px; line-height: 1.4; }
+.srow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.srow:first-of-type { margin-top: 14px; border-top: 1px solid var(--line); }
+.srow > div:first-child { flex: 1 1 15em; min-width: 0; }
+.sl { font-weight: 600; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sd { font-size: var(--fs-s); color: var(--muted); line-height: 1.7; margin-top: 2px; }
+.sw { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; font-size: var(--fs-s); color: var(--muted); min-height: 24px; }
+.sw .tr { width: 38px; height: 22px; border-radius: 11px; border: 1.5px solid var(--muted); position: relative; transition: background .15s; }
+.sw .tr::after { content: ""; position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+.sw[aria-checked="true"] { color: var(--accent-ink); font-weight: 600; }
+.sw[aria-checked="true"] .tr { background: var(--accent); border-color: var(--accent); }
+.sw[aria-checked="true"] .tr::after { transform: translateX(16px); background: var(--on-accent); }
+.sw span.t { min-width: 2.4em; text-align: left; }
+.inp.num { width: 76px; text-align: right; }
+.val { font: 15px var(--font-mono); }
+.note { margin-top: 14px; font-size: var(--fs-s); color: var(--muted); line-height: 1.7; }
+.tablewrap { overflow-x: auto; margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; background: var(--pane); letter-spacing: .04em; }
+tr:last-child td { border-bottom: 0; }
+td.r, th.r { text-align: right; }
+td.wrap { white-space: normal; min-width: 14em; }
+.bigcost { font: 700 34px/1.2 var(--font-mono); margin-top: 16px; }
+.bigcost small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 8px; }
+.hbar { display: inline-block; height: 8px; width: var(--w); min-width: 2px; border-radius: 2px; background: color-mix(in srgb, var(--accent) 75%, var(--surface)); vertical-align: middle; }
+.kv { display: grid; grid-template-columns: 11em minmax(0, 1fr); gap: 8px 16px; margin-top: 14px; padding: 14px 0; border-block: 1px solid var(--line); }
+.kv dt { color: var(--muted); font-size: var(--fs-s); }
+.legend { display: grid; gap: 8px; margin-top: 14px; }
+.legend li { display: flex; align-items: center; gap: 10px; font-size: var(--fs-s); }
+
+/* world map */
+.mapcard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 4px; }
+.maphead { display: flex; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.maphead::-webkit-scrollbar { display: none; }
+.maphead .seg { flex: none; }
+.mapbox { aspect-ratio: 16 / 7; background: var(--sea); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.mapbox.mini { margin: 0 0 12px; max-height: 280px; }
+.map { width: 100%; height: 100%; display: block; }
+.map .land { fill: var(--land); stroke: var(--sea); stroke-width: .6px; vector-effect: non-scaling-stroke; }
+.land.lv1, .dot.lv1 { fill: color-mix(in srgb, var(--accent) var(--r1), var(--sea)); background: color-mix(in srgb, var(--accent) var(--r1), var(--sea)); }
+.land.lv2, .dot.lv2 { fill: color-mix(in srgb, var(--accent) var(--r2), var(--sea)); background: color-mix(in srgb, var(--accent) var(--r2), var(--sea)); }
+.land.lv3, .dot.lv3 { fill: color-mix(in srgb, var(--accent) var(--r3), var(--sea)); background: color-mix(in srgb, var(--accent) var(--r3), var(--sea)); }
+.land.lv4, .dot.lv4, .land.hl, .dot.hl { fill: color-mix(in srgb, var(--accent) var(--r4), var(--sea)); background: color-mix(in srgb, var(--accent) var(--r4), var(--sea)); }
+.dot { stroke: var(--accent-ink); stroke-width: 1px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.hit { cursor: pointer; }
+.map path.hit:hover, .map path.hit:focus-visible { stroke: var(--ink); stroke-width: 1.2px; }
+.dothit { fill: transparent; stroke: none; }
+.dothit:hover, .dothit:focus-visible { stroke: var(--ink); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+.sel { fill: none; stroke: var(--ink); stroke-width: 1.6px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.mlabel { fill: var(--ink); font-weight: 500; letter-spacing: .03em; paint-order: stroke; stroke: var(--sea); stroke-width: 2.4px; stroke-linejoin: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+.mlabel.pinlabel { fill: var(--accent-ink); font-weight: 600; }
+.mapchips .chip small { font-size: var(--fs-xs); color: var(--muted); }
+.filterbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.chip.on svg { margin-left: 2px; }
+.viewseg, .mapview { display: none; }
+
+.pin { fill: var(--surface); stroke: var(--ink); stroke-width: 1.8px; vector-effect: non-scaling-stroke; pointer-events: none; }
+.chip.place { gap: 5px; }
+.chip.place svg { color: var(--accent-ink); }
+.chip.place small { font-size: var(--fs-xs); color: var(--muted); }
+.crumb { font-size: var(--fs-s); color: var(--muted); margin-bottom: 6px; }
+.placemap { margin-top: 14px; }
+.more-places { margin-top: 26px; }
+.more-places summary { cursor: pointer; font-size: var(--fs-s); color: var(--muted); margin-bottom: 10px; }
+.pagein section + section { margin-top: 4px; }
+
+/* look back (a designed place) and the ask panel */
+.slot { display: grid; gap: 12px; max-width: 40em; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 8px; }
+.slotrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.askscrim { position: fixed; inset: 0; z-index: 40; background: color-mix(in srgb, var(--ink) 35%, transparent); }
+.askpanel { position: fixed; z-index: 41; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: -8px 0 24px color-mix(in srgb, var(--ink) 14%, transparent); }
+.askpanel header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.askpanel h2 { font-size: var(--fs-l); }
+.asub { padding: 10px 16px 0; color: var(--muted); font-size: var(--fs-s); line-height: 1.6; }
+.asub b { color: var(--ink); font-weight: 600; }
+.abody { flex: 1; overflow-y: auto; padding: 18px 16px; }
+.abody h3 { font-size: var(--fs-s); color: var(--muted); letter-spacing: .06em; margin-bottom: 8px; }
+.abody li { margin-bottom: 8px; }
+.ex { width: 100%; text-align: left; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: var(--fs-m); line-height: 1.6; }
+.ex:hover { background: var(--hover); }
+.askpanel footer { display: grid; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); }
+.askpanel textarea { width: 100%; min-height: 76px; resize: vertical; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: var(--fs-m); line-height: 1.6; }
+.arow { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+/* narrow screens: tabs at the bottom, full-screen pages */
+@media (max-width: 859px) {
+  .app { display: block; height: auto; overflow: visible; }
+  .main { min-height: 100dvh; padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 8px); }
+  body[data-route="story"] .main { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  #view { display: block; }
+  .side, .dtool, .lh.today-head { display: none; }
+  .split { display: block; }
+  .split.has-detail .listpane, .split:not(.has-detail) .detailpane { display: none; }
+  .listpane { border-right: 0; overflow: visible; background: var(--surface); }
+  .detailpane { overflow: visible; }
+  .lh { position: static; background: var(--surface); padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 10px; border-bottom: 0; }
+  .lt { font-size: 28px; line-height: 1.25; }
+  .lt small { font-size: var(--fs-s); }
+  .lh input, .lh select, .inp { height: 44px; font-size: 16px; border-radius: 10px; }
+  .sbox svg { top: 14px; }
+  .gh { top: auto; position: static; }
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; padding: 4px max(6px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(6px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--surface) 92%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line); }
+  .tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 50px; text-decoration: none; color: var(--muted); font-size: 11px; font-weight: 600; line-height: 1.2; }
+  .tab svg { width: 24px; height: 24px; }
+  .tab[aria-current] { color: var(--accent-ink); }
+  body[data-route="story"] .tabbar { display: none; }
+  .hero { display: block; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 8px; }
+  .hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .hero-top b { font-size: var(--fs-s); letter-spacing: .06em; color: var(--muted); }
+  .brandline { display: inline-flex; align-items: center; gap: 9px; }
+  .hero .seg button { height: 32px; padding: 0 12px; }
+  .hero-date { margin: 18px 0 8px; }
+  .dnum { font-size: 72px; }
+  .dtxt b { font-size: 20px; }
+  .hero-meta { color: var(--muted); font-size: var(--fs-s); }
+  .hero-sum { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .hero-sum h2 { font-size: var(--fs-s); font-weight: 600; color: var(--muted); letter-spacing: .06em; margin-bottom: 6px; }
+  .hero-sum .points { font-size: var(--fs-read); line-height: 1.8; }
+  #sum-rest { margin-top: .6em; }
+  .hero-sum .link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-m); font-weight: 600; }
+  .catchips { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; background: var(--surface); border-bottom: 1px solid var(--line); scrollbar-width: none; }
+  .catchips::-webkit-scrollbar { display: none; }
+  .catchips a { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 20px; font-size: var(--fs-m); font-weight: 600; text-decoration: none; white-space: nowrap; color: var(--muted); }
+  .catchips a small { font-weight: 400; font-size: var(--fs-xs); }
+  .catchips a[aria-current] { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); color: var(--accent-ink); }
+  .bseg { display: flex; gap: 2px; margin: 0 0 14px; padding: 3px; border-radius: 10px; background: var(--hover); }
+  .bseg a { flex: 1 1 auto; display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 6px; border-radius: 8px; font-size: var(--fs-s); font-weight: 600; text-decoration: none; color: var(--muted); text-align: center; }
+  .bseg a[aria-current] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 18%, transparent); }
+  .quiet { margin: 14px 16px 0; padding: 14px 16px; font-size: var(--fs-m); }
+  .viewseg { display: block; padding: 10px 16px 0; background: var(--surface); }
+  .viewseg .seg { display: flex; }
+  .viewseg .seg button { flex: 1; height: 38px; }
+  .listpane.show-map .rows, .listpane.show-map .catchips, .listpane.show-map .filterbar, .listpane.show-map .foldbox { display: none; }
+  .listpane.show-map .mapview { display: block; padding: 12px 16px 24px; }
+  .mapbox { border-radius: 10px; }
+  .mapchips .chip { height: 34px; padding: 0 12px; font-size: var(--fs-m); }
+  .maphead .seg button { height: 34px; }
+  .row { grid-template-columns: minmax(0, 1fr); padding: 15px 16px; background: var(--surface); }
+  .row:active { background: var(--hover); }
+  .rk { display: none; }
+  .rt { -webkit-line-clamp: 3; line-height: 1.55; }
+  .rs { margin-top: 3px; font-size: var(--fs-m); line-height: 1.6; }
+  .rm { margin-top: 9px; font-size: var(--fs-s); gap: 6px 10px; }
+  .chip, .lab { height: 24px; padding: 0 8px; font-size: var(--fs-s); }
+  .noresult { font-size: var(--fs-m); }
+  .crow { padding: 12px 16px; font-size: var(--fs-l); }
+  .navbar { display: flex; align-items: center; position: sticky; top: 0; z-index: 5; min-height: calc(48px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 16px 0 6px;
+    background: color-mix(in srgb, var(--surface) 90%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .navbar a { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 4px; color: var(--accent-ink); font-size: var(--fs-l); font-weight: 600; text-decoration: none; }
+  .detail { padding: 18px 16px 24px; }
+  .detail h1 { font-size: var(--fs-xl); }
+  .facts { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .facts dd { margin-bottom: 10px; }
+  .chips2 .chip { height: 34px; padding: 0 12px; font-size: var(--fs-m); }
+  .art a { font-size: var(--fs-m); line-height: 1.55; }
+  .art { padding: 12px 0; }
+  .link { font-size: var(--fs-m); min-height: 40px; }
+  .grp { font-size: var(--fs-m); }
+  .actionbar { display: flex; gap: 10px; position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--surface) 94%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-top: 1px solid var(--line); }
+  .actionbar .btn { flex: 1; height: 48px; border-radius: 12px; font-size: var(--fs-l); }
+  .page { overflow: visible; }
+  .pagein { padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 40px; }
+  .ph1 { font-size: 28px; }
+  .tabs a { padding: 12px 14px; font-size: var(--fs-m); }
+  .phgrid { grid-template-columns: 1fr; gap: 24px; }
+  .settings { display: block; }
+  .snav { position: sticky; top: 0; z-index: 5; flex-direction: row; overflow-x: auto; padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px; border-right: 0; border-bottom: 1px solid var(--line); background: var(--surface); }
+  .snav h1 { display: none; }
+  .snav a { flex: none; white-space: nowrap; padding: 9px 12px; font-size: var(--fs-m); }
+  .sbody { overflow: visible; }
+  .sin { padding: 18px 16px 40px; max-width: none; }
+  .sin h2 { font-size: var(--fs-xl); }
+  .srow { padding: 14px 0; }
+  .sd { font-size: var(--fs-s); }
+  .seg button { height: 36px; padding: 0 14px; font-size: var(--fs-s); }
+  .sw .tr { width: 46px; height: 28px; border-radius: 14px; }
+  .sw .tr::after { width: 19px; height: 19px; }
+  .sw[aria-checked="true"] .tr::after { transform: translateX(18px); }
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .kv dd { margin-bottom: 10px; }
+  .cs-head { padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 12px; }
+  .askpanel { width: 100%; border-left: 0; box-shadow: none; padding-top: env(safe-area-inset-top, 0px); }
+  .askscrim { display: none; }
+  .slot { padding: 14px; }
+  .home { display: none; }
+  .tablewrap { border: 0; border-top: 1px solid var(--line); border-radius: 0; margin-inline: -16px; }
+  table.src thead { display: none; }
+  table.src, table.src tbody { display: block; }
+  table.src tr { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  table.src td { display: block; padding: 0; border: 0; font-size: var(--fs-s); color: var(--muted); }
+  table.src td.wrap { flex: 1 0 100%; min-width: 0; color: var(--ink); font-size: var(--fs-m); font-weight: 600; }
+  table.src td.r { margin-left: auto; color: var(--ink); }
+}
+@media (hover: none) { .row:hover, .crow:hover { background: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+/* sign-in and the account forms (the real app only) */
+#login { min-height: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; padding: 24px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); background: var(--ground); }
+#login[hidden] { display: none; }
+.login { width: 100%; max-width: 380px; box-sizing: border-box; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 28px 24px 24px; display: grid; gap: 14px; }
+.login h1 { margin: 0; font-size: 20px; line-height: 1.3; display: flex; align-items: center; gap: 12px; }
+.login h1 img { width: 44px; height: 44px; border-radius: 10px; }
+.login p { margin: 0; color: var(--muted); font-size: var(--fs-s); line-height: 1.7; }
+.login label { display: grid; gap: 6px; font-size: var(--fs-s); color: var(--muted); }
+.login .inp { height: 44px; font-size: 16px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+.login .btn { height: 44px; font-size: 15px; }
+.login .msg { min-height: 1.7em; }
+.login .msg.bad, .note.bad { color: color-mix(in srgb, #b3261e 82%, var(--ink)); }
+.frow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: flex-end; }
+.inp.pin { width: 8.5em; }
+.inp.zone { width: 15em; }
+.inp.gh { width: 15em; }
+.runstat { margin: 12px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--track); font-size: var(--fs-s); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.runstat b { font-weight: 600; }
+.runstat .ok { color: var(--accent-ink); font-weight: 600; }
+.runstat .ng { color: color-mix(in srgb, #b3261e 82%, var(--ink)); font-weight: 600; }
+.runtoday { margin: 10px 0 0; }
+.ulist { margin-top: 4px; }
+</style>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#3a4f8a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<style id="boot-hide">body > :not(#login):not(script) { display: none !important; }</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <div class="main"><main id="view" tabindex="-1"></main></div>
+  <nav class="tabbar" id="tabbar"></nav>
+</div>
+<div id="ask" hidden></div>
+<div id="login" hidden></div>
+<script>
+'use strict';
+/* The whole screen is one function. A mockup page calls it with the data written into the page (the last line of this script).
+   The real app calls it after sign-in, with the data it read from Firestore and the person's details (USER, see site/boot.js).
+   USER is null in the mockup. */
+function startApp(DATA, USER) {
+if (!DATA.costs) DATA.costs = { today_total: 0, by_step: {} };   // a member does not get the cost detail
+/* Routes (hash):
+   #/today[?cat=ID]   #/browse[?cat=ID&country=CODE&sort=rank|recent|articles|sources]   #/story/ID
+   #/countries[/CODE] #/events  #/glossary  #/weekly   #/library[/follow|save|other]
+   #/settings[/display|digest|notify|interests|sources|cost|admin|about]
+   Add ?demo to any route in a fresh browser to fill follow and save with sample stories (mockup only). */
+
+/* ---------- DOM helpers (text goes in as text nodes, never as HTML) ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+function put(el, kids) {
+  for (const k of kids.flat(Infinity)) {
+    if (k == null || k === false) continue;
+    el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  }
+  return el;
+}
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  return put(el, kids);
+}
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+const ICONS = {
+  today: ['M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4'],
+  browse: ['M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01'],
+  countries: ['M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0', 'M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18'],
+  events: ['M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z', 'M4 10h16M8 3v4M16 3v4'],
+  glossary: ['M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z', 'M5 17a3 3 0 0 1 3-3h11'],
+  weekly: ['M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5', 'M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5'],
+  library: ['M4 4h16v4H4zM5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4'],
+  settings: ['M4 7h9M17 7h3M4 17h3M11 17h9M13 4v6M7 14v6'],
+  back: ['M15 5l-7 7 7 7'], up: ['M6 15l6-6 6 6'], down: ['M6 9l6 6 6-6'],
+  plus: ['M12 5v14M5 12h14'], check: ['M5 12.5l4.5 4.5L19 7'],
+  bookmark: ['M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z'],
+  search: ['M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4'],
+  moon: ['M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z'],
+  close: ['M6 6l12 12M18 6L6 18'],
+  pin: ['M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z', 'M12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z'],
+  places: ['M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z', 'M12 7.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z'],
+  chat: ['M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10l-5 4v-4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z'],
+};
+function icon(name, size = 16, cls) {
+  const s = svgEl('svg', { viewBox: '0 0 24 24', width: size, height: size, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.7, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+  if (cls) s.setAttribute('class', cls);
+  for (const d of ICONS[name] || []) s.append(svgEl('path', { d }));
+  return s;
+}
+/* The icon (DATA.brand is the SVG of design/icons/favicon.svg). It is our own file, parsed as SVG, never as HTML.
+   If it is missing the older drawn mark is used. */
+function brandMark(size = 28) {
+  if (DATA.brand) {
+    const doc = new DOMParser().parseFromString(DATA.brand, 'image/svg+xml');
+    if (!doc.querySelector('parsererror')) {
+      const node = document.importNode(doc.documentElement, true);
+      node.setAttribute('width', size); node.setAttribute('height', size); node.setAttribute('aria-hidden', 'true');
+      return node;
+    }
+  }
+  const s = svgEl('svg', { viewBox: '0 0 28 28', width: size, height: size, 'aria-hidden': 'true' });
+  s.append(svgEl('rect', { width: 28, height: 28, rx: 7, fill: 'var(--accent)' }));
+  [[6, 7, 16], [9, 12.5, 13], [12, 18, 10]].forEach(([x, y, w]) => s.append(svgEl('rect', { x, y, width: w, height: 3, rx: 1.5, fill: 'var(--on-accent)' })));
+  return s;
+}
+function safeUrl(u) { try { const x = new URL(u); return x.protocol === 'https:' || x.protocol === 'http:' ? x.href : null; } catch (e) { return null; } }
+function ext(url, text, lang) {
+  const u = safeUrl(url);
+  return u ? h('a', { href: u, target: '_blank', rel: 'noopener noreferrer', lang }, text) : h('span', { lang }, text);
+}
+
+/* ---------- storage and state ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('nd.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('nd.' + k, JSON.stringify(v)); } catch (e) { /* works without storage */ } if (USER && USER.sync) USER.sync(k, v); },
+};
+const ids = v => (Array.isArray(v) ? v.filter(x => typeof x === 'string') : []);
+const oneOf = (v, list, d) => (list.includes(v) ? v : d);
+const clampInt = (v, lo, hi, d) => { const n = parseInt(v, 10); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : d; };
+const LANGS = DATA.settings.languages;   // [{code, name}] name is written in its own language
+const CAT_ORDER = DATA.categories.map(c => c.id);
+const BODIES = ['EU', 'NATO', 'UN', 'ASEAN', 'AFRICAN_UNION', 'INT'];
+const ROLES = ['official', 'news', 'analysis'];
+const S = {
+  lang: oneOf(store.get('lang'), LANGS.map(l => l.code), DATA.settings.language),
+  theme: oneOf(store.get('theme'), ['auto', 'light', 'dark'], 'auto'),
+  quiet: store.get('quiet', false) === true,
+  max: clampInt(store.get('max'), 1, 40, DATA.settings.max_stories),
+  below: clampInt(store.get('below'), 1, 40, DATA.settings.quiet_day_below),
+  follow: ids(store.get('follow', [])), save: ids(store.get('save', [])),
+  notify: Object.assign({ follow: true, sudden: false }, store.get('notify', {})),
+  interest: Object.assign({ security: true, political_economy: true, transnational: true, politics: true }, store.get('interest', {})),
+  palette: oneOf(store.get('palette'), ['ai', 'koke', 'sumi'], 'ai'),
+  sumOpen: false, group: 'rank', mapRegion: 'world', todayView: oneOf(store.get('todayView'), ['list', 'map'], 'list'),
+};
+const BY = new Map(DATA.stories.map(s => [s.id, s]));
+function applyTheme() {
+  const r = document.documentElement;
+  if (S.theme === 'light' || S.theme === 'dark') r.setAttribute('data-theme', S.theme); else r.removeAttribute('data-theme');
+  if (S.palette === 'ai') r.removeAttribute('data-palette'); else r.setAttribute('data-palette', S.palette);
+  r.lang = S.lang;
+}
+
+/* ---------- words ----------
+   UI words live in UI[language]. A new language is one more object with the same keys (the audit lists any
+   key that is missing). A missing key falls back to English. Words with a count use key_one, key_other and so
+   on, chosen by the language's own plural rules. Text from the data goes through T() and falls back to English. */
+const UI = {
+  ja: {
+    today: '今日', stories: 'ストーリー', browse: 'ブラウズ', countries: '国別', events: '出来事', glossary: '用語集', weekly: '週のふりかえり', library: 'ライブラリ', settings: '設定',
+    listSep: '・', listDot: '　', moreN: ' ほか{n}', categories: 'カテゴリ', all: 'すべて', following: '追っているストーリー', followEmpty: '追っているストーリーはまだありません。ストーリーを開いて「追う」を押すと、ここに並びます。',
+    glossLead: 'ストーリーに出てくる用語、人物、制度・機関を、短い説明と一緒にまとめています。すべて AI の下書きです。確認の画面は、あとの段階で作ります。',
+    glossSearch: '名前や説明で探す', glossAll: 'すべて', gk_term: '用語', gk_person: '人物', gk_institution: '制度・機関',
+    glossNoText: '説明はありません。AI が確信を持てなかったため、空にしてあります。', glossBasis_articles: '記事に基づく',
+    glossBasis_memory: 'AI の記憶による。古い可能性があります', glossBasis_both: '記事と AI の記憶による', glossAsOf: '{day}時点',
+    glossTerms: '用語', glossDraft: 'AI の下書き', glossOpen: '用語集で見る', glossOthers: 'ほか{n}件', glossEmpty: 'まだ用語がありません。次の実行で、ストーリーから用語を集めます。', glossNone: '条件に合う項目はありません。',
+    stageHold: '保留中（保存の機能で足りるかを見ています）', navHold: '保留中',
+    seeAll: 'ライブラリで見る', navMain: '主な画面', navStage: '段階 {s} で作ります', updated: '更新', back: '戻る', language: '言語',
+    daily: '今日の要点', readMore: '続きを読む', collapse: '閉じる', byRank: '順位', byCat: '分野別',
+    movedLine_other: '{n}件が動き、{shown}件を表示しています。', upcoming: '次の予定があるストーリー',
+    kMove: '前後へ', kFollow: '追う', kSave: '保存', kSearch: '検索',
+    quietTitle: '静かな日です', quietBody: '動きの少ない日でした。目立つ動きのあったストーリーだけを並べ、ページを埋めるための記事は加えていません。',
+    quietTry: '設定の「静かな日の表示を試す」がオンです。', quietMore: 'ほかのストーリーはブラウズで見られます', quietCap_other: '動きの少ない日です。{n}件だけを表示しています。',
+    search: 'ストーリーを検索', allCountries: 'すべての国・機関', sort: '並べ替え', sort_rank: '重要順', sort_recent: '新しい順', sort_articles: '記事の多い順', sort_sources: '出典の多い順',
+    noResult: '条件に合うストーリーはありません。',
+    status: '現在地', next: '次の予定', noNext: '予定はまだありません', summary: '要約', timeline: '経緯', tlCount_other: '{n}件', tlOpenAll: 'すべて開く', tlCloseAll: 'すべて閉じる', tlRecent: '新しい経緯', tlNote: '古い経緯は、{n}件ずつまとめてあります。開くと全部読めます。', evidence_other: '根拠の記事 {n}件', involved: '関係する国・機関', articles: '記事',
+    follow: '追う', followed: '追っています', save: '保存', saved: '保存済み', prev: '前のストーリー', nextStory: '次のストーリー', more_other: 'さらに{n}件を表示', less: '折りたたむ', notShown: '今日は未掲載',
+    key: '注目', keyTip: '関心に特に近い記事を含むストーリー',
+    cnt_story_other: '{n}件', cnt_article_other: '記事{n}件', cnt_source_other: '{n}出典', cnt_country_other: '{n}か国・機関', cnt_feed_other: 'フィード{n}本',
+    role_official: '公式発表', role_news: '報道', role_analysis: '分析',
+    kind_government: '官公庁', kind_international_org: '国際機関', kind_wire: '通信社', kind_outlet: '報道機関', kind_state_media: '国営メディア', kind_think_tank: 'シンクタンク',
+    cat_security: '安全保障・戦争', cat_political_economy: '国際政治経済', cat_transnational: '国際法・人権・環境', cat_politics: '政治・外交',
+    body_EU: '欧州連合', body_NATO: 'NATO', body_UN: '国連', body_ASEAN: 'ASEAN', body_AFRICAN_UNION: 'アフリカ連合', body_INT: '国際機関',
+    searchC: '国・機関を検索', pickCountry: '国・機関を選ぶと、そのストーリーが並びます。',
+    libFollow: '追っている', libSave: '保存', libOther: 'その他の記事', emptyTitle: 'まだ何もありません', emptyHow: '追う・保存するには',
+    emptyS1: '「今日」か「ブラウズ」でストーリーを開く。', emptyS2: 'ストーリーの「追う」を押すと、続報を見たいストーリーに印が付きます。', emptyS3: '「保存」は、あとで読み返したいストーリーに使います。',
+    demo: '見た目の確認用に、上位のストーリーをいくつか追う・保存する（試作用）', otherLead: 'どのストーリーにも入らなかった記事です。{n}日のあいだ、毎朝、続報がないか見直します。ストーリーに入った記事は、ここから消えます。',
+    otherJoined_other: '見直しの結果、これまでに{n}本がストーリーに加わりました。', otherUntil: '{date}まで見直し', otherAll: 'すべて', otherTop: '関心に特に近い',
+    otherSearch: '題名や理由で探す', otherNone: '条件に合う記事はありません。', foldTitle: '関心に近いが、ストーリーにならなかった記事',
+    foldLead: '続報が出れば、ストーリーに加わります。「今日」の件数には入れていません。', foldJump: 'ストーリーにならなかった記事を見る（{n}本）', joinedLater: '見直しで加わりました（{day}に見送り）',
+    keyTipArticle: '関心に特に近い記事',
+    stageBuild: '段階 {s} で作ります', willShow: '表示する予定の内容', stageWhen: '作る時期', stageUntil: 'それまでは、この画面には何も表示しません。',
+    ghostCap: '画面のイメージ（枠だけの見本。内容は入っていません）',
+    ph_events_lead: 'ストーリーとは別に、日付のある出来事を時間順にたどる画面です。', ph_events_1: '出来事が起きた日と名前', ph_events_2: '関係する国・機関', ph_events_3: 'その出来事が属するストーリー', ph_events_4: '月ごと、国ごとの絞り込み',
+    ph_weekly_lead: '一週間の動きをまとめて振り返る画面です。', ph_weekly_1: 'その週の要点', ph_weekly_2: '動きの大きかったストーリー', ph_weekly_3: '来週の予定', ph_weekly_4: '過去の週への切り替え',
+    s_display: '表示', s_digest: 'ダイジェスト', s_notify: '通知', s_interests: '関心', s_sources: '出典', s_cost: '費用', s_admin: '管理', s_about: 'このアプリについて', s_account: 'アカウント',
+    acName: '表示名', acNameD: 'アプリの中で使う名前です。', acSave: '保存', acSaved: '保存しました。', acNameBad: '表示名は、1字から60字までです。',
+    acError: '保存できませんでした。通信を確かめて、もう一度お試しください。', acRole: '役割', role_admin: '管理者', role_member: '一般の利用者',
+    acPin: 'PIN の変更', acPinD: '6桁の数字です。変えるには、いまの PIN が要ります。', acPinNow: 'いまの PIN', acPinNew: '新しい PIN', acPinChange: 'PIN を変える',
+    acPinDone: 'PIN を変えました。', acPinBad: '新しい PIN は、6桁の数字にしてください。', acPinWrong: 'いまの PIN が違います。',
+    acPinRecent: 'いったんログアウトして、ログインし直してから、もう一度お試しください。', acOut: 'ログアウト',
+    adTime: '毎朝のダイジェストの時刻', adTimeD: '時刻と時間帯です。決めた時刻を過ぎると、その日の分が作られます。変更は、次の朝から効きます。', adTimeZone: '時間帯',
+    adTimeBad: '時刻は 05:00 のように、時間帯は America/Chicago のように入れてください。',
+    adUsers: '利用者', adUsersD: 'オンの人が使えます。オフにすると、その人は、ログインしても何も読めません。', adSelf: '（あなた）', adLoading: '読み込んでいます…',
+    s_run: '今すぐ実行', runLead: '決まった時刻に、ダイジェストは自動で作られます。作られていないときは、ここから実行を頼めます。',
+    runHave: '今日のダイジェストは、できています（{time}）。', runLate: '今日のダイジェストは、まだできていません。予定の時刻（{time}）を過ぎています。',
+    runWait: '今日のダイジェストは、まだできていません。予定の時刻は {time} です。',
+    runConn: 'GitHub との接続（この端末だけ）', runConnD: 'リポジトリの名前とトークンは、この端末のブラウザにだけ保存されます。ほかの端末では、もう一度入れてください。',
+    runRepo: 'リポジトリ（owner/名前）', runToken: 'トークン', runExpiry: 'トークンの期限', runConnect: '接続する', runDisconnect: '接続を消す', runConnected: '接続しています',
+    runExpires: '期限 {date}（あと{n}日）', runExpiresSoon: 'もうすぐ期限が切れます。新しいトークンを作って、入れ直してください。', runExpired: '期限が切れています。新しいトークンを作って、入れ直してください。',
+    runNow: '今日のダイジェストを実行', runTest: '接続だけ試す（費用なし）', runAsking: '実行を頼んでいます…', runAsked: '実行を頼みました。始まるまで、数秒かかります。', runTested: '接続できました。何も作っていません。',
+    runAuto: '今朝のダイジェストが遅れているとき、自動で始める', runAutoD: '予定の時刻のあとにアプリを開いて、今日のダイジェストがまだなければ、実行を頼みます。同じ端末からは、30分に1回までです。',
+    runState_queued: '待機中', runState_in_progress: '実行中', runState_success: '成功', runState_failure: '失敗', runState_other: '終了', runOpen: 'GitHub で見る',
+    runLatest: '直近の実行', runNone: 'まだ実行の記録がありません。', runErrNone: 'まだ接続していません。', runErrAuth: 'トークンが拒まれました。期限が切れているか、権限が足りません。',
+    runErrNotFound: 'リポジトリか、実行の設定が見つかりません。名前を確かめてください。', runErrNet: '通信できませんでした。', runErrHttp: 'GitHub が、エラー（{code}）を返しました。',
+    runBad: 'リポジトリは owner/名前 の形で、トークンも入れてください。',
+    contentLang: '内容の言語', contentLangD: '題名、要約、経緯と、画面の文言が、すべて切り替わります。', langFallback: 'この言語に訳されていない文章は、英語で表示します。',
+    palette: '配色', paletteD: '色の組み合わせを選びます。試作の間だけある設定です。', pal_ai: '藍', pal_koke: '苔', pal_sumi: '墨',
+    theme: 'テーマ', themeD: '自動は、この端末の明るさの設定に合わせます。', th_auto: '自動', th_light: 'ライト', th_dark: 'ダーク', on: 'オン', off: 'オフ',
+    deliveryTime: '届ける時刻', deliveryTimeD: '毎朝この時刻にダイジェストを用意します。', notYet: 'まだ動きません', stage5: '段階 5 で動きます',
+    maxStories: '表示するストーリーの数', maxStoriesD: '「今日」に並べるストーリーの上限です。', quietBelow: '静かな日のしきい値', quietBelowD: '動いたストーリーがこの数より少ない日を、静かな日として扱います。',
+    tryQuiet: '静かな日の表示を試す', tryQuietD: 'オンにすると、今日が静かな日だったときの画面を見られます。',
+    nFollow: '追っているストーリーの更新', nFollowD: '追っているストーリーに動きがあったときに知らせます。', nSudden: '急な動き', nSuddenD: '朝のダイジェストを待たずに知らせます。',
+    sourcesNote_other: '{n}の出典から、これまでに{m}件の記事を集めました。', th_source: '出典', th_label: 'ラベル', th_kind: '種別', th_country: '国', th_lang: '言語', th_articles: '記事',
+    costToday: '今日の費用', costStep: '工程', costMonth: '月の見込み', costKey: 'APIキーの期限', daysLeft_other: '（あと{n}日）',
+    step_screen: '選別', step_assign: 'ストーリーへの振り分け', step_assign_recheck: '続報の見直し（候補の選別）', step_langtest: '言語の確認', step_write: '要約の作成', step_daily_summary: '今日の要点', step_translate: '翻訳', step_glossary_extract: '用語の抽出', step_glossary_explain: '用語の説明', step_glossary_align: '用語の書き方の拾い出し',
+    adminNote: '管理者だけが使う設定です。まだ作っていません。', adMembers: 'メンバー', adMembersD: '読む人の追加と権限。', adJournals: '学術誌', adJournalsD: '追加で読む学術誌の登録。',
+    adLangs: '言語', adLangsD: '内容を切り替えられる言語と、訳した文章の割合です。', notBuilt: 'まだありません', coverage: '訳した割合', base: '元の言語',
+    aboutLine: 'News Digest 画面の試作', aDate: '日付', aCol: '収集した記事', aKept: 'ストーリーに入れた記事', aStories: 'ストーリーの数', aOther: 'その他の記事', aBuilt: 'データの作成',
+    places: '場所', placeTags: '場所', placesLead: 'ストーリーに付いた場所のタグです。押すと、その場所に関わるストーリーとニュースが出ます。', placesNone: '場所のタグが付いたストーリーは、まだありません。',
+    placesOther_other: 'ほかの{n}か所（まだストーリーがありません）', placeStories: '関連するストーリー', placeNews: '関連するニュース', placeCountries: '関係する国', placeNone: 'この場所のストーリーは、まだありません。',
+    placeNote: '場所の位置は、地図の上の1点です。係争地の位置は、どの国のものかという立場を示すものではありません。', placeNotFound: 'この場所は、一覧にありません。',
+    placeType_strait: '海峡・運河', placeType_sea: '海', placeType_region: '地域・係争地', placeType_site: '施設・基地', placeType_city: '都市', placeMapAlt: '場所の地図',
+    map: '地図', region_world: '世界', region_europe: '欧州', region_middle_east: '中東', region_east_asia: '東アジア', region_africa: 'アフリカ', region_americas: '南北アメリカ',
+mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory: 'このストーリーに関係する国の地図', filterClear: '絞り込みを外す', view_list: '一覧', view_map: '地図',
+    mapNote: '国境は、Natural Earth の線を簡略にしたものです。係争地の線は、どの国の主張も示しません。',
+    mapAbout: '地図の形は、Natural Earth（パブリックドメイン）の線を簡略にしたものです。国連の立場に従って、クリミアはウクライナ、ゴラン高原はシリアの内側に描きます。西サハラは、国連が非自治地域としているため、全体をモロッコとは別の領域として描きます。ドンバス、アブハジア、南オセチア、沿ドニエストル、ナゴルノ・カラバフは、ウクライナ、ジョージア、モルドバ、アゼルバイジャンの内側です。カシミールは、インド、パキスタン、中国の支配の線で分かれます。台湾、コソボ、パレスチナは別の形です。これらの線は、法的な立場を示すものではありません。',
+    legend: '記号の見方', close: '閉じる', stageLater: '後の段階で作ります',
+    lookback: '過去をさかのぼる', lookbackD: 'このストーリーの前の経緯を、過去の記事から探して、経緯に足します。', lookbackPeriod: 'さかのぼる期間', days_other: '{n}日', lookbackBtn: 'さかのぼって探す',
+    lookbackNote: '実行の前に、費用の見積もりを出します。了承したあとだけ、探します。足した経緯には「さかのぼって追加」の印を付け、あとで消せます。',
+    lookbackNoResult: 'ストーリーにならなかった話題は、過去の記事からさかのぼって探すこともできます。',
+    ask: '質問', askTitle: 'このストーリーについて質問', askAbout: '対象', askExamples: '質問の例', askQ1: 'なぜ今、こうなっているのですか。', askQ2: '関係する国それぞれの立場を整理してください。', askQ3: '過去に似た出来事はありましたか。',
+    askPh: '質問を書く', askSend: '送る', askNote: '答えるときに読むのは、このストーリーの要約、経緯、記事の見出しです。回答はAIが書くので、間違うことがあります。1回ごとに見込みの費用を示し、1日の上限で止まります。',
+  },
+  en: {
+    today: 'Today', stories: 'Stories', browse: 'Browse', countries: 'Countries', events: 'Events', glossary: 'Glossary', weekly: 'Weekly review', library: 'Library', settings: 'Settings',
+    listSep: ', ', listDot: ' · ', moreN: ' +{n}', categories: 'Categories', all: 'All', following: 'Following', followEmpty: 'Nothing followed yet. Open a story and press Follow to list it here.',
+    glossLead: 'Terms, people and institutions from the stories, with a short explanation. Every entry is an AI draft. A screen to confirm them comes in a later stage.',
+    glossSearch: 'Search names and explanations', glossAll: 'All', gk_term: 'Term', gk_person: 'Person', gk_institution: 'Institution',
+    glossNoText: 'No explanation. The AI was not sure, so it is left empty.', glossBasis_articles: 'Based on the articles',
+    glossBasis_memory: 'From the AI\'s memory. It may be out of date.', glossBasis_both: 'From the articles and the AI\'s memory', glossAsOf: 'as of {day}',
+    glossTerms: 'Terms', glossDraft: 'AI draft', glossOpen: 'Open in the glossary', glossOthers: 'and {n} more', glossEmpty: 'No entries yet. The next run collects terms from the stories.', glossNone: 'No entries match.',
+    stageHold: 'On hold (the Save feature may be enough)', navHold: 'On hold',
+    seeAll: 'See all in Library', navMain: 'Main', navStage: 'Planned for stage {s}', updated: 'Updated', back: 'Back', language: 'Language',
+    daily: 'Today in brief', readMore: 'Read more', collapse: 'Collapse', byRank: 'Rank', byCat: 'By field',
+    movedLine_one: '{n} story moved, {shown} shown.', movedLine_other: '{n} stories moved, {shown} shown.', upcoming: 'Stories with a next step',
+    kMove: 'move', kFollow: 'follow', kSave: 'save', kSearch: 'search',
+    quietTitle: 'A quiet day', quietBody: 'Few stories moved today. Only the ones that did are shown, and nothing was added to fill the page.',
+    quietTry: '"Try the quiet-day view" is on in Settings.', quietMore: 'See the rest in Browse', quietCap_one: 'A quiet day. Showing only {n}.', quietCap_other: 'A quiet day. Showing only {n}.',
+    search: 'Search stories', allCountries: 'All countries and bodies', sort: 'Sort', sort_rank: 'By rank', sort_recent: 'Newest', sort_articles: 'Most articles', sort_sources: 'Most sources',
+    noResult: 'No stories match.',
+    status: 'Where it stands', next: 'Next step', noNext: 'Nothing scheduled yet', summary: 'Summary', timeline: 'Timeline', tlCount_one: '{n} line', tlCount_other: '{n} lines', tlOpenAll: 'Open all', tlCloseAll: 'Close all', tlRecent: 'Latest lines', tlNote: 'Older lines are grouped {n} at a time. Open a group to read them all.', evidence_one: 'Based on {n} article', evidence_other: 'Based on {n} articles', involved: 'Countries and bodies', articles: 'Articles',
+    follow: 'Follow', followed: 'Following', save: 'Save', saved: 'Saved', prev: 'Previous story', nextStory: 'Next story', more_other: 'Show {n} more', less: 'Show fewer', notShown: 'Not shown today',
+    key: 'Key', keyTip: 'Contains the articles closest to your interests',
+    cnt_story_one: '{n} story', cnt_story_other: '{n} stories', cnt_article_one: '{n} article', cnt_article_other: '{n} articles', cnt_source_one: '{n} source', cnt_source_other: '{n} sources',
+    cnt_country_one: '{n} country or body', cnt_country_other: '{n} countries and bodies', cnt_feed_one: '{n} feed', cnt_feed_other: '{n} feeds',
+    role_official: 'Official', role_news: 'News', role_analysis: 'Analysis',
+    kind_government: 'Government', kind_international_org: 'International org.', kind_wire: 'Wire service', kind_outlet: 'News outlet', kind_state_media: 'State media', kind_think_tank: 'Think tank',
+    cat_security: 'Security and war', cat_political_economy: 'Political economy', cat_transnational: 'Law, rights and environment', cat_politics: 'Politics and diplomacy',
+    body_EU: 'European Union', body_NATO: 'NATO', body_UN: 'United Nations', body_ASEAN: 'ASEAN', body_AFRICAN_UNION: 'African Union', body_INT: 'International bodies',
+    searchC: 'Search countries and bodies', pickCountry: 'Pick a country or body to see its stories.',
+    libFollow: 'Following', libSave: 'Saved', libOther: 'Other articles', emptyTitle: 'Nothing here yet', emptyHow: 'How to add one',
+    emptyS1: 'Open a story from Today or Browse.', emptyS2: 'Press Follow on a story you want to keep up with.', emptyS3: 'Press Save on a story you want to reread.',
+    demo: 'Follow and save a few top stories to preview this screen (mockup only)', otherLead: 'Articles that belong to no story. For {n} days they are checked again every morning for a later report. An article that joins a story leaves this list.',
+    otherJoined_one: 'A later report has brought {n} article into a story so far.', otherJoined_other: 'Later reports have brought {n} articles into stories so far.',
+    otherUntil: 'Checked until {date}', otherAll: 'All', otherTop: 'Closest to your interests', otherSearch: 'Search titles and reasons',
+    otherNone: 'No articles match.', foldTitle: 'Close to your interests, but not part of a story',
+    foldLead: 'If a later report comes out, it will join a story. These are not counted in Today.', foldJump: 'See articles that did not become a story ({n})', joinedLater: 'Added on a recheck (set aside {day})',
+    keyTipArticle: 'Closest to your interests',
+    stageBuild: 'Planned for stage {s}', willShow: 'What will appear', stageWhen: 'When', stageUntil: 'Until then this screen shows nothing.',
+    ghostCap: 'Layout sketch (frames only, no content)',
+    ph_events_lead: 'A time-ordered view of dated events, separate from stories.', ph_events_1: 'The date and name of each event', ph_events_2: 'The countries and bodies involved', ph_events_3: 'The story each event belongs to', ph_events_4: 'Filters by month and country',
+    ph_weekly_lead: 'A look back over the week as a whole.', ph_weekly_1: 'The week in brief', ph_weekly_2: 'The stories that moved most', ph_weekly_3: 'What is scheduled for next week', ph_weekly_4: 'A switch to earlier weeks',
+    s_display: 'Display', s_digest: 'Digest', s_notify: 'Notifications', s_interests: 'Interests', s_sources: 'Sources', s_cost: 'Cost', s_admin: 'Admin', s_about: 'About', s_account: 'Account',
+    acName: 'Display name', acNameD: 'The name used inside the app.', acSave: 'Save', acSaved: 'Saved.', acNameBad: 'A display name has 1 to 60 characters.',
+    acError: 'It could not be saved. Check the connection and try again.', acRole: 'Role', role_admin: 'Administrator', role_member: 'Member',
+    acPin: 'Change PIN', acPinD: 'Six digits. You need the current PIN to change it.', acPinNow: 'Current PIN', acPinNew: 'New PIN', acPinChange: 'Change PIN',
+    acPinDone: 'The PIN was changed.', acPinBad: 'The new PIN must be six digits.', acPinWrong: 'The current PIN is wrong.',
+    acPinRecent: 'Sign out, sign in again, and then try once more.', acOut: 'Sign out',
+    adTime: 'Time of the morning digest', adTimeD: 'The time and the time zone. Once the time has passed, the day is made. A change takes effect from the next morning.', adTimeZone: 'Time zone',
+    adTimeBad: 'Enter the time like 05:00 and the time zone like America/Chicago.',
+    adUsers: 'People', adUsersD: 'People who are on can use the app. Someone who is off can sign in but reads nothing.', adSelf: '(you)', adLoading: 'Loading…',
+    s_run: 'Run now', runLead: 'The digest is made automatically at the set time. When it has not been made, you can ask for it here.',
+    runHave: 'Today\'s digest is ready ({time}).', runLate: 'Today\'s digest has not been made yet. The set time ({time}) has passed.',
+    runWait: 'Today\'s digest has not been made yet. The set time is {time}.',
+    runConn: 'Connection to GitHub (this device only)', runConnD: 'The repository name and the token are kept only in the browser of this device. Enter them again on other devices.',
+    runRepo: 'Repository (owner/name)', runToken: 'Token', runExpiry: 'Token expiry', runConnect: 'Connect', runDisconnect: 'Disconnect', runConnected: 'Connected',
+    runExpires: 'Expires {date} ({n} days left)', runExpiresSoon: 'It expires soon. Make a new token and enter it again.', runExpired: 'It has expired. Make a new token and enter it again.',
+    runNow: 'Run today\'s digest', runTest: 'Test the connection only (free)', runAsking: 'Asking for a run…', runAsked: 'A run was requested. It takes a few seconds to start.', runTested: 'Connected. Nothing was made.',
+    runAuto: 'Start it by itself when this morning\'s digest is late', runAutoD: 'When you open the app after the set time and today\'s digest is not there yet, it asks for a run. At most once in 30 minutes from one device.',
+    runState_queued: 'Waiting', runState_in_progress: 'Running', runState_success: 'Succeeded', runState_failure: 'Failed', runState_other: 'Finished', runOpen: 'Open on GitHub',
+    runLatest: 'Latest run', runNone: 'There is no run yet.', runErrNone: 'Not connected yet.', runErrAuth: 'The token was refused. It has expired or lacks the permission.',
+    runErrNotFound: 'The repository or the workflow was not found. Check the name.', runErrNet: 'Could not connect.', runErrHttp: 'GitHub returned an error ({code}).',
+    runBad: 'Enter the repository as owner/name, and the token.',
+    contentLang: 'Content language', contentLangD: 'Titles, summaries, timelines and the interface switch together.', langFallback: 'Text not yet translated into this language is shown in English.',
+    palette: 'Colours', paletteD: 'Pick a set of colours. This setting exists only during the mockup.', pal_ai: 'Indigo', pal_koke: 'Moss', pal_sumi: 'Ink',
+    theme: 'Theme', themeD: 'Auto follows the device setting.', th_auto: 'Auto', th_light: 'Light', th_dark: 'Dark', on: 'On', off: 'Off',
+    deliveryTime: 'Delivery time', deliveryTimeD: 'The digest is prepared at this time each morning.', notYet: 'Not working yet', stage5: 'Works from stage 5',
+    maxStories: 'Stories shown', maxStoriesD: 'The most stories Today will list.', quietBelow: 'Quiet-day threshold', quietBelowD: 'A day with fewer moved stories than this counts as quiet.',
+    tryQuiet: 'Try the quiet-day view', tryQuietD: 'Shows how Today looks on a quiet day.',
+    nFollow: 'Updates to followed stories', nFollowD: 'Tells you when a followed story moves.', nSudden: 'Sudden developments', nSuddenD: 'Does not wait for the morning digest.',
+    sourcesNote_one: '{n} source, {m} articles collected so far.', sourcesNote_other: '{n} sources, {m} articles collected so far.', th_source: 'Source', th_label: 'Label', th_kind: 'Kind', th_country: 'Country', th_lang: 'Language', th_articles: 'Articles',
+    costToday: 'Today', costStep: 'Step', costMonth: 'Monthly estimate', costKey: 'API key expires', daysLeft_one: ' ({n} day left)', daysLeft_other: ' ({n} days left)',
+    step_screen: 'Screening', step_assign: 'Assigning to stories', step_assign_recheck: 'Rechecking earlier items', step_langtest: 'Language check', step_write: 'Writing', step_daily_summary: 'Daily summary', step_translate: 'Translation', step_glossary_extract: 'Listing glossary terms', step_glossary_explain: 'Explaining glossary terms', step_glossary_align: 'Finding how terms are written',
+    adminNote: 'Settings for administrators only. Not built yet.', adMembers: 'Members', adMembersD: 'Adding readers and their roles.', adJournals: 'Journals', adJournalsD: 'Registering journals to read in addition.',
+    adLangs: 'Languages', adLangsD: 'The languages content can switch to, and how much of it is translated.', notBuilt: 'Not built', coverage: 'Translated', base: 'Source language',
+    aboutLine: 'News Digest screen mockup', aDate: 'Date', aCol: 'Articles collected', aKept: 'Articles in stories', aStories: 'Stories', aOther: 'Other articles', aBuilt: 'Data built',
+    places: 'Places', placeTags: 'Places', placesLead: 'The place tags that stories carry. Press one to see the stories and news about that place.', placesNone: 'No story has a place tag yet.',
+    placesOther_one: '{n} more place, with no story yet', placesOther_other: '{n} more places, with no story yet', placeStories: 'Stories', placeNews: 'News', placeCountries: 'Countries', placeNone: 'No story for this place yet.',
+    placeNote: 'A place is one point on the map. The position of a disputed place takes no side on whose it is.', placeNotFound: 'This place is not in the list.',
+    placeType_strait: 'Straits and canals', placeType_sea: 'Seas', placeType_region: 'Regions and disputed areas', placeType_site: 'Sites and bases', placeType_city: 'Cities', placeMapAlt: 'Map of the place',
+    map: 'Map', region_world: 'World', region_europe: 'Europe', region_middle_east: 'Middle East', region_east_asia: 'East Asia', region_africa: 'Africa', region_americas: 'Americas',
+mapAlt: "World map of the countries in today's stories", mapAltStory: 'Map of the countries in this story', filterClear: 'Clear the filter', view_list: 'List', view_map: 'Map',
+    mapNote: "Borders are simplified lines from Natural Earth. The lines in disputed areas show no country's claim.",
+    mapAbout: 'The map shapes are simplified lines from Natural Earth (public domain). Following the position of the United Nations, Crimea is drawn inside Ukraine and the Golan Heights inside Syria. Western Sahara, which the United Nations lists as a non-self-governing territory, is drawn whole and separate from Morocco. Donbas, Abkhazia, South Ossetia, Transnistria and Nagorno-Karabakh are drawn inside Ukraine, Georgia, Moldova and Azerbaijan. Kashmir is split along the lines of control of India, Pakistan and China. Taiwan, Kosovo and Palestine have their own shapes. None of these lines shows a legal position.',
+    legend: 'Reading the marks', close: 'Close', stageLater: 'Planned for a later stage',
+    lookback: 'Look back', lookbackD: 'Finds earlier articles on this story and adds them to its timeline.', lookbackPeriod: 'How far back', days_one: '{n} day', days_other: '{n} days', lookbackBtn: 'Look back',
+    lookbackNote: 'An estimate of the cost is shown first, and nothing is searched until you agree. Entries added this way are marked "Added by look-back" and can be removed later.',
+    lookbackNoResult: 'A topic that never became a story can also be searched in past articles.',
+    ask: 'Ask', askTitle: 'Ask about this story', askAbout: 'About', askExamples: 'Examples', askQ1: 'Why is it at this point now?', askQ2: 'Lay out the position of each country involved.', askQ3: 'Was there a similar event in the past?',
+    askPh: 'Write a question', askSend: 'Send', askNote: 'It reads the summary, timeline and article headlines of this story to answer. The AI writes the answer and can be wrong. The estimated cost is shown for each question, and a daily limit stops it.',
+  },
+};
+const plurals = {};
+function ruleFor(n) {
+  if (!plurals[S.lang]) { try { plurals[S.lang] = new Intl.PluralRules(S.lang); } catch (e) { plurals[S.lang] = new Intl.PluralRules('en'); } }
+  return plurals[S.lang].select(n);
+}
+const num = n => { try { return new Intl.NumberFormat(S.lang).format(n); } catch (e) { return String(n); } };
+function t(key, vars) {
+  const tab = UI[S.lang] || {}, base = UI.en;
+  let k = key;
+  if (vars && typeof vars.n === 'number') k = [key + '_' + ruleFor(vars.n), key + '_other'].find(c => tab[c] != null || base[c] != null) || key;
+  const s = tab[k] != null ? tab[k] : base[k] != null ? base[k] : key;
+  return vars ? s.replace(/\{(\w+)\}/g, (m, n) => (vars[n] == null ? m : typeof vars[n] === 'number' ? num(vars[n]) : vars[n])) : s;
+}
+/* Data text: {en, ja, ...}. Falls back to English, then to any language, and says which language it used. */
+function pick(o) {
+  if (!o) return ['', S.lang];
+  if (o[S.lang]) return [o[S.lang], S.lang];
+  if (o.en) return [o.en, 'en'];
+  for (const l of LANGS) if (o[l.code]) return [o[l.code], l.code];
+  return ['', S.lang];
+}
+const T = o => pick(o)[0];
+const lg = o => { const l = pick(o)[1]; return l === S.lang ? null : { lang: l }; };   // spread into attrs
+const allText = o => (o ? Object.values(o).join(' ') : '');
+const catName = id => (UI.en['cat_' + id] ? t('cat_' + id) : ((DATA.categories.find(c => c.id === id) || {}).ja || id));
+const kindName = k => (UI.en['kind_' + k] ? t('kind_' + k) : k);
+const langName = code => (LANGS.find(l => l.code === code) || {}).name || String(code).toUpperCase();
+const regionNames = {};
+function regionName(code) {
+  try {
+    const d = regionNames[S.lang] || (regionNames[S.lang] = new Intl.DisplayNames([S.lang], { type: 'region' }));
+    const r = d.of(code);
+    return r && r !== code ? r : '';
+  } catch (e) { return ''; }
+}
+function cname(code) {
+  if (BODIES.includes(code)) return t('body_' + code);
+  const c = DATA.countries[code] || {};
+  if (c[S.lang]) return c[S.lang];
+  if (S.lang === 'en' && c.en) return c.en;
+  return regionName(code) || c.en || code;
+}
+const countryHay = code => { const c = DATA.countries[code] || {}; return (allText(c) + ' ' + cname(code) + ' ' + code).toLowerCase(); };
+const isQuiet = () => S.quiet || DATA.day.quiet;
+const PLACE_TYPES = ['region', 'strait', 'sea', 'site', 'city'];
+const PLACES = DATA.places || {};
+const pname = id => (PLACES[id] ? T(PLACES[id].names) : id);
+const plang = id => (PLACES[id] ? lg(PLACES[id].names) : null);
+const placeChip = id => h('a', { class: 'chip place', href: '#/places/' + encodeURIComponent(id) }, icon('pin', 12), h('span', plang(id), pname(id)),
+  PLACES[id] && PLACES[id].n_stories ? h('small', {}, num(PLACES[id].n_stories)) : null);
+/* A source name in the reader's language when the config has one, else the original name (marked as English). */
+function srcLabel(o) {
+  const names = o.names || o.source_names || {};
+  return names[S.lang] ? [names[S.lang], S.lang] : [o.source_name || o.name || '', 'en'];
+}
+const srcSpan = o => { const [txt, l] = srcLabel(o); return h('span', { lang: l }, txt); };
+const codeLabel = c => (['INT', 'AFRICAN_UNION'].includes(c) ? '' : c);
+function fmtDate(iso, opt) {
+  if (!iso) return '';
+  const [y, m, d] = String(iso).slice(0, 10).split('-').map(Number);
+  try { return new Intl.DateTimeFormat(S.lang, { timeZone: 'UTC', ...opt }).format(new Date(Date.UTC(y, m - 1, d))); } catch (e) { return String(iso).slice(0, 10); }
+}
+const dLong = iso => fmtDate(iso, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+const dShort = iso => fmtDate(iso, { month: 'numeric', day: 'numeric' });
+function fmtStamp(iso) {
+  try { return new Intl.DateTimeFormat(S.lang, { timeZone: DATA.settings.timezone, month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(iso)); } catch (e) { return ''; }
+}
+/* A long summary reads better in short paragraphs. Sentences come from the browser's own segmenter. */
+function paras(text, per = 2) {
+  if (!text) return [];
+  let s = [text];
+  try { s = [...new Intl.Segmenter(S.lang, { granularity: 'sentence' }).segment(text)].map(x => x.segment.trim()).filter(Boolean); } catch (e) { s = text.split(/(?<=[.!?。！？])\s*/).filter(Boolean); }
+  const sep = /[　-鿿]/.test(text) ? '' : ' ', out = [];
+  for (let i = 0; i < s.length; i += per) out.push(s.slice(i, i + per).join(sep));
+  return out;
+}
+function coverage(code) {
+  if (code === 'en') return null;
+  let have = 0, total = 0;
+  for (const s of DATA.stories) for (const f of ['title', 'one_line', 'summary', 'status_line']) if (s[f] && s[f].en) { total++; if (s[f][code]) have++; }
+  return total ? Math.round(100 * have / total) : 0;
+}
+
+/* ---------- small components ---------- */
+const sh = role => h('i', { class: 'sh ' + role, 'aria-hidden': 'true' });
+const roleChip = r => h('span', { class: 'lab' }, sh(r), t('role_' + r));
+const langBadge = l => h('span', { class: 'lang', title: langName(l) }, String(l || '').toUpperCase());
+function keyMark(withText, tip) {
+  const s = svgEl('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
+  s.append(svgEl('path', { d: 'M6 21V3' }), svgEl('path', { d: 'M6 4h12l-3.5 4.5L18 13H6', fill: 'currentColor' }));
+  return h('span', { class: 'key', title: tip || t('keyTip') }, s, h('span', { class: withText ? 'kt' : 'sr' }, t('key')));
+}
+/* Countries as plain text in the lists: the names joined by the language's own separator, with "and n more". */
+function countryText(codes, max) {
+  return codes.slice(0, max).map(cname).join(t('listSep')) + (codes.length > max ? t('moreN', { n: codes.length - max }) : '');
+}
+const labelCounts = s => ROLES.filter(r => s.roles[r] > 0).map(r => h('span', { class: 'lc', title: t('role_' + r) }, sh(r), t('role_' + r) + ' ' + num(s.roles[r])));
+function seg(options, current, onPick, label) {
+  const box = h('div', { class: 'seg', role: 'group', 'aria-label': label });
+  const paint = v => box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  for (const [v, text, title, lang] of options) box.append(h('button', { type: 'button', 'data-v': v, title, lang, onclick: () => { paint(v); onPick(v); } }, text));
+  paint(current);
+  return box;
+}
+function toggle(on, label, onChange) {
+  const b = h('button', { type: 'button', class: 'sw', role: 'switch', 'aria-label': label }, h('span', { class: 'tr' }), h('span', { class: 't' }));
+  const paint = v => { b.setAttribute('aria-checked', String(v)); b.lastChild.textContent = t(v ? 'on' : 'off'); };
+  b.addEventListener('click', () => { on = !on; paint(on); onChange(on); });
+  paint(on);
+  return b;
+}
+const langSeg = (short, onPick) => seg(LANGS.map(l => [l.code, short ? l.code.toUpperCase() : l.name, l.name, l.code]), S.lang, onPick || setLang, t('language'));
+
+/* ---------- world map ----------
+   Shapes come from DATA.map (Equal Earth, made by tools/build_world_map.py). Countries with stories are filled
+   by how many stories they have. A country too small to see gets a dot. Bodies such as the EU are not on the
+   map, they sit in the list of chips under it. */
+const MAP = DATA.map || null;
+const REGION_IDS = ['world', 'europe', 'middle_east', 'east_asia', 'africa', 'americas'];
+const MAP_AR = 16 / 7;
+function fitAspect(box) {
+  let [x, y, w, h] = box;
+  const cx = x + w / 2, cy = y + h / 2;
+  if (w / h < MAP_AR) w = h * MAP_AR; else h = w / MAP_AR;
+  if (w >= MAP.width) return [0, 0, MAP.width, MAP.height];
+  x = Math.min(Math.max(0, cx - w / 2), MAP.width - w); y = Math.min(Math.max(0, cy - h / 2), MAP.height - h);
+  return [x, y, w, h];
+}
+function fitBox(codes, pins) {
+  const bs = codes.map(c => MAP.countries[c] && MAP.countries[c].bbox).filter(Boolean).concat((pins || []).map(q => [q.x, q.y, q.x, q.y]));
+  if (!bs.length) return null;
+  const x0 = Math.min(...bs.map(b => b[0])), y0 = Math.min(...bs.map(b => b[1])), x1 = Math.max(...bs.map(b => b[2])), y1 = Math.max(...bs.map(b => b[3]));
+  const w = Math.max((x1 - x0) * 1.5, 150), h = Math.max((y1 - y0) * 1.5, 150 / MAP_AR);
+  return fitAspect([(x0 + x1) / 2 - w / 2, (y0 + y1) / 2 - h / 2, w, h]);
+}
+const levelOf = n => (n >= 5 ? 4 : n >= 3 ? 3 : n);
+function worldMap(opt) {
+  const view = opt.view || [0, 0, MAP.width, MAP.height];
+  const counts = opt.counts || {}, hl = new Set(opt.highlight || []);
+  const svg = svgEl('svg', { viewBox: view.map(v => +v.toFixed(1)).join(' '), class: 'map', role: 'img', 'aria-label': opt.label, preserveAspectRatio: 'xMidYMid meet' });
+  const land = svgEl('g', {}), over = svgEl('g', {});
+  const pick = (el, code, n) => {
+    el.setAttribute('tabindex', '0'); el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', cname(code) + ', ' + t('cnt_story', { n }));
+    el.append(Object.assign(svgEl('title', {}), { textContent: cname(code) + ' ' + t('cnt_story', { n }) }));
+    el.addEventListener('click', () => opt.onPick(code));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); opt.onPick(code); } });
+  };
+  for (const [code, c] of Object.entries(MAP.countries)) {
+    const n = counts[code] || 0;
+    const p = svgEl('path', { d: c.d, 'fill-rule': 'evenodd', class: ['land', n ? 'lv' + levelOf(n) : '', hl.has(code) ? 'hl' : ''].filter(Boolean).join(' ') });
+    if (n && opt.onPick && !c.tiny) { p.classList.add('hit'); pick(p, code, n); }
+    land.append(p);
+    if (c.tiny && (n || hl.has(code))) {
+      const dot = svgEl('circle', { cx: c.cx, cy: c.cy, r: hl.has(code) ? 3.4 : 2.2 + Math.min(n, 6) * 0.35, class: 'dot ' + (hl.has(code) ? 'hl' : 'lv' + levelOf(n)) });
+      over.append(dot);
+      if (n && opt.onPick) { const hit = svgEl('circle', { cx: c.cx, cy: c.cy, r: 7, class: 'hit dothit' }); pick(hit, code, n); over.append(hit); }
+    }
+    if (opt.selected === code) {
+      const ring = c.tiny ? svgEl('circle', { cx: c.cx, cy: c.cy, r: 6, class: 'sel' }) : svgEl('path', { d: c.d, 'fill-rule': 'evenodd', class: 'sel' });
+      over.append(ring);
+    }
+  }
+  const pr = Math.max(view[2] / 150, 1.5);
+  (opt.pins || []).forEach(q => over.append(svgEl('circle', { cx: q.x, cy: q.y, r: pr, class: 'pin' })));
+  if (opt.labels) {
+    // A name is left out when it would overlap one already placed. The chips under the map name every country and place.
+    // The text is sized in screen pixels (about 10.5), whatever the zoom of the map: a map 640 wide on a wide
+    // screen, about 358 wide on a phone.
+    const size = view[2] * 10.5 / (isWide() ? 640 : 358), placed = [];
+    // flipX is where a name that would run past the right edge is anchored instead (it then ends there).
+    const put1 = (x, y, name, anchor, cls, flipX) => {
+      const w = [...name].reduce((sum, ch) => sum + (ch.charCodeAt(0) > 0x2e80 ? 1.03 : 0.56), 0) * size;
+      if (anchor === 'start' && flipX != null && x + w > view[0] + view[2] - 2) { anchor = 'end'; x = flipX; }
+      const bx = anchor === 'start' ? x : anchor === 'end' ? x - w : x - w / 2, box = [bx - size * 0.5, y - size * 0.95, bx + w + size * 0.5, y + size * 0.35];
+      if (placed.some(b => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) return;
+      placed.push(box);
+      over.append(Object.assign(svgEl('text', { x, y, 'font-size': size, 'text-anchor': anchor, class: 'mlabel ' + cls }), { textContent: name }));
+    };
+    (opt.pins || []).slice(0, 4).forEach(q => put1(q.x + pr * 1.8, q.y + size * 0.3, q.name, 'start', 'pinlabel', q.x - pr * 1.8));
+    [...hl].filter(c => MAP.countries[c]).slice(0, 8).forEach(c => {
+      const o = MAP.countries[c];
+      put1(o.cx + (o.tiny ? size * 0.7 : 0), o.cy + (o.tiny ? size * 0.3 : 0), cname(c), o.tiny ? 'start' : 'middle', '', o.cx - size * 0.7);
+    });
+  }
+  svg.append(land, over);
+  return svg;
+}
+const mapCounts = pool => { const m = {}; pool.forEach(s => s.countries.forEach(c => { m[c] = (m[c] || 0) + 1; })); return m; };
+/* The page address of the Today list with one country picked (the same one again clears it). */
+function countryHref(code) {
+  const q = new URLSearchParams(parse().name === 'today' ? parse().q : {});
+  if (q.get('country') === code) q.delete('country'); else q.set('country', code);
+  return '#/today' + (q.toString() ? '?' + q : '');
+}
+function mapCard(pool, selected, shown) {
+  const counts = mapCounts(pool);
+  const holder = h('div', { class: 'mapbox' });
+  const paint = () => holder.replaceChildren(worldMap({ counts, selected, view: fitAspect(MAP.regions[S.mapRegion]), label: t('mapAlt'),
+    onPick: code => { S.todayView = 'list'; store.set('todayView', 'list'); location.hash = countryHref(code); } }));
+  paint();
+  const chips = Object.entries(counts).sort((x, y) => y[1] - x[1] || cname(x[0]).localeCompare(cname(y[0]), S.lang))
+    .map(([c, n]) => h('a', { class: 'chip', href: countryHref(c), 'aria-current': c === selected ? 'true' : null }, cname(c), h('small', {}, num(n))));
+  // The first twelve are shown. A picked country is always shown. The rest sit behind "show n more".
+  const SHOWN = shown || 12, pickedAt = chips.findIndex(c => c.getAttribute('aria-current') === 'true');
+  const head = chips.slice(0, SHOWN), rest = chips.slice(SHOWN);
+  if (pickedAt >= SHOWN) { head.push(chips[pickedAt]); rest.splice(pickedAt - SHOWN, 1); }
+  return h('section', { class: 'mapcard', 'aria-label': t('map') },
+    h('div', { class: 'maphead' }, seg(REGION_IDS.map(id => [id, t('region_' + id)]), S.mapRegion, v => { S.mapRegion = v; paint(); }, t('map'))),
+    holder, h('div', { class: 'chips2 mapchips' }, head),
+    rest.length > 0 && h('details', { class: 'more-places' }, h('summary', {}, t('more', { n: rest.length })), h('div', { class: 'chips2 mapchips' }, rest)),
+    h('p', { class: 'sd' }, t('mapNote')));
+}
+
+/* ---------- routing ---------- */
+function parse() {
+  const [path, qs = ''] = (location.hash || '#/today').slice(1).split('?');
+  const p = path.split('/').filter(Boolean).map(x => { try { return decodeURIComponent(x); } catch (e) { return x; } });
+  return { name: p[0] || 'today', a: p[1], q: Object.fromEntries(new URLSearchParams(qs)) };
+}
+const wideQuery = matchMedia('(min-width: 860px)');
+const isWide = () => wideQuery.matches;
+const cur = { sig: null, split: null, list: null, detail: null };
+let ctxHash = '#/today', prevName = null, listY = 0;
+function seedDemo(r) {
+  if (!('demo' in r.q) || USER || S.follow.length || S.save.length) return;
+  const top = DATA.stories.filter(s => s.shown_today).map(s => s.id);
+  S.follow = [top[0], top[2], top[3]].filter(Boolean); S.save = [top[1], top[4]].filter(Boolean);
+  store.set('follow', S.follow); store.set('save', S.save);
+}
+function route(keep) {
+  const r = parse();
+  seedDemo(r);
+  if (!$('#ask').hidden) closeAsk();
+  document.body.dataset.route = r.name;
+  if (prevName !== 'story' && r.name === 'story') listY = window.scrollY;
+  const views = { today: listView, browse: listView, story: storyView, countries: countriesView, places: r => (r.a ? placeView(r) : placesIndex()), library: libraryView, settings: settingsView, events: phView, glossary: glossaryView, weekly: phView };
+  if (['today', 'browse', 'library'].includes(r.name) || (r.name === 'countries' && r.a) || (r.name === 'places' && PLACES[r.a])) ctxHash = location.hash || '#/today';
+  else if (r.name === 'story' && prevName === null && BY.get(r.a)) ctxHash = BY.get(r.a).shown_today ? '#/today' : '#/browse';
+  document.title = 'News Digest';
+  renderSide(r); renderTabs(r);
+  (views[r.name] || listView)(r);
+  if (!keep) window.scrollTo(0, prevName === 'story' && r.name !== 'story' ? listY : 0);
+  prevName = r.name;
+}
+function showPage(node) { cur.sig = null; $('#view').replaceChildren(node); }
+function showSplit(sig, build, selId, detailFn, hasDetail) {
+  const view = $('#view');
+  const full = [sig, S.lang, S.quiet, S.max, S.below, isWide()].join('~');
+  if (cur.sig !== full || !view.contains(cur.split)) {
+    cur.list = build(); cur.detail = h('section', { class: 'detailpane', 'aria-label': t('summary') });
+    cur.split = h('div', { class: 'split' }, cur.list.el, cur.detail);
+    view.replaceChildren(cur.split); cur.sig = full;
+  }
+  cur.list.select(selId);
+  cur.detail.replaceChildren(...detailFn());
+  cur.detail.scrollTop = 0;
+  cur.split.classList.toggle('has-detail', !!hasDetail);
+}
+function setLang(v) {
+  if (v === S.lang || !LANGS.some(l => l.code === v)) return;
+  const keep = { y: window.scrollY, list: cur.list && cur.list.el.scrollTop, detail: cur.detail && cur.detail.scrollTop, page: $('.page') && $('.page').scrollTop, sbody: $('.sbody') && $('.sbody').scrollTop };
+  S.lang = v; store.set('lang', v); applyTheme(); cur.sig = null; route(true);
+  window.scrollTo(0, keep.y);
+  const set = (sel, y) => { const e = $(sel); if (e && y) e.scrollTop = y; };
+  set('.listpane', keep.list); set('.detailpane', keep.detail); set('.page', keep.page); set('.sbody', keep.sbody);
+}
+
+/* ---------- shell: sidebar and tabs ---------- */
+function todayPool() {
+  let a = DATA.stories.filter(s => s.shown_today).slice(0, S.max);
+  if (isQuiet()) a = a.slice(0, 3);
+  return a;
+}
+function ctxRoute() { const [p, qs = ''] = ctxHash.slice(1).split('?'); const a = p.split('/').filter(Boolean); return { name: a[0], a: a[1], q: Object.fromEntries(new URLSearchParams(qs)) }; }
+function catCounts(scope) {
+  if (scope === 'today') { const m = {}; todayPool().forEach(s => { m[s.category] = (m[s.category] || 0) + 1; }); return m; }
+  return Object.fromEntries(DATA.categories.map(c => [c.id, c.n_stories]));
+}
+function catHref(id) {
+  const c = ctxRoute(), base = c.name === 'today' ? 'today' : 'browse';
+  const q = new URLSearchParams(base === 'browse' && c.name === 'browse' ? c.q : {}); q.delete('q');
+  if (id) q.set('cat', id); else q.delete('cat');
+  return '#/' + base + (q.toString() ? '?' + q : '');
+}
+const STAGES = { events: 'hold', weekly: '5' };     // 'hold' is a feature that is put on hold
+const stageShort = id => (STAGES[id] === 'hold' ? t('navHold') : STAGES[id]);
+function renderSide(r) {
+  const c = r.name === 'story' ? ctxRoute() : r;
+  const counts = catCounts(c.name === 'today' ? 'today' : 'all'), active = (c.name === 'today' || c.name === 'browse') ? (c.q.cat || '') : '';
+  const nav = [['today', todayPool().length], ['browse', DATA.stories.length], ['countries', Object.keys(DATA.countries).length], ['places', Object.values(PLACES).filter(p => p.n_stories > 0).length], ['events'], ['glossary', (DATA.glossary || []).length], ['weekly'], ['library', S.follow.length + S.save.length || ''], ['settings', '']];
+  const navEls = nav.map(([id, n]) => h('a', { class: 'ni', href: '#/' + id, 'aria-current': r.name === id || (r.name === 'story' && id === ctxRoute().name) ? 'page' : null, title: STAGES[id] ? (STAGES[id] === 'hold' ? t('stageHold') : t('navStage', { s: STAGES[id] })) : null },
+    icon(id), h('span', { class: 'nl' }, t(id)), STAGES[id] ? h('span', { class: 'nstage' }, stageShort(id)) : h('span', { class: 'nc' }, n === '' ? '' : num(n))));
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+  const catEls = [h('a', { class: 'ci', href: catHref(''), 'aria-current': active ? null : 'true' }, h('span', { class: 'nl' }, t('all')), h('span', { class: 'nc' }, num(total)))]
+    .concat(CAT_ORDER.map(id => h('a', { class: 'ci', href: catHref(id), title: catName(id), 'aria-current': active === id ? 'true' : null }, h('span', { class: 'nl' }, catName(id)), h('span', { class: 'nc' }, num(counts[id] || 0)))));
+  const fol = S.follow.map(id => BY.get(id)).filter(Boolean);
+  const folEls = fol.length
+    ? fol.slice(0, 5).map(s => h('a', { class: 'fi', href: '#/story/' + s.id, 'aria-current': r.name === 'story' && r.a === s.id ? 'true' : null, title: T(s.title) }, h('span', { class: 'nl', ...lg(s.title) }, T(s.title))))
+      .concat(fol.length > 5 ? [h('a', { class: 'fi', href: '#/library/follow' }, h('span', { class: 'nl' }, t('seeAll')), h('span', { class: 'nc' }, num(fol.length)))] : [])
+    : [h('p', { class: 'fnote' }, t('followEmpty'))];
+  $('#side').replaceChildren(
+    h('div', { class: 'brand' }, brandMark(), h('div', {}, h('b', {}, 'News Digest'), h('small', {}, dLong(DATA.day.date)))),
+    h('nav', { 'aria-label': t('navMain') }, navEls),
+    h('div', {}, h('h2', {}, t('categories')), h('nav', { 'aria-label': t('categories') }, catEls)),
+    h('div', {}, h('h2', {}, t('following')), h('nav', { 'aria-label': t('following') }, folEls)),
+    h('div', { class: 'side-gap' }),
+    h('div', { class: 'side-foot' }, h('span', {}, t('updated') + ' ' + fmtStamp(DATA.built_at)), langSeg(true)));
+}
+const TAB_OF = { events: 'browse', glossary: 'browse', weekly: 'browse', places: 'countries' };
+function renderTabs(r) {
+  const active = TAB_OF[r.name] || r.name;
+  $('#tabbar').setAttribute('aria-label', t('navMain'));
+  $('#tabbar').replaceChildren(...['today', 'browse', 'countries', 'library', 'settings'].map(id =>
+    h('a', { class: 'tab', href: '#/' + id, 'aria-current': id === active ? 'page' : null }, icon(id, 24), h('span', {}, t(id)))));
+}
+const browseSeg = active => h('nav', { class: 'bseg', 'aria-label': t('browse') },
+  [['browse', 'stories'], ['events', 'events'], ['glossary', 'glossary'], ['weekly', 'weekly']].map(([id, k]) => h('a', { href: '#/' + id, 'aria-current': id === active ? 'page' : null }, t(k))));
+
+/* ---------- story lists ---------- */
+function listDef(r) {
+  const q = r.q || {};
+  if (r.name === 'browse') return { kind: 'browse', q, sig: ['browse', q.cat, q.country, q.sort].join('|'), title: t('browse'), pool: () => DATA.stories };
+  if (r.name === 'countries') return { kind: 'country', q: {}, sig: 'c|' + r.a, title: cname(r.a), pool: () => DATA.stories.filter(s => s.countries.includes(r.a)) };
+  if (r.name === 'places') return { kind: 'place', q: {}, sig: 'p|' + r.a, title: pname(r.a), pool: () => DATA.stories.filter(s => (s.places || []).includes(r.a)) };
+  if (r.name === 'library') return { kind: 'library', q: {}, sig: 'l|' + (r.a || 'follow'), title: t('library'), pool: () => S[r.a === 'save' ? 'save' : 'follow'].map(id => BY.get(id)).filter(Boolean) };
+  return { kind: 'today', q, sig: 'today|' + q.cat + '|' + q.country, title: t('today'), pool: todayPool };
+}
+function hay(s) {
+  if (!s._h) s._h = [s.title, s.one_line, s.status_line, s.summary].map(allText).join(' ') + ' ' + s.countries.map(countryHay).join(' ');
+  return s._h.toLowerCase();
+}
+function visible(def, ui) {
+  let a = def.pool();
+  if (def.q.cat) a = a.filter(s => s.category === def.q.cat);
+  if (def.q.country) a = a.filter(s => s.countries.includes(def.q.country));
+  if (ui.q) a = a.filter(s => hay(s).includes(ui.q.toLowerCase()));
+  const by = { recent: (x, y) => y.last_day.localeCompare(x.last_day) || x.rank - y.rank, articles: (x, y) => y.n_articles - x.n_articles, sources: (x, y) => y.n_sources - x.n_sources, rank: (x, y) => x.rank - y.rank };
+  return a.slice().sort(by[def.q.sort] || by.rank);
+}
+function row(s, withCat) {
+  return h('a', { class: 'row', href: '#/story/' + s.id, 'data-id': s.id },
+    h('span', { class: 'rk' }, s.rank),
+    h('div', {},
+      h('div', { class: 'rt', ...lg(s.title) }, s.top_score >= 3 && keyMark(false), T(s.title)),
+      h('div', { class: 'rs', ...lg(T(s.status_line) ? s.status_line : s.one_line) }, T(s.status_line) || T(s.one_line)),
+      h('div', { class: 'rm' }, h('span', { class: 'cs' }, withCat ? catName(s.category) + t('listDot') : '', countryText(s.countries, 3)), labelCounts(s), h('span', {}, t('cnt_article', { n: s.n_articles })))));
+}
+/* The daily summary is one point per line. An older one-paragraph summary becomes one point per sentence. */
+function points(text) {
+  const lines = String(text || '').split('\n').map(x => x.trim()).filter(Boolean);
+  return lines.length > 1 ? lines : paras(text, 1);
+}
+/* A real quiet day has a summary written for it. The Settings switch only simulates one, so it keeps two points. */
+const dayPoints = () => { const p = points(T(DATA.day.summary)); return S.quiet && !DATA.day.quiet ? p.slice(0, 2) : p; };
+const pointList = (items, extra) => h('ul', { class: 'points', ...extra }, items.map(x => h('li', {}, termNodes(x, pick(DATA.day.summary)[1]))));
+const digestList = () => pointList(dayPoints(), { ...lg(DATA.day.summary), class: 'points digest' });
+function dateBlock(cls) {
+  const d = Number(DATA.day.date.split('-')[2]);
+  return h('div', { class: 'dateblock ' + (cls || '') }, h('span', { class: 'dnum' }, d),
+    h('span', { class: 'dtxt' }, h('b', {}, fmtDate(DATA.day.date, { weekday: 'long' })), h('span', {}, fmtDate(DATA.day.date, { year: 'numeric', month: 'long' }))));
+}
+function hero(def) {
+  const p = dayPoints(), head = p.slice(0, 3), rest = p.slice(3);
+  const wrap = h('section', { class: 'hero-sum', 'aria-label': t('daily'), ...lg(DATA.day.summary) });
+  const moreBox = h('div', { id: 'sum-rest', hidden: !S.sumOpen }, pointList(rest));
+  const btn = h('button', { type: 'button', class: 'link', 'aria-controls': 'sum-rest' });
+  const paint = () => { moreBox.hidden = !S.sumOpen; btn.textContent = S.sumOpen ? t('collapse') : t('readMore'); btn.setAttribute('aria-expanded', String(S.sumOpen)); };
+  btn.addEventListener('click', () => { S.sumOpen = !S.sumOpen; paint(); });
+  paint();
+  put(wrap, [h('h2', {}, t('daily')), p.length ? pointList(head) : null, rest.length ? moreBox : null, rest.length ? btn : null]);
+  return h('header', { class: 'hero' },
+    h('div', { class: 'hero-top' }, h('b', { class: 'brandline' }, brandMark(24), 'News Digest'), langSeg(true)),
+    dateBlock('hero-date'),
+    h('p', { class: 'hero-meta' }, isQuiet() ? t('quietCap', { n: todayPool().length }) : t('movedLine', { n: DATA.day.moved_count, shown: DATA.day.n_shown })),
+    foldJump('hero-meta', def),
+    p.length ? wrap : null);
+}
+function quietBlock() {
+  return h('div', { class: 'quiet', role: 'note' }, icon('moon', 18),
+    h('div', {}, h('b', {}, t('quietTitle')), h('p', {}, t('quietBody')), S.quiet && h('p', {}, t('quietTry') + ' ', h('a', { class: 'link', href: '#/settings/digest' }, t('settings')))));
+}
+function catHrefFor(def, id) {
+  const q = new URLSearchParams(def.q); q.delete('q');
+  if (id) q.set('cat', id); else q.delete('cat');
+  return '#/' + (def.kind === 'browse' ? 'browse' : 'today') + (q.toString() ? '?' + q : '');
+}
+function buildList(def, asH1) {
+  const ui = { q: def.q.q || '' };
+  const rows = h('div', { class: 'rows' });
+  const sub = h('small');
+  const el = h('section', { class: 'listpane', 'aria-label': def.title });
+  const grouped = () => def.kind === 'today' && S.group === 'cat' && !def.q.cat;
+  function fill() {
+    const a = visible(def, ui);
+    sub.textContent = [def.q.cat && catName(def.q.cat), def.kind === 'today' && def.q.country && cname(def.q.country)].filter(Boolean).map(x => x + ' · ').join('') + t('cnt_story', { n: a.length });
+    const withCat = !def.q.cat && !grouped() && def.kind !== 'today';
+    const nodes = [];
+    if (!a.length) nodes.push(h('p', { class: 'noresult' }, t('noResult'), def.kind === 'browse' && [' ', t('lookbackNoResult'), ' ', h('span', { class: 'stage' }, t('stageBuild', { s: '2c' }))]));
+    else if (grouped()) CAT_ORDER.forEach(id => { const g = a.filter(s => s.category === id); if (g.length) nodes.push(h('h3', { class: 'gh' }, catName(id) + '  ' + num(g.length)), g.map(s => row(s, false))); });
+    else nodes.push(a.map(s => row(s, withCat)));
+    if (def.kind === 'today' && isQuiet()) nodes.push(h('p', { class: 'end' }, h('a', { class: 'link', href: '#/browse' }, t('quietMore'))));
+    rows.replaceChildren(...nodes.flat());
+    api.ids = a.map(s => s.id);
+    api.select(api.sel);
+  }
+  const api = { el, ids: [], sel: null, select(id) {
+    api.sel = id;
+    rows.querySelectorAll('[data-id]').forEach(n => { if (n.dataset.id === id) { n.setAttribute('aria-current', 'true'); if (isWide()) n.scrollIntoView({ block: 'nearest' }); } else n.removeAttribute('aria-current'); });
+  } };
+  const top = h('div', { class: 'lh-top' }, h(asH1 ? 'h1' : 'div', { class: 'lt' }, def.title, sub));
+  if (def.kind === 'today') top.append(seg([['rank', t('byRank')], ['cat', t('byCat')]], S.group, v => { S.group = v; fill(); }, t('today')));
+  const head = h('header', { class: 'lh' + (def.kind === 'today' ? ' today-head' : '') });
+  if (def.kind === 'browse') head.append(browseSeg('browse'));
+  head.append(top);
+  if (def.kind === 'browse') head.append(browseTools(def, ui, fill));
+  el.append(head);
+  if (def.kind === 'today') {
+    el.append(hero(def)); if (isQuiet()) el.append(quietBlock());
+    if (MAP) el.append(h('div', { class: 'viewseg' }, seg([['list', t('view_list')], ['map', t('view_map')]], S.todayView, v => { S.todayView = v; store.set('todayView', v); el.classList.toggle('show-map', v === 'map'); }, t('today'))));
+    el.classList.toggle('show-map', !!MAP && S.todayView === 'map');
+  }
+  if (def.kind === 'today' || def.kind === 'browse') {
+    const pool = def.kind === 'today' ? todayPool() : DATA.stories;
+    el.append(h('nav', { class: 'catchips', 'aria-label': t('categories') }, [''].concat(CAT_ORDER).map(id =>
+      h('a', { href: catHrefFor(def, id), 'aria-current': (def.q.cat || '') === id ? 'true' : null }, id ? catName(id) : t('all'), h('small', {}, num(id ? pool.filter(s => s.category === id).length : pool.length))))));
+  }
+  if (def.kind === 'today' && def.q.country) {
+    el.append(h('div', { class: 'filterbar' }, h('a', { class: 'chip on', href: countryHref(def.q.country), 'aria-label': t('filterClear') + ': ' + cname(def.q.country) }, cname(def.q.country), icon('close', 11))));
+  }
+  el.append(rows);
+  if (foldOn(def)) { const f = foldBox(); if (f) el.append(f); }
+  if (def.kind === 'today' && MAP) el.append(h('div', { class: 'mapview' }, mapCard(todayPool().filter(s => !def.q.cat || s.category === def.q.cat), def.q.country)));
+  fill();
+  return api;
+}
+function browseTools(def, ui, fill) {
+  const nav = (k, v) => { const q = new URLSearchParams(def.q); q.delete('q'); if (v) q.set(k, v); else q.delete(k); location.hash = '#/browse' + (q.toString() ? '?' + q : ''); };
+  const input = h('input', { class: 'lsearch', type: 'search', placeholder: t('search'), 'aria-label': t('search'), value: ui.q, oninput: e => {
+    ui.q = e.target.value.trim(); fill();
+    const q = new URLSearchParams(def.q); if (ui.q) q.set('q', ui.q); else q.delete('q');
+    history.replaceState(null, '', '#/browse' + (q.toString() ? '?' + q : '')); ctxHash = location.hash;
+  } });
+  const cs = Object.entries(DATA.countries).sort((a, b) => b[1].n_stories - a[1].n_stories || cname(a[0]).localeCompare(cname(b[0]), S.lang));
+  const country = h('select', { 'aria-label': t('countries'), onchange: e => nav('country', e.target.value) }, h('option', { value: '' }, t('allCountries')),
+    cs.map(([c, o]) => h('option', { value: c, selected: def.q.country === c }, cname(c) + ' (' + num(o.n_stories) + ')')));
+  const sort = h('select', { 'aria-label': t('sort'), onchange: e => nav('sort', e.target.value === 'rank' ? '' : e.target.value) },
+    ['rank', 'recent', 'articles', 'sources'].map(k => h('option', { value: k, selected: (def.q.sort || 'rank') === k }, t('sort_' + k))));
+  return h('div', { class: 'tools' }, h('div', { class: 'sbox' }, icon('search', 15), input), country, sort);
+}
+function listView(r) {
+  const def = listDef(r);
+  showSplit(def.sig, () => buildList(def, true), null, () => [homePane(def)], false);
+}
+function homePane(def) {
+  const up = DATA.stories.filter(s => T(s.next_step));
+  return h('div', { class: 'home' },
+    dateBlock(),
+    h('p', { class: 'cap' }, isQuiet() ? t('quietCap', { n: todayPool().length }) : t('movedLine', { n: DATA.day.moved_count, shown: DATA.day.n_shown })),
+    foldJump('cap', def),
+    MAP && def.kind === 'today' && [h('h2', {}, t('map')), mapCard(todayPool().filter(s => !def.q.cat || s.category === def.q.cat), def.q.country, 6)],
+    T(DATA.day.summary) && [h('h2', {}, t('daily')), digestList()],
+    up.length > 0 && [h('h2', {}, t('upcoming')), h('ul', {}, up.map(s => h('li', {}, h('a', { href: '#/story/' + s.id }, h('b', lg(s.title), T(s.title)), h('span', lg(s.next_step), T(s.next_step))))))],
+    h('div', { class: 'keys' }, h('span', {}, h('kbd', {}, 'j'), ' ', h('kbd', {}, 'k'), ' ' + t('kMove')), h('span', {}, h('kbd', {}, 'f'), ' ' + t('kFollow')), h('span', {}, h('kbd', {}, 's'), ' ' + t('kSave')), h('span', {}, h('kbd', {}, '/'), ' ' + t('kSearch'))));
+}
+
+/* ---------- story detail ---------- */
+function paintFlag(b, kind) {
+  const on = S[kind].includes(b.dataset.id);
+  b.setAttribute('aria-pressed', String(on));
+  b.classList.toggle('primary', kind === 'follow' && !on);
+  b.replaceChildren(icon(kind === 'follow' ? (on ? 'check' : 'plus') : 'bookmark', 15, 'fillable'), t(kind === 'follow' ? (on ? 'followed' : 'follow') : (on ? 'saved' : 'save')));
+}
+function flag(kind, s) {
+  const b = h('button', { type: 'button', class: 'btn js-' + kind, 'data-id': s.id, onclick: () => {
+    S[kind] = S[kind].includes(s.id) ? S[kind].filter(x => x !== s.id) : S[kind].concat(s.id);
+    store.set(kind, S[kind]);
+    document.querySelectorAll('.js-' + kind).forEach(x => paintFlag(x, kind));
+    renderSide(parse());
+  } });
+  paintFlag(b, kind);
+  return b;
+}
+function artRow(a) {
+  return h('li', { class: 'art' }, ext(a.url, a.title, a.lang),
+    h('div', { class: 'am' }, srcSpan(a), h('span', {}, kindName(a.kind)), langBadge(a.lang), a.published && h('span', {}, dShort(a.published)),
+      a.joined_later && h('span', { class: 'jl' }, t('joinedLater', { day: dShort(a.joined_later.left_alone) }))));
+}
+/* Items that belong to no story. The row has the source, the role, the language, the date and the reason it was left alone. */
+function otherRow(a) {
+  return h('li', { class: 'art' }, (a.score || 0) >= 3 && keyMark(false, t('keyTipArticle')), ext(a.url, a.title, a.lang),
+    h('div', { class: 'am' }, roleChip(a.role), srcSpan(a), langBadge(a.lang), a.published && h('span', {}, dShort(a.published))),
+    T(a.reason_text) && h('div', { class: 'why', ...lg(a.reason_text) }, T(a.reason_text)));
+}
+/* Items left alone have no category and no country, so the block is hidden while either filter is on. */
+const foldOn = def => def.kind === 'today' && !def.q.cat && !def.q.country && (DATA.standalone_fold || []).length > 0;
+/* A short way to the block, because it sits at the end of a long list. */
+function foldJump(cls, def) {
+  if (!foldOn(def)) return null;
+  const go = () => { const f = document.querySelector('.foldbox'); if (f) { f.open = true; f.scrollIntoView({ block: 'start' }); } };
+  return h('p', { class: cls }, h('button', { type: 'button', class: 'link', onclick: go }, t('foldJump', { n: DATA.standalone_fold.length })));
+}
+/* The closed block under the Today list: the left-alone items that are closest to the interests, from the last few days. */
+function foldBox() {
+  const byId = new Map(DATA.standalone.map(a => [a.id, a]));
+  const items = (DATA.standalone_fold || []).map(id => byId.get(id)).filter(Boolean);
+  if (!items.length) return null;
+  return h('details', { class: 'foldbox' }, h('summary', {}, t('foldTitle'), h('small', {}, num(items.length))),
+    h('p', { class: 'pl' }, t('foldLead')), h('ul', { class: 'arts' }, items.map(otherRow)));
+}
+/* The Library list of items left alone: the day groups, newest first (the latest three open), a filter and a search.
+   The list is exactly what is still being checked again, so an item leaves it when it joins a story or its days are over. */
+function otherView() {
+  const ui = { top: false, q: '' };
+  const list = h('div', {});
+  function fill() {
+    const q = ui.q.toLowerCase();
+    const hit = a => (!ui.top || (a.score || 0) >= 3) && (!q || (a.title + ' ' + a.source_name + ' ' + allText(a.reason_text)).toLowerCase().includes(q));
+    const groups = new Map();
+    DATA.standalone.filter(hit).forEach(a => { if (!groups.has(a.day)) groups.set(a.day, []); groups.get(a.day).push(a); });
+    const days = [...groups.keys()].sort().reverse();
+    list.replaceChildren(...(days.length ? days.map((d, i) => {
+      const g = groups.get(d);
+      return h('details', { class: 'daygrp', open: i < 3 || q !== '' },
+        h('summary', { class: 'grp' }, fmtDate(d, { month: 'long', day: 'numeric', weekday: 'short' }),
+          h('span', {}, t('cnt_article', { n: g.length }) + ' · ' + t('otherUntil', { date: dShort(g[0].until) }))),
+        h('ul', { class: 'arts' }, g.map(otherRow)));
+    }) : [h('p', { class: 'noresult' }, t('otherNone'))]));
+  }
+  const input = h('input', { class: 'lsearch', type: 'search', placeholder: t('otherSearch'), 'aria-label': t('otherSearch'), oninput: e => { ui.q = e.target.value.trim(); fill(); } });
+  fill();
+  const n = DATA.stats.n_joined_later || 0;
+  return h('div', {}, h('p', { class: 'pl' }, t('otherLead', { n: DATA.settings.standalone_days || 30 })),
+    n > 0 && h('p', { class: 'pl' }, t('otherJoined', { n })),
+    h('div', { class: 'otherbar' }, seg([['all', t('otherAll')], ['top', t('otherTop')]], 'all', v => { ui.top = v === 'top'; fill(); }, t('libOther')),
+      h('div', { class: 'sbox' }, icon('search', 15), input)),
+    list);
+}
+function artGroup(s, role) {
+  const list = s.articles.filter(a => a.role === role).sort((a, b) => (b.score || 0) - (a.score || 0) || (b.published || '').localeCompare(a.published || ''));
+  if (!list.length) return null;
+  const ul = h('ul', { class: 'arts' }), long = list.length > 8;
+  let open = !long;
+  const btn = h('button', { type: 'button', class: 'link more', hidden: !long });
+  const paint = () => {
+    ul.replaceChildren(...(open ? list : list.slice(0, 5)).map(artRow));
+    btn.textContent = open ? t('less') : t('more', { n: list.length - 5 });
+    btn.setAttribute('aria-expanded', String(open));
+  };
+  btn.addEventListener('click', () => { open = !open; paint(); });
+  paint();
+  return h('div', {}, h('h3', { class: 'grp' }, sh(role), t('role_' + role), h('span', {}, num(list.length))), ul, btn);
+}
+/* ---------- glossary terms in the texts ----------
+   A term gets a dotted underline. A card with its definition opens on hover or keyboard focus, and on a tap on a phone.
+   The forms to look for come with each entry (DATA.glossary[].forms, by the language of the text). The longest form wins,
+   and only the first place of a term in a text is marked, so that a paragraph does not fill up with underlines. */
+const GLOSS = new Map((DATA.glossary || []).map(x => [x.id, x]));
+const GLOSS_BY_STORY = new Map();
+(DATA.glossary || []).forEach(x => { if (T0(x.text)) x.stories.forEach(sid => { if (!GLOSS_BY_STORY.has(sid)) GLOSS_BY_STORY.set(sid, []); GLOSS_BY_STORY.get(sid).push(x); }); });
+function T0(o) { return o ? (o.en || Object.values(o).find(Boolean) || '') : ''; }
+const termCache = {};
+function termList(lang) {
+  if (termCache[lang]) return termCache[lang];
+  const list = [];
+  for (const x of DATA.glossary || []) {
+    const f = x.forms || {};
+    // Short English names (acronyms such as USTR or CENTCOM) are also written in Latin letters inside Japanese text.
+    const own = f[lang] && f[lang].length ? f[lang] : f.en || [];
+    const latin = lang !== 'en' && f[lang] && f[lang].length ? (f.en || []).filter(w => /^[A-Za-z0-9.\-]{2,10}$/.test(w)) : [];
+    for (const form of [...new Set([...own, ...latin])]) {
+      if (form.length < 2) continue;
+      list.push({ form, id: x.id, latin: /^[\x20-\x7e]+$/.test(form), cs: !(form.length > 5 && /[a-z]/.test(form)) });   // a short name is matched with its case
+    }
+  }
+  list.sort((a, b) => b.form.length - a.form.length);
+  return (termCache[lang] = list);
+}
+const wordChar = c => !!c && /[A-Za-z0-9]/.test(c);
+function termSpans(text, lang) {
+  const spans = [];
+  for (const f of termList(lang)) {
+    const hay = f.cs ? text : text.toLowerCase(), needle = f.cs ? f.form : f.form.toLowerCase();
+    let i = hay.indexOf(needle);
+    while (i !== -1) {
+      const end = i + needle.length;
+      const clash = spans.some(s => i < s.end && end > s.start);
+      if (!clash && !(f.latin && (wordChar(text[i - 1]) || wordChar(text[end])))) spans.push({ start: i, end, id: f.id });
+      i = hay.indexOf(needle, i + 1);
+    }
+  }
+  spans.sort((a, b) => a.start - b.start);
+  const seen = new Set();
+  return spans.filter(s => !seen.has(s.id) && seen.add(s.id));
+}
+const termEl = (txt, id) => h('span', { class: 'gterm', tabindex: '0', role: 'button', 'data-g': id, 'aria-haspopup': 'true' }, txt);
+/* A string in the given language as nodes: plain text, with a span for each term. */
+function termNodes(str, lang) {
+  if (!str || !(DATA.glossary || []).length) return [str];
+  const spans = termSpans(str, lang);
+  if (!spans.length) return [str];
+  const out = [];
+  let at = 0;
+  for (const sp of spans) {
+    if (sp.start > at) out.push(str.slice(at, sp.start));
+    out.push(termEl(str.slice(sp.start, sp.end), sp.id));
+    at = sp.end;
+  }
+  if (at < str.length) out.push(str.slice(at));
+  return out;
+}
+/* A data text {en, ja, ...} (or one part of it, `part`) as nodes. */
+function termify(o, part) {
+  const [full, lang] = pick(o);
+  return termNodes(part != null ? part : full, lang);
+}
+function glossBasis(x) {
+  return x.basis && x.basis !== 'none' ? t('glossBasis_' + x.basis) + (x.as_of ? ' · ' + t('glossAsOf', { day: fmtDate(x.as_of, { year: 'numeric', month: 'numeric', day: 'numeric' }) }) : '') : '';
+}
+const gpop = { el: null, anchor: null, timer: null, at: 0 };
+function gpopEl() {
+  if (!gpop.el) {
+    gpop.el = h('div', { id: 'gpop', role: 'tooltip', hidden: true });
+    gpop.el.addEventListener('mouseenter', () => clearTimeout(gpop.timer));
+    gpop.el.addEventListener('mouseleave', () => gpopHide(160));
+    document.body.append(gpop.el);
+  }
+  return gpop.el;
+}
+function gpopHide(delay) {
+  clearTimeout(gpop.timer);
+  const go = () => { if (gpop.el) gpop.el.hidden = true; if (gpop.anchor) gpop.anchor.removeAttribute('aria-describedby'); gpop.anchor = null; };
+  if (delay) gpop.timer = setTimeout(go, delay); else go();
+}
+function gpopShow(anchor) {
+  const x = GLOSS.get(anchor.dataset.g);
+  if (!x || !anchor.getClientRects().length) return;     // an unknown term, or one that is not on the screen
+  clearTimeout(gpop.timer);
+  if (gpop.anchor && gpop.anchor !== anchor) gpop.anchor.removeAttribute('aria-describedby');
+  const name = T(x.name), en = x.name.en, el = gpopEl();
+  el.replaceChildren();
+  put(el, [h('div', { class: 'gpn' }, h('b', lg(x.name), name), S.lang !== 'en' && en && name !== en && h('span', { class: 'ge', lang: 'en' }, en), h('span', { class: 'lab' }, t('gk_' + x.kind))),
+    T(x.text) ? h('p', { class: 'gpt', ...lg(x.text) }, T(x.text)) : null,
+    h('div', { class: 'gpm' }, glossBasis(x) && h('span', {}, glossBasis(x)), h('span', {}, t('glossDraft')), h('a', { class: 'link', href: '#/glossary/' + x.id }, t('glossOpen')))]);
+  el.hidden = false;
+  anchor.setAttribute('aria-describedby', 'gpop');
+  gpop.anchor = anchor;
+  gpop.at = Date.now();
+  const rects = anchor.getClientRects(), first = rects[0], last = rects[rects.length - 1], w = el.offsetWidth, hh = el.offsetHeight;
+  const left = Math.max(8, Math.min(first.left, innerWidth - w - 8));
+  let top = last.bottom + 6;
+  if (top + hh > innerHeight - 8 && first.top - hh - 6 > 8) top = first.top - hh - 6;
+  top = Math.max(8, Math.min(top, innerHeight - hh - 8));     // always inside the window
+  el.style.left = left + 'px';
+  el.style.top = top + 'px';
+}
+let gLast = 'mouse';     // the kind of pointer used last: a touch has no hover, so a tap opens and closes the card
+const gTerm = e => (e.target && e.target.closest ? e.target.closest('.gterm') : null);
+document.addEventListener('pointerdown', e => { gLast = e.pointerType || 'mouse'; }, true);
+document.addEventListener('mouseover', e => { const a = gTerm(e); if (a && gLast === 'mouse') { clearTimeout(gpop.timer); gpop.timer = setTimeout(() => gpopShow(a), 90); } });
+document.addEventListener('mouseout', e => { if (gTerm(e) && gLast === 'mouse') gpopHide(160); });
+document.addEventListener('focusin', e => { const a = gTerm(e); if (a && a.matches(':focus-visible')) gpopShow(a); });
+document.addEventListener('focusout', e => { if (gTerm(e) && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('#gpop'))) gpopHide(120); });
+document.addEventListener('click', e => {
+  const a = gTerm(e);
+  if (a) { if (gLast !== 'mouse' && gpop.anchor === a && gpop.el && !gpop.el.hidden) gpopHide(); else gpopShow(a); return; }
+  if (!e.target.closest || !e.target.closest('#gpop')) gpopHide();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { gpopHide(); return; }
+  const a = gTerm(e);
+  if (a && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); gpopShow(a); }      // Escape closes it
+});
+// A scroll closes the card, except the one the browser makes to bring a focused term into view just after the card opened.
+document.addEventListener('scroll', () => { if (Date.now() - gpop.at > 400) gpopHide(); }, true);
+window.addEventListener('hashchange', () => gpopHide());
+
+/* The timeline of a story. It grows with the amount of information, not with the calendar. The newest lines are
+   shown as they are. The older lines are cut into blocks of the same size, from the oldest, and a full block is
+   folded. No line is removed, and a block opens with all of its lines. The lines that do not fill a block yet stay
+   in the plain list. (A short summary of each full block, marked as the AI's, is planned for December. It will sit
+   under the block's heading.) */
+const tlRow = e => h('li', {}, h('div', { class: 'd' }, dLong(e.date)), h('p', lg(e.text), termify(e.text)),
+  e.n_evidence > 0 && h('div', { class: 'ev' }, t('evidence', { n: e.n_evidence })));
+function timelineBlock(s) {
+  const keep = DATA.settings.timeline_keep_recent || 10, size = DATA.settings.timeline_block_lines || 12;
+  const older = s.timeline.slice(0, Math.max(0, s.timeline.length - keep));     // everything before the newest lines
+  const nBlocks = Math.floor(older.length / size);
+  if (!nBlocks) return h('ol', { class: 'tl' }, s.timeline.map(tlRow));
+  const range = g => dShort(g[0].date) + ' – ' + dShort(g[g.length - 1].date);
+  const boxes = [];
+  for (let i = 0; i < nBlocks; i++) {
+    const g = older.slice(i * size, (i + 1) * size);
+    boxes.push(h('details', { class: 'tlgrp' }, h('summary', {}, range(g), h('span', {}, t('tlCount', { n: g.length }))), h('ol', { class: 'tl' }, g.map(tlRow))));
+  }
+  const plain = s.timeline.slice(nBlocks * size);                                // the rest, in order, as they are
+  const btn = h('button', { type: 'button', class: 'link' }, t('tlOpenAll'));
+  const paint = () => { btn.textContent = boxes.every(b => b.open) ? t('tlCloseAll') : t('tlOpenAll'); };
+  btn.addEventListener('click', () => { const open = !boxes.every(b => b.open); boxes.forEach(b => { b.open = open; }); paint(); });
+  boxes.forEach(b => b.addEventListener('toggle', paint));
+  return h('div', {}, h('p', { class: 'tlnote' }, t('tlNote', { n: size }), ' ', btn), boxes,
+    h('div', { class: 'tlhead' }, t('tlRecent'), h('span', {}, t('tlCount', { n: plain.length }))), h('ol', { class: 'tl' }, plain.map(tlRow)));
+}
+const secHead = (k, n) => h('h2', { class: 'sec' }, t(k), n != null && h('span', {}, num(n)));
+/* Look back (stage 2c): a designed place only. It does nothing yet and shows no invented content. */
+function lookbackBlock() {
+  return h('section', { class: 'slot' },
+    h('p', { class: 'sd' }, t('lookbackD')),
+    h('div', { class: 'slotrow' }, h('span', { class: 'sd' }, t('lookbackPeriod')),
+      seg([30, 60, 90].map(n => [String(n), t('days', { n })]), '90', () => {}, t('lookbackPeriod')),
+      h('button', { type: 'button', class: 'btn', disabled: true }, icon('search', 15), t('lookbackBtn')),
+      h('span', { class: 'stage' }, t('stageBuild', { s: '2c' }))),
+    h('p', { class: 'sd' }, t('lookbackNote')));
+}
+/* Ask the AI about a story: the panel is designed, the send button waits for a later stage. */
+let askReturn = null;
+function closeAsk() {
+  const host = $('#ask');
+  host.replaceChildren(); host.hidden = true;
+  document.body.classList.remove('ask-open');
+  if (askReturn && askReturn.isConnected) askReturn.focus();
+  askReturn = null;
+}
+function openAsk(s, from) {
+  askReturn = from;
+  const area = h('textarea', { id: 'ask-in', rows: 3, placeholder: t('askPh'), 'aria-label': t('askPh') });
+  const panel = h('section', { class: 'askpanel', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'ask-h' },
+    h('header', {}, h('h2', { id: 'ask-h' }, t('askTitle')), h('button', { type: 'button', class: 'btn icon', 'aria-label': t('close'), onclick: closeAsk }, icon('close', 18))),
+    h('p', { class: 'asub' }, t('askAbout') + '  ', h('b', lg(s.title), T(s.title))),
+    h('div', { class: 'abody' }, h('h3', {}, t('askExamples')), h('ul', {}, [1, 2, 3].map(i => h('li', {}, h('button', { type: 'button', class: 'ex', onclick: () => { area.value = t('askQ' + i); area.focus(); } }, t('askQ' + i)))))),
+    h('footer', {}, area, h('div', { class: 'arow' }, h('span', { class: 'stage' }, t('stageLater')), h('button', { type: 'button', class: 'btn primary', disabled: true }, t('askSend'))), h('p', { class: 'sd' }, t('askNote'))));
+  const host = $('#ask');
+  host.replaceChildren(h('div', { class: 'askscrim', onclick: closeAsk }), panel);
+  host.hidden = false; document.body.classList.add('ask-open'); area.focus();
+}
+const askBtn = s => h('button', { type: 'button', class: 'btn', onclick: e => openAsk(s, e.currentTarget) }, icon('chat', 15), t('ask'));
+function storyView(r) {
+  const s = BY.get(r.a);
+  const c = ctxRoute();
+  const def = listDef({ name: c.name || 'today', a: c.a, q: c.q });
+  if (!s) { showPage(h('div', { class: 'pagein' }, h('p', { class: 'pl' }, t('noResult')))); return; }
+  document.title = T(s.title) + ' | News Digest';
+  showSplit(def.sig, () => buildList(def, false), s.id, () => storyNodes(s, def), true);
+}
+const storyPins = s => (s.places || []).filter(id => PLACES[id]).map(id => ({ x: PLACES[id].x, y: PLACES[id].y, name: pname(id) }));
+function storyNodes(s, def) {
+  const ids = cur.list.ids, i = ids.indexOf(s.id);
+  const go = d => { const n = ids[i + d]; if (n) location.hash = '#/story/' + n; };
+  const navbar = h('div', { class: 'navbar' }, h('a', { href: ctxHash }, icon('back', 22), def.title));
+  const tool = h('div', { class: 'dtool' },
+    h('button', { type: 'button', class: 'btn icon', 'aria-label': t('prev'), title: t('prev'), disabled: i <= 0, onclick: () => go(-1) }, icon('up')),
+    h('button', { type: 'button', class: 'btn icon', 'aria-label': t('nextStory'), title: t('nextStory'), disabled: i < 0 || i >= ids.length - 1, onclick: () => go(1) }, icon('down')),
+    h('span', { class: 'pos' }, i >= 0 ? num(i + 1) + ' / ' + num(ids.length) : ''),
+    h('span', { class: 'sp' }), askBtn(s), flag('follow', s), flag('save', s));
+  const period = s.first_day === s.last_day ? dShort(s.last_day) : dShort(s.first_day) + ' – ' + dShort(s.last_day);
+  const body = h('article', { class: 'detail' },
+    h('div', { class: 'kick' }, s.top_score >= 3 && keyMark(true), h('b', {}, catName(s.category)), h('span', {}, period),
+      h('span', {}, t('cnt_article', { n: s.n_articles }) + ' · ' + t('cnt_source', { n: s.n_sources }))),
+    h('h1', lg(s.title), T(s.title)),
+    T(s.one_line) && h('p', { class: 'lede', ...lg(s.one_line) }, termify(s.one_line)),
+    h('dl', { class: 'facts' }, h('dt', {}, t('status')), h('dd', { class: 'st', ...lg(s.status_line) }, T(s.status_line) ? termify(s.status_line) : h('span', { class: 'none' }, '—')),
+      h('dt', {}, t('next')), h('dd', lg(s.next_step), T(s.next_step) ? termify(s.next_step) : h('span', { class: 'none' }, t('noNext')))),
+    T(s.summary) && [secHead('summary'), h('div', { class: 'summary', ...lg(s.summary) }, paras(T(s.summary), 3).map(x => h('p', {}, termify(s.summary, x))))],
+    s.countries.length > 0 && [secHead('involved', s.countries.length), MAP && fitBox(s.countries, storyPins(s)) && h('div', { class: 'mapbox mini' }, worldMap({ highlight: s.countries, pins: storyPins(s), view: fitBox(s.countries, storyPins(s)), label: t('mapAltStory'), labels: true })), h('div', { class: 'chips2' }, s.countries.map(c => h('a', { class: 'chip', href: '#/countries/' + encodeURIComponent(c) }, cname(c), codeLabel(c) && h('small', {}, codeLabel(c)))))],
+    (s.places || []).length > 0 && [secHead('placeTags', s.places.length), h('div', { class: 'chips2' }, s.places.filter(id => PLACES[id]).map(placeChip))],
+    (GLOSS_BY_STORY.get(s.id) || []).length > 0 && [secHead('glossTerms', GLOSS_BY_STORY.get(s.id).length), h('div', { class: 'chips2' }, GLOSS_BY_STORY.get(s.id).map(x => h('span', { class: 'chip gterm', tabindex: '0', role: 'button', 'data-g': x.id, 'aria-haspopup': 'true', ...lg(x.name) }, T(x.name))))],
+    s.timeline.length > 0 && [secHead('timeline', s.timeline.length), timelineBlock(s)],
+    [secHead('lookback'), lookbackBlock()],
+    secHead('articles', s.n_articles),
+    h('div', {}, ROLES.map(role => artGroup(s, role))));
+  const bar = h('div', { class: 'actionbar' }, flag('follow', s), flag('save', s), askBtn(s));
+  return [navbar, tool, body, bar];
+}
+
+/* ---------- countries ---------- */
+function countriesView(r) {
+  const list = Object.keys(DATA.countries).map(c => ({ c, n: DATA.countries[c].n_stories, name: cname(c), alt: S.lang === 'en' ? '' : (DATA.countries[c].en || '') }))
+    .sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, S.lang));
+  const code = r.a || (isWide() ? list[0].c : null);
+  const max = Math.max(1, ...list.map(x => x.n));
+  const build = () => {
+    const rows = h('div', { class: 'rows' });
+    const api = { el: null, ids: [], sel: null, select(id) {
+      rows.querySelectorAll('[data-id]').forEach(n => { if (n.dataset.id === id) { n.setAttribute('aria-current', 'true'); if (isWide()) n.scrollIntoView({ block: 'nearest' }); } else n.removeAttribute('aria-current'); });
+    } };
+    const fill = q => rows.replaceChildren(...list.filter(x => !q || countryHay(x.c).includes(q.toLowerCase())).map(x =>
+      h('a', { class: 'crow', href: '#/countries/' + encodeURIComponent(x.c), 'data-id': x.c }, h('span', {}, x.name, codeLabel(x.c) && h('span', { class: 'cc' }, codeLabel(x.c))), h('span', { class: 'cn' }, t('cnt_story', { n: x.n })),
+        h('span', { class: 'cbar', style: '--w:' + Math.round(x.n / max * 100) + '%' }, h('i')))));
+    const input = h('input', { class: 'inp', type: 'search', placeholder: t('searchC'), 'aria-label': t('searchC'), oninput: e => { fill(e.target.value.trim()); api.select(api.sel); } });
+    api.el = h('section', { class: 'listpane', 'aria-label': t('countries') },
+      h('header', { class: 'lh' }, countriesSeg('countries'), h('h1', { class: 'lt' }, t('countries'), h('small', {}, t('cnt_country', { n: list.length }))), h('div', { class: 'sbox' }, icon('search', 15), input)), rows);
+    fill('');
+    return api;
+  };
+  const stories = code ? DATA.stories.filter(s => s.countries.includes(code)) : [];
+  const alt = code && S.lang !== 'en' ? (DATA.countries[code] || {}).en : '';
+  const node = code ? h('div', {}, h('div', { class: 'navbar' }, h('a', { href: '#/countries' }, icon('back', 22), t('countries'))),
+    h('div', { class: 'cs-head' }, h('h1', {}, cname(code)), h('p', {}, [alt, codeLabel(code), t('cnt_story', { n: stories.length })].filter(Boolean).join(' · '))),
+    h('div', { class: 'cstories bare', style: 'border-top:0' }, stories.map(s => row(s, true)))) : h('p', { class: 'noresult' }, t('pickCountry'));
+  showSplit('countries', build, code, () => [node], !!r.a);
+}
+
+/* ---------- places ---------- */
+const countriesSeg = active => h('nav', { class: 'bseg', 'aria-label': t('countries') }, [['countries', 'countries'], ['places', 'places']].map(([id, k]) =>
+  h('a', { href: '#/' + id, 'aria-current': id === active ? 'page' : null }, t(k))));
+function placesIndex() {
+  const all = Object.entries(PLACES), used = all.filter(([, p]) => p.n_stories > 0), rest = all.filter(([, p]) => !p.n_stories);
+  const byType = ty => used.filter(([, p]) => p.type === ty).sort((x, y) => y[1].n_stories - x[1].n_stories || pname(x[0]).localeCompare(pname(y[0]), S.lang));
+  const groups = PLACE_TYPES.filter(ty => byType(ty).length).map(ty => h('section', {}, h('h2', { class: 'sec' }, t('placeType_' + ty), h('span', {}, num(byType(ty).length))),
+    h('div', { class: 'chips2' }, byType(ty).map(([id]) => placeChip(id)))));
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, countriesSeg('places'), h('h1', { class: 'ph1' }, t('places')), h('p', { class: 'pl' }, t('placesLead')),
+    used.length ? groups : h('div', { class: 'empty' }, h('p', { class: 'sd' }, t('placesNone'))),
+    rest.length > 0 && h('details', { class: 'more-places' }, h('summary', {}, t('placesOther', { n: rest.length })),
+      h('div', { class: 'chips2' }, rest.sort((x, y) => pname(x[0]).localeCompare(pname(y[0]), S.lang)).map(([id]) => placeChip(id)))))));
+}
+function placeView(r) {
+  const p = PLACES[r.a];
+  if (!p) { showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, countriesSeg('places'), h('p', { class: 'pl' }, t('placeNotFound')), h('a', { class: 'link', href: '#/places' }, t('places'))))); return; }
+  const stories = DATA.stories.filter(s => (s.places || []).includes(r.a));
+  const seen = new Set(), news = [];
+  stories.forEach(s => s.articles.forEach(a => { if (!seen.has(a.url)) { seen.add(a.url); news.push(a); } }));
+  news.sort((x, y) => (y.score || 0) - (x.score || 0) || String(y.published || '').localeCompare(String(x.published || '')));
+  const pin = [{ x: p.x, y: p.y, name: pname(r.a) }];
+  const ul = h('ul', { class: 'arts' });
+  let open = news.length <= 10;
+  const btn = h('button', { type: 'button', class: 'link more', hidden: open });
+  const paint = () => { ul.replaceChildren(...(open ? news : news.slice(0, 8)).map(artRow)); btn.textContent = open ? t('less') : t('more', { n: news.length - 8 }); btn.hidden = news.length <= 10; };
+  btn.addEventListener('click', () => { open = !open; paint(); });
+  paint();
+  document.title = pname(r.a) + ' | News Digest';
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, countriesSeg('places'),
+    h('p', { class: 'crumb' }, h('a', { class: 'link', href: '#/places' }, t('places')), ' / ', t('placeType_' + p.type)),
+    h('h1', { class: 'ph1' }, h('span', plang(r.a), pname(r.a))),
+    MAP && h('div', { class: 'mapbox mini placemap' }, worldMap({ highlight: p.countries, pins: pin, view: fitBox(p.countries, pin), label: t('placeMapAlt'), labels: true })),
+    h('p', { class: 'sd' }, t('placeNote')),
+    p.countries.length > 0 && [h('h2', { class: 'sec' }, t('placeCountries'), h('span', {}, num(p.countries.length))), h('div', { class: 'chips2' }, p.countries.map(c => h('a', { class: 'chip', href: '#/countries/' + encodeURIComponent(c) }, cname(c), codeLabel(c) && h('small', {}, codeLabel(c)))))],
+    h('h2', { class: 'sec' }, t('placeStories'), h('span', {}, num(stories.length))),
+    stories.length ? h('div', { class: 'bare rows' }, stories.map(s => row(s, true))) : h('p', { class: 'sd' }, t('placeNone')),
+    news.length > 0 && [h('h2', { class: 'sec' }, t('placeNews'), h('span', {}, num(news.length))), ul, btn])));
+}
+
+/* ---------- library ---------- */
+function libraryView(r) {
+  const tab = oneOf(r.a, ['follow', 'save', 'other'], 'follow');
+  const tabs = [['follow', t('libFollow'), S.follow.length], ['save', t('libSave'), S.save.length], ['other', t('libOther'), DATA.standalone.length]];
+  let content;
+  if (tab === 'other') {
+    content = otherView();
+  } else {
+    const items = S[tab].map(id => BY.get(id)).filter(Boolean);
+    content = items.length ? h('div', { class: 'bare rows' }, items.map(s => row(s, true))) : h('div', { class: 'empty' }, h('h2', {}, t('emptyTitle')), h('p', { class: 'sd' }, t('emptyHow')),
+      h('ol', {}, h('li', {}, t('emptyS1')), h('li', {}, t('emptyS2')), h('li', {}, t('emptyS3'))), h('a', { class: 'link', href: '#/library/' + tab + '?demo' }, t('demo')));
+  }
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, h('h1', { class: 'ph1' }, t('library')),
+    h('nav', { class: 'tabs', 'aria-label': t('library') }, tabs.map(([id, label, n]) => h('a', { href: '#/library/' + id, 'aria-current': id === tab ? 'page' : null }, label, h('small', {}, num(n))))),
+    h('div', { style: 'margin-top:14px' }, content))));
+}
+
+/* ---------- glossary ---------- */
+function glossRow(x) {
+  const name = T(x.name), en = x.name.en;
+  const basis = glossBasis(x);
+  const stories = x.stories.filter(sid => BY.has(sid));
+  return h('li', { id: 'g-' + x.id },
+    h('div', { class: 'gnm' }, h('b', lg(x.name), name), S.lang !== 'en' && en && name !== en && h('span', { class: 'ge', lang: 'en' }, en), h('span', { class: 'lab' }, t('gk_' + x.kind))),
+    T(x.text) ? h('p', { class: 'gt', ...lg(x.text) }, T(x.text)) : h('p', { class: 'gt dim' }, t('glossNoText')),
+    h('div', { class: 'am' }, basis && h('span', {}, basis),
+      stories.slice(0, 3).map(sid => h('a', { class: 'link', href: '#/story/' + sid, ...lg(BY.get(sid).title) }, T(BY.get(sid).title))),
+      stories.length > 3 && h('span', {}, t('glossOthers', { n: stories.length - 3 }))));
+}
+function glossaryView(r) {
+  const all = DATA.glossary || [];
+  const ui = { kind: '', q: '' };
+  const list = h('ul', { class: 'gl' });
+  function fill() {
+    const q = ui.q.toLowerCase();
+    const hit = x => (!ui.kind || x.kind === ui.kind) && (!q || (allText(x.name) + ' ' + allText(x.text) + ' ' + x.aliases.join(' ')).toLowerCase().includes(q));
+    const items = all.filter(hit).sort((a, b) => T(a.name).localeCompare(T(b.name), S.lang));
+    list.replaceChildren(...(items.length ? items.map(glossRow) : [h('li', { class: 'noresult' }, t(all.length ? 'glossNone' : 'glossEmpty'))]));
+  }
+  fill();
+  const input = h('input', { class: 'lsearch', type: 'search', placeholder: t('glossSearch'), 'aria-label': t('glossSearch'), oninput: e => { ui.q = e.target.value.trim(); fill(); } });
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, browseSeg('glossary'), h('h1', { class: 'ph1' }, t('glossary')),
+    h('p', { class: 'pl' }, t('glossLead')),
+    all.length > 0 && h('div', { class: 'otherbar' }, seg([['', t('glossAll')], ['term', t('gk_term')], ['person', t('gk_person')], ['institution', t('gk_institution')]], '', v => { ui.kind = v; fill(); }, t('glossary')),
+      h('div', { class: 'sbox' }, icon('search', 15), input)),
+    list)));
+  const hit = r && r.a && GLOSS.has(r.a) ? document.getElementById('g-' + r.a) : null;      // opened from a popup: show that entry
+  if (hit) { hit.setAttribute('aria-current', 'true'); hit.scrollIntoView({ block: 'center' }); }
+}
+
+/* ---------- placeholders (events and weekly are not built yet) ---------- */
+function ghost(kind) {
+  const bar = w => h('i', { style: 'width:' + w });
+  const rows = kind === 'events' ? [0, 1, 2, 3].map(() => h('div', { class: 'gr' }, h('div', { class: 'bx' }), h('div', { class: 'gcol' }, bar('62%'), bar('38%'))))
+    : [h('div', { class: 'gr' }, bar('40%')), h('div', { class: 'gr' }, [1, 2, 3].map(() => h('div', { class: 'gcol' }, bar('90%'), bar('60%'), bar('75%')))), h('div', { class: 'gr' }, bar('55%'))];
+  return h('div', { class: 'ghost', 'aria-hidden': 'true' }, h('div', { class: 'gcap' }, t('ghostCap')), rows);
+}
+function phView(r) {
+  const k = r.name, hold = STAGES[k] === 'hold', when = hold ? t('stageHold') : t('stageBuild', { s: STAGES[k] });
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' },
+    browseSeg(k),
+    h('h1', { class: 'ph1' }, t(k), h('span', { class: 'stage' }, when)),
+    h('p', { class: 'pl' }, t('ph_' + k + '_lead')),
+    h('div', { class: 'phgrid' }, h('section', {}, h('h2', {}, t('willShow')), h('ul', {}, [1, 2, 3, 4].map(i => h('li', {}, t('ph_' + k + '_' + i))))),
+      h('section', {}, h('h2', {}, t('stageWhen')), h('p', {}, hold ? when : when + ' ' + t('stageUntil')))),
+    ghost(k))));
+}
+
+/* ---------- settings ---------- */
+const srow = (label, desc, ctrl, note) => h('div', { class: 'srow' }, h('div', {}, h('div', { class: 'sl' }, label, note && h('span', { class: 'stage' }, note)), desc && h('div', { class: 'sd' }, desc)), h('div', {}, ctrl));
+function numInput(key, min, max, label) {
+  return h('input', { class: 'inp num', type: 'number', min, max, value: S[key], 'aria-label': label, onchange: e => {
+    const v = clampInt(e.target.value, min, max, min); e.target.value = v; S[key] = v; store.set(key, v); cur.sig = null;
+  } });
+}
+/* ---------- account and admin (the real app only) ---------- */
+const ZONES = ['America/Chicago', 'America/New_York', 'America/Denver', 'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo', 'UTC'];
+const validZone = z => { try { new Intl.DateTimeFormat('en', { timeZone: z }); return true; } catch (e) { return false; } };
+const ADMIN_ONLY = ['cost', 'admin', 'run'];
+const visibleSections = () => SECTIONS.filter(x => (!['account', 'run'].includes(x[0]) || USER) && (!USER || USER.role === 'admin' || !ADMIN_ONLY.includes(x[0])));
+const say = (box, msg, bad) => { box.textContent = msg; box.className = 'note' + (bad ? ' bad' : ''); };
+function accountSection() {
+  const api = USER.api;
+  const nameBox = h('p', { class: 'note', role: 'status', 'aria-live': 'polite' });
+  const pinBox = h('p', { class: 'note', role: 'status', 'aria-live': 'polite' });
+  const name = h('input', { class: 'inp', type: 'text', maxlength: '60', value: USER.display_name, 'aria-label': t('acName'), autocomplete: 'nickname' });
+  const pin = (label, auto) => h('input', { class: 'inp pin', type: 'password', inputmode: 'numeric', pattern: '[0-9]*', maxlength: '6', autocomplete: auto, 'aria-label': label, placeholder: label });
+  const now = pin(t('acPinNow'), 'current-password'), next = pin(t('acPinNew'), 'new-password');
+  const saveName = async () => {
+    const v = name.value.trim();
+    if (!v || v.length > 60) return say(nameBox, t('acNameBad'), true);
+    try { await api.setDisplayName(v); USER.display_name = v; say(nameBox, t('acSaved')); } catch (e) { say(nameBox, t('acError'), true); }
+  };
+  const changePin = async () => {
+    if (!/^\d{6}$/.test(next.value)) return say(pinBox, t('acPinBad'), true);
+    try { await api.changePin(now.value, next.value); now.value = ''; next.value = ''; say(pinBox, t('acPinDone')); }
+    catch (e) { say(pinBox, e && e.code === 'wrong-pin' ? t('acPinWrong') : e && e.code === 'recent' ? t('acPinRecent') : t('acError'), true); }
+  };
+  return [
+    srow(t('acName'), t('acNameD'), h('div', { class: 'frow' }, name, h('button', { type: 'button', class: 'btn primary', onclick: saveName }, t('acSave')))), nameBox,
+    srow(t('acRole'), null, h('span', { class: 'val' }, t('role_' + USER.role))),
+    srow(t('acPin'), t('acPinD'), h('div', { class: 'frow' }, now, next, h('button', { type: 'button', class: 'btn', onclick: changePin }, t('acPinChange')))), pinBox,
+    srow(t('acOut'), null, h('button', { type: 'button', class: 'btn', onclick: () => USER.api.signOut() }, t('acOut'))),
+  ];
+}
+function adminSection() {
+  const api = USER.api;
+  const box = h('p', { class: 'note', role: 'status', 'aria-live': 'polite' });
+  const time = h('input', { class: 'inp', type: 'time', value: USER.app.digest_time, 'aria-label': t('adTime') });
+  const zone = h('input', { class: 'inp zone', type: 'text', list: 'zonelist', value: USER.app.timezone, 'aria-label': t('adTimeZone'), autocapitalize: 'off', spellcheck: 'false' });
+  const save = async () => {
+    const tv = time.value, zv = zone.value.trim();
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(tv) || !/^(UTC|[A-Z][A-Za-z_]+(\/[A-Za-z0-9_+-]+){1,2})$/.test(zv) || !validZone(zv)) return say(box, t('adTimeBad'), true);
+    try { await api.saveAppSettings({ digest_time: tv, timezone: zv }); USER.app = { digest_time: tv, timezone: zv }; say(box, t('acSaved')); } catch (e) { say(box, t('acError'), true); }
+  };
+  const list = h('div', { class: 'ulist' }, h('p', { class: 'note' }, t('adLoading')));
+  const row = u => {
+    const self = u.uid === USER.uid;
+    return srow(u.display_name + (self ? ' ' + t('adSelf') : ''), t('role_' + u.role),
+      self ? h('span', { class: 'val' }, t('on')) : toggle(u.active === true, u.display_name, async v => {
+        try { await api.setActive(u.uid, v); } catch (e) { say(box, t('acError'), true); load(); }
+      }));
+  };
+  const load = () => api.listUsers().then(users => list.replaceChildren(...users.map(row)), () => list.replaceChildren(h('p', { class: 'note bad' }, t('acError'))));
+  load();
+  return [
+    srow(t('adTime'), t('adTimeD'), h('div', { class: 'frow' }, time, zone, h('datalist', { id: 'zonelist' }, ZONES.map(z => h('option', { value: z }))),
+      h('button', { type: 'button', class: 'btn primary', onclick: save }, t('acSave')))), box,
+    h('h2', { class: 'sec' }, t('adUsers')), h('p', { class: 'note' }, t('adUsersD')), list,
+  ];
+}
+/* ---------- run now (administrators only; the GitHub token stays in this browser) ---------- */
+const GH_WORKFLOW = 'digest.yml', GH_REF = 'main';
+const ghKey = k => 'nd-run.' + USER.uid + '.' + k;      // not under nd., which is cleared at sign-in and sign-out
+const ghGet = (k, d) => { try { const v = localStorage.getItem(ghKey(k)); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const ghSet = (k, v) => { try { localStorage.setItem(ghKey(k), JSON.stringify(v)); } catch (e) { /* no storage */ } };
+const ghDel = k => { try { localStorage.removeItem(ghKey(k)); } catch (e) { /* no storage */ } };
+const ymdIn = tz => new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const hmIn = tz => new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+/* Is there a digest for today (in this time zone)? DATA.day.date is always the day the data was built, so DATA.day.made says whether it was written. */
+const digestMade = tz => DATA.day.date === ymdIn(tz) && DATA.day.made !== false;
+async function ghFetch(repo, token, path, init) {
+  let r;
+  try {
+    r = await fetch('https://api.github.com' + path, Object.assign({}, init, { headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } }));
+  } catch (e) { throw Object.assign(new Error('network'), { code: 'net' }); }
+  if (r.status === 401 || r.status === 403) throw Object.assign(new Error('refused'), { code: 'auth' });
+  if (r.status === 404) throw Object.assign(new Error('not found'), { code: 'notfound' });
+  if (!r.ok) throw Object.assign(new Error('http'), { code: 'http', status: r.status });
+  return r;
+}
+const ghFlow = repo => '/repos/' + repo + '/actions/workflows/' + GH_WORKFLOW;
+function ghApi(suffix, init) {
+  const repo = ghGet('repo'), token = ghGet('token');
+  return repo && token ? ghFetch(repo, token, ghFlow(repo) + suffix, init) : Promise.reject(Object.assign(new Error('none'), { code: 'none' }));
+}
+const ghDispatch = (digest, trigger) => ghApi('/dispatches', { method: 'POST', body: JSON.stringify({ ref: GH_REF, inputs: { digest, trigger } }) });
+const ghLatestRun = async () => ((await (await ghApi('/runs?per_page=5')).json()).workflow_runs || [])[0] || null;
+const ghErr = e => ({ none: t('runErrNone'), auth: t('runErrAuth'), notfound: t('runErrNotFound'), net: t('runErrNet') }[e && e.code] || t('runErrHttp', { code: (e && e.status) || '?' }));
+const runState = r => (['queued', 'waiting', 'pending', 'requested'].includes(r.status) ? 'queued' : r.status === 'in_progress' ? 'in_progress' : r.conclusion === 'success' ? 'success' : r.conclusion ? 'failure' : 'other');
+const runOver = r => ['success', 'failure', 'other'].includes(runState(r));
+function runSection() {
+  const wrap = h('div', {});
+  const box = h('p', { class: 'note', role: 'status', 'aria-live': 'polite' });
+  const stat = h('div', { class: 'runstat', role: 'status', 'aria-live': 'polite' });
+  const paintRun = run => {
+    const link = run && safeUrl(run.html_url);
+    stat.replaceChildren(...(run ? [h('b', {}, t('runLatest')), h('span', { class: runState(run) === 'success' ? 'ok' : runState(run) === 'failure' ? 'ng' : '' }, t('runState_' + runState(run))),
+      h('span', {}, fmtStamp(run.created_at)), link && h('a', { class: 'link', href: link, target: '_blank', rel: 'noopener noreferrer' }, t('runOpen'))] : [h('span', {}, t('runNone'))]));
+  };
+  let watching = false;
+  async function watch(since) {      // since: the moment a run was asked for (0 = just show the latest one)
+    if (watching) return;
+    watching = true;
+    try {
+      for (let i = 0; i < 90 && stat.isConnected; i++) {
+        let run = null;
+        try { run = await ghLatestRun(); } catch (e) { say(box, ghErr(e), true); break; }
+        const mine = !since || (run && Date.parse(run.created_at) >= since - 15000);      // the run we asked for may not be listed yet
+        if (mine) paintRun(run);
+        if (mine ? (!run || runOver(run)) : i >= 10) break;
+        await new Promise(r => setTimeout(r, i < 6 ? 4000 : 10000));
+      }
+    } finally { watching = false; }
+  }
+  const repoIn = h('input', { class: 'inp gh gh-repo', type: 'text', placeholder: 'owner/news-digest', autocapitalize: 'off', spellcheck: 'false', 'aria-label': t('runRepo') });
+  const tokIn = h('input', { class: 'inp gh gh-token', type: 'password', autocomplete: 'off', placeholder: t('runToken'), 'aria-label': t('runToken') });
+  const expIn = h('input', { class: 'inp gh gh-expiry', type: 'date', 'aria-label': t('runExpiry'), title: t('runExpiry') });
+  const connect = async () => {
+    const repo = repoIn.value.trim(), token = tokIn.value.trim();
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) return say(box, t('runBad'), true);
+    try { await ghFetch(repo, token, ghFlow(repo)); } catch (e) { return say(box, ghErr(e), true); }
+    ghSet('repo', repo); ghSet('token', token);
+    if (expIn.value) ghSet('expiry', expIn.value); else ghDel('expiry');
+    say(box, t('acSaved'));
+    paint();
+  };
+  const disconnect = () => { ['repo', 'token', 'expiry', 'last_auto'].forEach(ghDel); say(box, ''); paint(); };
+  const start = async (digest, trigger) => {
+    say(box, t('runAsking'));
+    const since = Date.now();
+    try { await ghDispatch(digest, trigger); } catch (e) { return say(box, ghErr(e), true); }
+    say(box, digest === 'skip' ? t('runTested') : t('runAsked'));
+    watch(since);
+  };
+  function paint() {
+    const connected = !!(ghGet('repo') && ghGet('token'));
+    const tz = USER.app.timezone, kids = [h('p', { class: 'note' }, t('runLead'))];
+    kids.push(h('p', { class: 'runtoday' }, digestMade(tz) ? t('runHave', { time: fmtStamp(DATA.built_at) })
+      : hmIn(tz) >= USER.app.digest_time ? t('runLate', { time: USER.app.digest_time }) : t('runWait', { time: USER.app.digest_time })));
+    if (!connected) {
+      kids.push(srow(t('runConn'), t('runConnD'), h('div', { class: 'frow' }, repoIn, tokIn, expIn, h('button', { type: 'button', class: 'btn primary', onclick: connect }, t('runConnect')))));
+    } else {
+      const exp = ghGet('expiry'), left = exp ? Math.ceil((Date.parse(exp) - Date.now()) / 864e5) : null;
+      kids.push(srow(t('runConn'), ghGet('repo') + (exp ? '  ' + t('runExpires', { date: exp, n: left }) : ''),
+        h('div', { class: 'frow' }, h('span', { class: 'val gh-ok' }, t('runConnected')), h('button', { type: 'button', class: 'btn', onclick: disconnect }, t('runDisconnect')))));
+      if (left != null && left <= 30) kids.push(h('p', { class: 'note bad' }, left < 0 ? t('runExpired') : t('runExpiresSoon')));
+      kids.push(srow(t('runNow'), null, h('div', { class: 'frow' },
+        h('button', { type: 'button', class: 'btn primary', onclick: () => start('today', 'app') }, t('runNow')),
+        h('button', { type: 'button', class: 'btn', onclick: () => start('skip', 'app') }, t('runTest')))), stat,
+      srow(t('runAuto'), t('runAutoD'), toggle(ghGet('auto', true) !== false, t('runAuto'), v => ghSet('auto', v))));
+    }
+    kids.push(box);
+    wrap.replaceChildren(...kids);
+    if (connected) setTimeout(() => watch(0), 0);      // after the page has been put on the screen
+  }
+  paint();
+  return [wrap];
+}
+/* Opening the app after the set time, with no digest for today: ask for one (once in 30 minutes from this device). */
+async function maybeAutoStart() {
+  if (!USER || USER.role !== 'admin' || ghGet('auto', true) === false || !ghGet('token') || !ghGet('repo')) return;
+  const tz = USER.app.timezone;
+  if (digestMade(tz) || hmIn(tz) < USER.app.digest_time) return;      // it is there, or it is not time yet
+  if (Date.now() - ghGet('last_auto', 0) < 30 * 60 * 1000) return;
+  ghSet('last_auto', Date.now());
+  try {
+    const run = await ghLatestRun();
+    if (run && !runOver(run)) return;      // one is on its way
+    await ghDispatch('if due', 'app-auto');
+  } catch (e) { /* the Run now page shows what is wrong when it is opened */ }
+}
+const SECTIONS = [
+  ['display', () => {
+    const cv = coverage(S.lang);
+    return [
+      srow(t('contentLang'), [t('contentLangD'), cv != null && cv < 100 ? ' ' + t('langFallback') : ''].join(''), langSeg(false)),
+      srow(t('theme'), t('themeD'), seg([['auto', t('th_auto')], ['light', t('th_light')], ['dark', t('th_dark')]], S.theme, v => { S.theme = v; store.set('theme', v); applyTheme(); }, t('theme'))),
+      srow(t('palette'), t('paletteD'), seg([['ai', t('pal_ai')], ['koke', t('pal_koke')], ['sumi', t('pal_sumi')]], S.palette, v => { S.palette = v; store.set('palette', v); applyTheme(); cur.sig = null; route(true); }, t('palette')))];
+  }],
+  ['account', () => accountSection()],
+  ['digest', () => [
+    srow(t('deliveryTime'), t('deliveryTimeD'), h('span', { class: 'val' }, USER ? USER.app.digest_time + '  ' + USER.app.timezone : DATA.settings.digest_time), USER ? null : t('notYet')),
+    srow(t('maxStories'), t('maxStoriesD'), numInput('max', 1, 40, t('maxStories'))),
+    srow(t('quietBelow'), t('quietBelowD'), numInput('below', 1, 40, t('quietBelow'))),
+    srow(t('tryQuiet'), t('tryQuietD'), toggle(S.quiet, t('tryQuiet'), v => { S.quiet = v; store.set('quiet', v); cur.sig = null; }))]],
+  ['notify', () => [
+    srow(t('nFollow'), t('nFollowD'), toggle(S.notify.follow, t('nFollow'), v => { S.notify.follow = v; store.set('notify', S.notify); }), t('stage5')),
+    srow(t('nSudden'), t('nSuddenD'), toggle(S.notify.sudden, t('nSudden'), v => { S.notify.sudden = v; store.set('notify', S.notify); }), t('stage5'))]],
+  ['interests', () => DATA.categories.map(c =>
+    srow(catName(c.id), t('cnt_story', { n: c.n_stories }), toggle(S.interest[c.id] !== false, catName(c.id), v => { S.interest[c.id] = v; store.set('interest', S.interest); }), t('notYet')))],
+  ['sources', () => {
+    const rank = { official: 0, news: 1, analysis: 2 };
+    const list = DATA.sources.slice().sort((a, b) => rank[a.role] - rank[b.role] || b.n_articles - a.n_articles);
+    const sum = list.reduce((a, x) => a + x.n_articles, 0);
+    return [h('p', { class: 'note' }, t('sourcesNote', { n: list.length, m: sum })),
+      h('div', { class: 'tablewrap' }, h('table', { class: 'src' }, h('thead', {}, h('tr', {}, ['th_source', 'th_label', 'th_kind', 'th_country', 'th_lang'].map(k => h('th', {}, t(k))), h('th', { class: 'r' }, t('th_articles')))),
+        h('tbody', {}, list.map(x => h('tr', {}, h('td', { class: 'wrap', lang: srcLabel(x)[1] }, srcLabel(x)[0]), h('td', {}, roleChip(x.role)), h('td', {}, kindName(x.kind)), h('td', {}, cname(x.country)), h('td', {}, langBadge(x.lang)), h('td', { class: 'r' }, num(x.n_articles)))))))];
+  }],
+  ['cost', () => {
+    const steps = Object.entries(DATA.costs.by_step).sort((a, b) => b[1] - a[1]), top = steps.length ? steps[0][1] : 1;
+    const days = Math.round((Date.parse(DATA.settings.key_expires) - Date.parse(DATA.day.date)) / 864e5);
+    return [h('div', { class: 'bigcost' }, '$' + DATA.costs.today_total.toFixed(3), h('small', {}, t('costToday'))),
+      h('div', { class: 'tablewrap' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', {}, t('costStep')), h('th', {}, ''), h('th', { class: 'r' }, 'USD'))),
+        h('tbody', {}, steps.map(([k, v]) => h('tr', {}, h('td', {}, UI.en['step_' + k] ? t('step_' + k) : k), h('td', { style: 'width:40%' }, h('span', { class: 'hbar', style: '--w:' + Math.round(v / top * 100) + '%' })), h('td', { class: 'r mono' }, v.toFixed(4))))))),
+      h('dl', { class: 'kv' }, h('dt', {}, t('costMonth')), h('dd', {}, '$' + DATA.settings.monthly_estimate_usd),
+        h('dt', {}, t('costKey')), h('dd', {}, dLong(DATA.settings.key_expires) + (isNaN(days) ? '' : t('daysLeft', { n: days }))))];
+  }],
+  ['admin', () => USER ? adminSection() : [
+    h('p', { class: 'note' }, t('adminNote')),
+    srow(t('adMembers'), t('adMembersD'), h('span', { class: 'none' }, '—'), t('notBuilt')),
+    srow(t('adJournals'), t('adJournalsD'), h('span', { class: 'none' }, '—'), t('notBuilt')),
+    srow(t('adLangs'), t('adLangsD'), h('div', { class: 'chips2' }, LANGS.map(l => { const cv = coverage(l.code); return h('span', { class: 'chip', title: cv == null ? t('base') : t('coverage') + ' ' + cv + '%' }, h('span', { lang: l.code }, l.name), h('small', {}, cv == null ? t('base') : cv + '%')); })))]],
+  ['run', () => USER ? runSection() : []],
+  ['about', () => {
+    const st = DATA.stats;
+    return [h('p', { class: 'note' }, t('aboutLine')),
+      h('dl', { class: 'kv' }, h('dt', {}, t('aDate')), h('dd', {}, dLong(DATA.day.date)), h('dt', {}, t('aCol')), h('dd', {}, num(st.n_articles_collected)),
+        h('dt', {}, t('aKept')), h('dd', {}, num(st.n_kept)), h('dt', {}, t('aStories')), h('dd', {}, num(st.n_stories)),
+        h('dt', {}, t('aOther')), h('dd', {}, num(st.n_standalone)), h('dt', {}, t('aBuilt')), h('dd', {}, fmtStamp(DATA.built_at) + ' (' + DATA.settings.timezone + ')')),
+      h('h2', { class: 'sec' }, t('legend')),
+      h('ul', { class: 'legend' }, ROLES.map(r => h('li', {}, roleChip(r))), h('li', {}, keyMark(true), h('span', {}, t('keyTip')))),
+      h('p', { class: 'note' }, t('mapAbout'))];
+  }],
+];
+function settingsView(r) {
+  const shown = visibleSections();
+  const id = shown.some(x => x[0] === r.a) ? r.a : 'display';
+  const sec = shown.find(x => x[0] === id);
+  const nav = h('nav', { class: 'snav', 'aria-label': t('settings') }, h('h1', {}, t('settings')),
+    shown.map(x => h('a', { href: '#/settings/' + x[0], 'aria-current': x[0] === id ? 'page' : null }, t('s_' + x[0]))));
+  showPage(h('div', { class: 'settings' }, nav, h('div', { class: 'sbody' }, h('section', { class: 'sin' + (id === 'sources' ? ' wide' : '') }, h('h2', {}, t('s_' + id)), ...sec[1]()))));
+}
+
+/* ---------- keyboard and start ---------- */
+function step(d) {
+  const idsNow = cur.list ? cur.list.ids : [];
+  const r = parse();
+  if (!idsNow.length || (r.name !== 'story' && !['today', 'browse'].includes(r.name))) return;
+  const i = r.name === 'story' ? idsNow.indexOf(r.a) : -1;
+  const n = idsNow[Math.max(0, Math.min(idsNow.length - 1, i + d))];
+  if (n) location.hash = '#/story/' + n;
+}
+const visibleBtn = sel => [...document.querySelectorAll(sel)].find(b => b.offsetParent !== null);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#ask').hidden) { closeAsk(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.key === 'j') step(1);
+  else if (e.key === 'k') step(-1);
+  else if (e.key === 'f') { const b = visibleBtn('.js-follow'); if (b) b.click(); }
+  else if (e.key === 's') { const b = visibleBtn('.js-save'); if (b) b.click(); }
+  else if (e.key === '/') { const i = visibleBtn('.lsearch'); if (i) { e.preventDefault(); i.focus(); } }
+});
+window.addEventListener('hashchange', () => route());
+wideQuery.addEventListener('change', () => { cur.sig = null; route(true); });
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+applyTheme();
+if (DATA.brand) {   // the tab icon, from the same SVG
+  const link = document.querySelector('link[rel="icon"]') || document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'icon' }));
+  link.type = 'image/svg+xml'; link.href = 'data:image/svg+xml,' + encodeURIComponent(DATA.brand);
+}
+if (USER) maybeAutoStart();      // the real app only
+route();
+}
+/* the sign-in script at the end of the page starts the app */
+</script>
+<script type="module">
+/* Sign-in and loading for the real app. It runs as a module after the screen's own script has defined startApp().
+   news_digest/appbuild.py puts the Firebase settings (public values from config/firebase_web.json) into the line that sets CONFIG.
+   Three more marks, which only tests use, are empty in the app that is published. A test copy fills them so that a test can sign in with a token. */
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut as fbSignOut, sendPasswordResetEmail,
+  updatePassword, reauthenticateWithCredential, EmailAuthProvider 
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import { getFirestore, doc, getDoc, getDocs, setDoc, updateDoc, collection } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+const CONFIG = {
+  "apiKey": "AIzaSyC-fCww-2-jcfyCp8lrrBsd_j6xLa1_Mmk",
+  "authDomain": "news-digest-273ec.firebaseapp.com",
+  "projectId": "news-digest-273ec",
+  "storageBucket": "news-digest-273ec.firebasestorage.app",
+  "messagingSenderId": "503760011810",
+  "appId": "1:503760011810:web:3bb15e5411fa421349007b"
+};
+const JA = (navigator.language || '').toLowerCase().startsWith('ja');
+document.documentElement.lang = JA ? 'ja' : 'en';
+const W = JA ? {
+  lead: 'メールアドレスと、6桁の PIN で、ログインしてください。', email: 'メールアドレス', pin: 'PIN（6桁の数字）', login: 'ログイン',
+  forgot: 'PIN を忘れたとき', resetAsk: '先にメールアドレスを入れてから、「PIN を忘れたとき」を押してください。',
+  resetSent: 'そのメールアドレスが登録されていれば、新しい PIN を決めるためのメールを送りました。', badEmail: 'メールアドレスの形が正しくありません。',
+  wrong: 'メールアドレスか PIN が違います。', tooMany: '失敗が続いたので、しばらく待ってから、もう一度お試しください。',
+  network: '通信できませんでした。接続を確かめて、もう一度お試しください。', loading: '読み込んでいます…',
+  notRegistered: 'このアカウントは、まだ登録されていません。管理者に連絡してください。', stopped: 'このアカウントは、停止中です。管理者に連絡してください。',
+  noData: 'まだ、表示するデータがありません。しばらくしてから、もう一度お試しください。', loadFail: 'データを読み込めませんでした。', retry: 'もう一度読み込む', signOut: 'ログアウト'
+} : {
+  lead: 'Sign in with your email address and your six-digit PIN.', email: 'Email address', pin: 'PIN (six digits)', login: 'Sign in',
+  forgot: 'Forgot your PIN?', resetAsk: 'Enter your email address first, then press "Forgot your PIN?".',
+  resetSent: 'If that address is registered, an email for choosing a new PIN has been sent.', badEmail: 'That email address is not valid.',
+  wrong: 'The email address or the PIN is wrong.', tooMany: 'Too many failed attempts. Wait a while and try again.',
+  network: 'Could not connect. Check the connection and try again.', loading: 'Loading…',
+  notRegistered: 'This account is not registered yet. Please contact the administrator.', stopped: 'This account has been stopped. Please contact the administrator.',
+  noData: 'There is nothing to show yet. Please try again in a while.', loadFail: 'The data could not be loaded.', retry: 'Load again', signOut: 'Sign out'
+};
+
+/* ---------- small helpers ---------- */
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') e.className = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return e;
+}
+const root = document.getElementById('login');
+const heading = () => el('h1', {}, el('img', { src: 'apple-touch-icon.png', alt: '' }), 'News Digest');
+function card(tag, attrs, ...kids) {
+  root.hidden = false;
+  root.replaceChildren(el(tag, Object.assign({ class: 'login' }, attrs), heading(), ...kids));
+}
+const FIELDS = { lang: 'lang', theme: 'theme', palette: 'palette', today_view: 'todayView', quiet: 'quiet', max: 'max', below: 'below',
+  notify: 'notify', interest: 'interest', follow: 'follow', save: 'save' };      // Firestore field -> the key the screen saves under
+const clearLocal = () => { try { Object.keys(localStorage).filter(k => k.startsWith('nd.')).forEach(k => localStorage.removeItem(k)); } catch (e) { /* no storage */ } };
+function applyPrefs(prefs) {
+  clearLocal();      // two people may use one browser: nothing of the last person stays
+  for (const [field, key] of Object.entries(FIELDS)) {
+    if (prefs[field] !== undefined) { try { localStorage.setItem('nd.' + key, JSON.stringify(prefs[field])); } catch (e) { /* no storage */ } }
+  }
+}
+function assemble(parts, admin, extra) {      // the same as news_digest/publish.py assemble()
+  const data = Object.assign({}, parts.core);
+  const counts = data.parts || {};
+  delete data.parts;
+  for (const key of ['stories', 'standalone', 'glossary']) {
+    let list = [];
+    for (let i = 0; i < (counts[key] || 0); i++) list = list.concat(parts[key + '_' + i] || []);
+    data[key] = list;
+  }
+  return Object.assign(data, admin, extra);
+}
+
+/* ---------- Firebase ---------- */
+const app = initializeApp(CONFIG);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+function authMessage(e) {
+  const code = (e && e.code) || '';
+  if (code === 'auth/too-many-requests') return W.tooMany;
+  if (code === 'auth/network-request-failed') return W.network;
+  if (code === 'auth/invalid-email') return W.badEmail;
+  return W.wrong;
+}
+
+function showLogin() {
+  const email = el('input', { class: 'inp', id: 'lg-email', type: 'email', autocomplete: 'username', inputmode: 'email', autocapitalize: 'off', spellcheck: 'false', required: true });
+  const pin = el('input', { class: 'inp', id: 'lg-pin', type: 'password', autocomplete: 'current-password', inputmode: 'numeric', pattern: '[0-9]*', maxlength: '6', required: true });
+  const msg = el('p', { class: 'msg', role: 'status', 'aria-live': 'polite' });
+  const say = (text, bad) => { msg.textContent = text; msg.className = 'msg' + (bad ? ' bad' : ''); };
+  const go = el('button', { class: 'btn primary', type: 'submit' }, W.login);
+  const forgot = el('button', { class: 'link', type: 'button', onclick: async () => {
+    const address = email.value.trim();
+    if (!address) return say(W.resetAsk, true);
+    try { await sendPasswordResetEmail(auth, address); say(W.resetSent); }
+    catch (e) {
+      const code = (e && e.code) || '';
+      if (code === 'auth/network-request-failed') say(W.network, true);
+      else if (code === 'auth/invalid-email') say(W.badEmail, true);
+      else say(W.resetSent);      // the same answer whether or not the address is registered
+    }
+  } }, W.forgot);
+  card('form', { novalidate: true, onsubmit: async ev => {
+    ev.preventDefault();
+    go.disabled = true; say(W.loading);
+    try { await signInWithEmailAndPassword(auth, email.value.trim(), pin.value); }
+    catch (e) { say(authMessage(e), true); go.disabled = false; pin.value = ''; pin.focus(); }
+  } },
+  el('p', {}, W.lead),
+  el('label', { for: 'lg-email' }, W.email, email),
+  el('label', { for: 'lg-pin' }, W.pin, pin),
+  msg, go, forgot);
+  email.focus();
+}
+const showLoading = () => card('div', {}, el('p', { role: 'status' }, W.loading));
+function showMessage(text, ...buttons) { card('div', {}, el('p', { role: 'alert' }, text), ...buttons); }
+const outButton = () => el('button', { class: 'btn', type: 'button', onclick: () => fbSignOut(auth) }, W.signOut);
+
+let started = false, entering = false;
+async function enter(user) {
+  if (started || entering) return;
+  entering = true;
+  showLoading();
+  try {
+    const meSnap = await getDoc(doc(db, 'users', user.uid));
+    if (!meSnap.exists()) return showMessage(W.notRegistered, outButton());
+    const me = meSnap.data();
+    if (me.active !== true) return showMessage(W.stopped, outButton());
+    const admin = me.role === 'admin';
+    const [appSnap, costsSnap, mapRes, prefsSnap, settingsSnap] = await Promise.all([
+      getDocs(collection(db, 'app')),
+      admin ? getDoc(doc(db, 'app_admin', 'costs')) : null,
+      fetch('world_map.json', { cache: 'no-cache' }),
+      getDoc(doc(db, 'users', user.uid, 'settings', 'prefs')),
+      getDoc(doc(db, 'settings', 'app')),
+    ]);
+    const parts = {};
+    appSnap.forEach(d => { parts[d.id] = JSON.parse(d.data().json); });
+    if (!parts.core) return showMessage(W.noData, outButton());
+    const data = assemble(parts, admin && costsSnap && costsSnap.exists() ? { costs: JSON.parse(costsSnap.data().json) } : {}, mapRes.ok ? { map: await mapRes.json() } : {});
+    applyPrefs(prefsSnap.exists() ? prefsSnap.data() : {});
+    const shared = settingsSnap.exists() ? settingsSnap.data() : {};
+    start(data, user, me, { digest_time: shared.digest_time || data.settings.digest_time, timezone: shared.timezone || data.settings.timezone });
+  } catch (e) {
+    showMessage(W.loadFail, el('button', { class: 'btn primary', type: 'button', onclick: () => { entering = false; enter(user); } }, W.retry), outButton());
+  } finally {
+    entering = false;
+  }
+}
+
+function start(data, user, me, shared) {
+  const uid = user.uid;
+  const prefsRef = doc(db, 'users', uid, 'settings', 'prefs');
+  const pending = {};
+  let timer = null;
+  async function flush() {
+    clearTimeout(timer);
+    if (!Object.keys(pending).length) return;
+    const batch = Object.assign({}, pending);
+    for (const k of Object.keys(pending)) delete pending[k];
+    try { await setDoc(prefsRef, Object.assign(batch, { updated_at: new Date().toISOString() }), { merge: true }); }
+    catch (e) { for (const k of Object.keys(batch)) if (!(k in pending)) pending[k] = batch[k]; }      // try again with the next change
+  }
+  const USER = {
+    uid, role: me.role, display_name: me.display_name, app: shared,
+    sync(key, value) {
+      const field = Object.keys(FIELDS).find(f => FIELDS[f] === key);
+      if (!field) return;
+      pending[field] = value;
+      clearTimeout(timer);
+      timer = setTimeout(flush, 800);
+    },
+    api: {
+      setDisplayName: name => updateDoc(doc(db, 'users', uid), { display_name: name }),
+      async changePin(current, next) {
+        try { await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, current)); }
+        catch (e) { throw Object.assign(new Error('wrong PIN'), { code: 'wrong-pin' }); }
+        try { await updatePassword(user, next); }
+        catch (e) { throw Object.assign(new Error('not changed'), { code: e && e.code === 'auth/requires-recent-login' ? 'recent' : 'failed' }); }
+      },
+      async signOut() { await flush(); await fbSignOut(auth); clearLocal(); location.reload(); },
+      saveAppSettings: ({ digest_time, timezone }) => setDoc(doc(db, 'settings', 'app'), { digest_time, timezone, updated_at: new Date().toISOString() }),
+      async listUsers() {
+        const snap = await getDocs(collection(db, 'users'));
+        return snap.docs.map(d => Object.assign({ uid: d.id }, d.data())).sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+      },
+      setActive: (otherUid, active) => updateDoc(doc(db, 'users', otherUid), { active }),
+    },
+  };
+  let hiddenAt = 0;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { hiddenAt = Date.now(); flush(); }
+    else if (hiddenAt && Date.now() - hiddenAt > 30 * 60 * 1000) location.reload();      // the data is fresh once a day
+  });
+  addEventListener('pagehide', flush);
+  started = true;
+  root.hidden = true;
+  const hide = document.getElementById('boot-hide');
+  if (hide) hide.remove();
+  
+  window.startApp(data, USER);
+}
+
+
+showLoading();
+onAuthStateChanged(auth, user => { if (user) enter(user); else if (!started) showLogin(); });
+</script>
+</body>
+</html>
