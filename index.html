@@ -706,13 +706,13 @@ const UI = {
   ja: {
     today: '今日', stories: 'ストーリー', browse: 'ブラウズ', countries: '国別', events: '出来事', glossary: '用語集', weekly: '週のふりかえり', library: 'ライブラリ', settings: '設定',
     listSep: '・', listDot: '　', moreN: ' ほか{n}', categories: 'カテゴリ', all: 'すべて', following: '追っているストーリー', followEmpty: '追っているストーリーはまだありません。ストーリーを開いて「追う」を押すと、ここに並びます。',
-    glossLead: 'ストーリーに出てくる用語、人物、制度・機関を、短い説明と一緒にまとめています。すべて AI の下書きです。確認の画面は、あとの段階で作ります。',
+    glossLead: 'ストーリーに出てくる用語、人物、制度・機関を、短い説明と一緒にまとめています。すべて AI の下書きです。確認の画面は、準備中です。',
     glossSearch: '名前や説明で探す', glossAll: 'すべて', gk_term: '用語', gk_person: '人物', gk_institution: '制度・機関',
     glossNoText: '説明はありません。AI が確信を持てなかったため、空にしてあります。', glossBasis_articles: '記事に基づく',
     glossBasis_memory: 'AI の記憶による。古い可能性があります', glossBasis_both: '記事と AI の記憶による', glossAsOf: '{day}時点',
     glossTerms: '用語', glossDraft: 'AI の下書き', glossOpen: '用語集で見る', glossOthers: 'ほか{n}件', glossEmpty: 'まだ用語がありません。次の実行で、ストーリーから用語を集めます。', glossNone: '条件に合う項目はありません。',
-    stageHold: '保留中（保存の機能で足りるかを見ています）', navHold: '保留中',
-    seeAll: 'ライブラリで見る', navMain: '主な画面', navStage: '段階 {s} で作ります', updated: '更新', back: '戻る', language: '言語',
+    stageHold: '保留中（保存の機能で足りるかを見ています）', navHold: '保留中', navSoon: '準備中',
+    seeAll: 'ライブラリで見る', navMain: '主な画面', navStage: '準備中です', updated: '更新', back: '戻る', language: '言語',
     daily: '今日の要点', readMore: '続きを読む', collapse: '閉じる', byRank: '順位', byCat: '分野別',
     movedLine_other: '{n}件が動き、{shown}件を表示しています。', upcoming: '次の予定があるストーリー',
     kMove: '前後へ', kFollow: '追う', kSave: '保存', kSearch: '検索',
@@ -736,7 +736,7 @@ const UI = {
     otherSearch: '題名や理由で探す', otherNone: '条件に合う記事はありません。', foldTitle: '関心に近いが、ストーリーにならなかった記事',
     foldLead: '続報が出れば、ストーリーに加わります。「今日」の件数には入れていません。', foldJump: 'ストーリーにならなかった記事を見る（{n}本）', joinedLater: '見直しで加わりました（{day}に見送り）',
     keyTipArticle: '関心に特に近い記事',
-    stageBuild: '段階 {s} で作ります', willShow: '表示する予定の内容', stageWhen: '作る時期', stageUntil: 'それまでは、この画面には何も表示しません。',
+    stageBuild: '準備中です', willShow: '表示する予定の内容', stageWhen: '状態', stageUntil: 'それまでは、この画面には何も表示しません。',
     ghostCap: '画面のイメージ（枠だけの見本。内容は入っていません）',
     ph_events_lead: 'ストーリーとは別に、日付のある出来事を時間順にたどる画面です。', ph_events_1: '出来事が起きた日と名前', ph_events_2: '関係する国・機関', ph_events_3: 'その出来事が属するストーリー', ph_events_4: '月ごと、国ごとの絞り込み',
     ph_weekly_lead: '一週間の動きをまとめて振り返る画面です。', ph_weekly_1: 'その週の要点', ph_weekly_2: '動きの大きかったストーリー', ph_weekly_3: '来週の予定', ph_weekly_4: '過去の週への切り替え',
@@ -766,14 +766,14 @@ const UI = {
     contentLang: '内容の言語', contentLangD: '題名、要約、経緯と、画面の文言が、すべて切り替わります。', langFallback: 'この言語に訳されていない文章は、英語で表示します。',
     palette: '配色', paletteD: '色の組み合わせを選びます。試作の間だけある設定です。', pal_ai: '藍', pal_koke: '苔', pal_sumi: '墨',
     theme: 'テーマ', themeD: '自動は、この端末の明るさの設定に合わせます。', th_auto: '自動', th_light: 'ライト', th_dark: 'ダーク', on: 'オン', off: 'オフ',
-    deliveryTime: '届ける時刻', deliveryTimeD: '毎朝この時刻にダイジェストを用意します。', notYet: 'まだ動きません', stage5: '段階 5 で動きます',
+    deliveryTime: '届ける時刻', deliveryTimeD: '毎朝この時刻にダイジェストを用意します。', notYet: 'まだ動きません', stage5: '準備中です',
     maxStories: '表示するストーリーの数', maxStoriesD: '「今日」に並べるストーリーの上限です。', quietBelow: '静かな日のしきい値', quietBelowD: '動いたストーリーがこの数より少ない日を、静かな日として扱います。',
     tryQuiet: '静かな日の表示を試す', tryQuietD: 'オンにすると、今日が静かな日だったときの画面を見られます。',
     nFollow: '追っているストーリーの更新', nFollowD: '追っているストーリーに動きがあったときに知らせます。', nSudden: '急な動き', nSuddenD: '朝のダイジェストを待たずに知らせます。',
     sourcesNote_other: '{n}の出典から、これまでに{m}件の記事を集めました。', th_source: '出典', th_label: 'ラベル', th_kind: '種別', th_country: '国', th_lang: '言語', th_articles: '記事',
     costToday: '今日の費用', costStep: '工程', costMonth: '月の見込み', costKey: 'APIキーの期限', daysLeft_other: '（あと{n}日）',
     step_screen: '選別', step_assign: 'ストーリーへの振り分け', step_assign_recheck: '続報の見直し（候補の選別）', step_langtest: '言語の確認', step_write: '要約の作成', step_daily_summary: '今日の要点', step_translate: '翻訳', step_glossary_extract: '用語の抽出', step_glossary_explain: '用語の説明', step_glossary_align: '用語の書き方の拾い出し',
-    adminNote: '管理者だけが使う設定です。まだ作っていません。', adMembers: 'メンバー', adMembersD: '読む人の追加と権限。', adJournals: '学術誌', adJournalsD: '追加で読む学術誌の登録。',
+    adminNote: '管理者だけが使う設定です。まだ作っていません。', adMembers: 'メンバー', adMembersD: '読む人の追加と権限。', adJournals: '出典', adJournalsD: '読むニュースの出典の追加と選択。',
     adLangs: '言語', adLangsD: '内容を切り替えられる言語と、訳した文章の割合です。', notBuilt: 'まだありません', coverage: '訳した割合', base: '元の言語',
     aboutLine: 'News Digest 画面の試作', aDate: '日付', aCol: '収集した記事', aKept: 'ストーリーに入れた記事', aStories: 'ストーリーの数', aOther: 'その他の記事', aBuilt: 'データの作成',
     places: '場所', placeTags: '場所', placesLead: 'ストーリーに付いた場所のタグです。押すと、その場所に関わるストーリーとニュースが出ます。', placesNone: '場所のタグが付いたストーリーは、まだありません。',
@@ -784,7 +784,7 @@ const UI = {
 mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory: 'このストーリーに関係する国の地図', filterClear: '絞り込みを外す', view_list: '一覧', view_map: '地図',
     mapNote: '国境は、Natural Earth の線を簡略にしたものです。係争地の線は、どの国の主張も示しません。',
     mapAbout: '地図の形は、Natural Earth（パブリックドメイン）の線を簡略にしたものです。国連の立場に従って、クリミアはウクライナ、ゴラン高原はシリアの内側に描きます。西サハラは、国連が非自治地域としているため、全体をモロッコとは別の領域として描きます。ドンバス、アブハジア、南オセチア、沿ドニエストル、ナゴルノ・カラバフは、ウクライナ、ジョージア、モルドバ、アゼルバイジャンの内側です。カシミールは、インド、パキスタン、中国の支配の線で分かれます。台湾、コソボ、パレスチナは別の形です。これらの線は、法的な立場を示すものではありません。',
-    legend: '記号の見方', close: '閉じる', stageLater: '後の段階で作ります',
+    legend: '記号の見方', close: '閉じる', stageLater: '準備中です',
     lookback: '過去をさかのぼる', lookbackD: 'このストーリーの前の経緯を、過去の記事から探して、経緯に足します。', lookbackPeriod: 'さかのぼる期間', days_other: '{n}日', lookbackBtn: 'さかのぼって探す',
     lookbackNote: '実行の前に、費用の見積もりを出します。了承したあとだけ、探します。足した経緯には「さかのぼって追加」の印を付け、あとで消せます。',
     lookbackNoResult: 'ストーリーにならなかった話題は、過去の記事からさかのぼって探すこともできます。',
@@ -794,13 +794,13 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
   en: {
     today: 'Today', stories: 'Stories', browse: 'Browse', countries: 'Countries', events: 'Events', glossary: 'Glossary', weekly: 'Weekly review', library: 'Library', settings: 'Settings',
     listSep: ', ', listDot: ' · ', moreN: ' +{n}', categories: 'Categories', all: 'All', following: 'Following', followEmpty: 'Nothing followed yet. Open a story and press Follow to list it here.',
-    glossLead: 'Terms, people and institutions from the stories, with a short explanation. Every entry is an AI draft. A screen to confirm them comes in a later stage.',
+    glossLead: 'Terms, people and institutions from the stories, with a short explanation. Every entry is an AI draft. A screen to confirm them is not available yet.',
     glossSearch: 'Search names and explanations', glossAll: 'All', gk_term: 'Term', gk_person: 'Person', gk_institution: 'Institution',
     glossNoText: 'No explanation. The AI was not sure, so it is left empty.', glossBasis_articles: 'Based on the articles',
     glossBasis_memory: 'From the AI\'s memory. It may be out of date.', glossBasis_both: 'From the articles and the AI\'s memory', glossAsOf: 'as of {day}',
     glossTerms: 'Terms', glossDraft: 'AI draft', glossOpen: 'Open in the glossary', glossOthers: 'and {n} more', glossEmpty: 'No entries yet. The next run collects terms from the stories.', glossNone: 'No entries match.',
-    stageHold: 'On hold (the Save feature may be enough)', navHold: 'On hold',
-    seeAll: 'See all in Library', navMain: 'Main', navStage: 'Planned for stage {s}', updated: 'Updated', back: 'Back', language: 'Language',
+    stageHold: 'On hold (the Save feature may be enough)', navHold: 'On hold', navSoon: 'Soon',
+    seeAll: 'See all in Library', navMain: 'Main', navStage: 'Coming soon', updated: 'Updated', back: 'Back', language: 'Language',
     daily: 'Today in brief', readMore: 'Read more', collapse: 'Collapse', byRank: 'Rank', byCat: 'By field',
     movedLine_one: '{n} story moved, {shown} shown.', movedLine_other: '{n} stories moved, {shown} shown.', upcoming: 'Stories with a next step',
     kMove: 'move', kFollow: 'follow', kSave: 'save', kSearch: 'search',
@@ -826,7 +826,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     otherNone: 'No articles match.', foldTitle: 'Close to your interests, but not part of a story',
     foldLead: 'If a later report comes out, it will join a story. These are not counted in Today.', foldJump: 'See articles that did not become a story ({n})', joinedLater: 'Added on a recheck (set aside {day})',
     keyTipArticle: 'Closest to your interests',
-    stageBuild: 'Planned for stage {s}', willShow: 'What will appear', stageWhen: 'When', stageUntil: 'Until then this screen shows nothing.',
+    stageBuild: 'Coming soon', willShow: 'What will appear', stageWhen: 'Status', stageUntil: 'Until then this screen shows nothing.',
     ghostCap: 'Layout sketch (frames only, no content)',
     ph_events_lead: 'A time-ordered view of dated events, separate from stories.', ph_events_1: 'The date and name of each event', ph_events_2: 'The countries and bodies involved', ph_events_3: 'The story each event belongs to', ph_events_4: 'Filters by month and country',
     ph_weekly_lead: 'A look back over the week as a whole.', ph_weekly_1: 'The week in brief', ph_weekly_2: 'The stories that moved most', ph_weekly_3: 'What is scheduled for next week', ph_weekly_4: 'A switch to earlier weeks',
@@ -856,14 +856,14 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     contentLang: 'Content language', contentLangD: 'Titles, summaries, timelines and the interface switch together.', langFallback: 'Text not yet translated into this language is shown in English.',
     palette: 'Colours', paletteD: 'Pick a set of colours. This setting exists only during the mockup.', pal_ai: 'Indigo', pal_koke: 'Moss', pal_sumi: 'Ink',
     theme: 'Theme', themeD: 'Auto follows the device setting.', th_auto: 'Auto', th_light: 'Light', th_dark: 'Dark', on: 'On', off: 'Off',
-    deliveryTime: 'Delivery time', deliveryTimeD: 'The digest is prepared at this time each morning.', notYet: 'Not working yet', stage5: 'Works from stage 5',
+    deliveryTime: 'Delivery time', deliveryTimeD: 'The digest is prepared at this time each morning.', notYet: 'Not working yet', stage5: 'Coming soon',
     maxStories: 'Stories shown', maxStoriesD: 'The most stories Today will list.', quietBelow: 'Quiet-day threshold', quietBelowD: 'A day with fewer moved stories than this counts as quiet.',
     tryQuiet: 'Try the quiet-day view', tryQuietD: 'Shows how Today looks on a quiet day.',
     nFollow: 'Updates to followed stories', nFollowD: 'Tells you when a followed story moves.', nSudden: 'Sudden developments', nSuddenD: 'Does not wait for the morning digest.',
     sourcesNote_one: '{n} source, {m} articles collected so far.', sourcesNote_other: '{n} sources, {m} articles collected so far.', th_source: 'Source', th_label: 'Label', th_kind: 'Kind', th_country: 'Country', th_lang: 'Language', th_articles: 'Articles',
     costToday: 'Today', costStep: 'Step', costMonth: 'Monthly estimate', costKey: 'API key expires', daysLeft_one: ' ({n} day left)', daysLeft_other: ' ({n} days left)',
     step_screen: 'Screening', step_assign: 'Assigning to stories', step_assign_recheck: 'Rechecking earlier items', step_langtest: 'Language check', step_write: 'Writing', step_daily_summary: 'Daily summary', step_translate: 'Translation', step_glossary_extract: 'Listing glossary terms', step_glossary_explain: 'Explaining glossary terms', step_glossary_align: 'Finding how terms are written',
-    adminNote: 'Settings for administrators only. Not built yet.', adMembers: 'Members', adMembersD: 'Adding readers and their roles.', adJournals: 'Journals', adJournalsD: 'Registering journals to read in addition.',
+    adminNote: 'Settings for administrators only. Not built yet.', adMembers: 'Members', adMembersD: 'Adding readers and their roles.', adJournals: 'Sources', adJournalsD: 'Adding and choosing the news sources to read.',
     adLangs: 'Languages', adLangsD: 'The languages content can switch to, and how much of it is translated.', notBuilt: 'Not built', coverage: 'Translated', base: 'Source language',
     aboutLine: 'News Digest screen mockup', aDate: 'Date', aCol: 'Articles collected', aKept: 'Articles in stories', aStories: 'Stories', aOther: 'Other articles', aBuilt: 'Data built',
     places: 'Places', placeTags: 'Places', placesLead: 'The place tags that stories carry. Press one to see the stories and news about that place.', placesNone: 'No story has a place tag yet.',
@@ -874,7 +874,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
 mapAlt: "World map of the countries in today's stories", mapAltStory: 'Map of the countries in this story', filterClear: 'Clear the filter', view_list: 'List', view_map: 'Map',
     mapNote: "Borders are simplified lines from Natural Earth. The lines in disputed areas show no country's claim.",
     mapAbout: 'The map shapes are simplified lines from Natural Earth (public domain). Following the position of the United Nations, Crimea is drawn inside Ukraine and the Golan Heights inside Syria. Western Sahara, which the United Nations lists as a non-self-governing territory, is drawn whole and separate from Morocco. Donbas, Abkhazia, South Ossetia, Transnistria and Nagorno-Karabakh are drawn inside Ukraine, Georgia, Moldova and Azerbaijan. Kashmir is split along the lines of control of India, Pakistan and China. Taiwan, Kosovo and Palestine have their own shapes. None of these lines shows a legal position.',
-    legend: 'Reading the marks', close: 'Close', stageLater: 'Planned for a later stage',
+    legend: 'Reading the marks', close: 'Close', stageLater: 'Coming soon',
     lookback: 'Look back', lookbackD: 'Finds earlier articles on this story and adds them to its timeline.', lookbackPeriod: 'How far back', days_one: '{n} day', days_other: '{n} days', lookbackBtn: 'Look back',
     lookbackNote: 'An estimate of the cost is shown first, and nothing is searched until you agree. Entries added this way are marked "Added by look-back" and can be removed later.',
     lookbackNoResult: 'A topic that never became a story can also be searched in past articles.',
@@ -1172,7 +1172,7 @@ function catHref(id) {
   return '#/' + base + (q.toString() ? '?' + q : '');
 }
 const STAGES = { events: 'hold', weekly: '5' };     // 'hold' is a feature that is put on hold
-const stageShort = id => (STAGES[id] === 'hold' ? t('navHold') : STAGES[id]);
+const stageShort = id => (STAGES[id] === 'hold' ? t('navHold') : t('navSoon'));
 function renderSide(r) {
   const c = r.name === 'story' ? ctxRoute() : r;
   const counts = catCounts(c.name === 'today' || c.name === 'day' ? 'today' : 'all'), active = (c.name === 'today' || c.name === 'day' || c.name === 'browse') ? (c.q.cat || '') : '';
@@ -1793,7 +1793,7 @@ function libraryView(r) {
   } else {
     const items = S[tab].map(id => BY.get(id)).filter(Boolean);
     content = items.length ? h('div', { class: 'bare rows' }, items.map(s => row(s, true))) : h('div', { class: 'empty' }, h('h2', {}, t('emptyTitle')), h('p', { class: 'sd' }, t('emptyHow')),
-      h('ol', {}, h('li', {}, t('emptyS1')), h('li', {}, t('emptyS2')), h('li', {}, t('emptyS3'))), h('a', { class: 'link', href: '#/library/' + tab + '?demo' }, t('demo')));
+      h('ol', {}, h('li', {}, t('emptyS1')), h('li', {}, t('emptyS2')), h('li', {}, t('emptyS3'))), USER ? null : h('a', { class: 'link', href: '#/library/' + tab + '?demo' }, t('demo')));
   }
   showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, h('h1', { class: 'ph1' }, t('library')),
     h('nav', { class: 'tabs', 'aria-label': t('library') }, tabs.map(([id, label, n]) => h('a', { href: '#/library/' + id, 'aria-current': id === tab ? 'page' : null }, label, h('small', {}, num(n))))),
