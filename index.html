@@ -212,6 +212,21 @@ kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--l
 .gl .gt { margin: 6px 0 0; line-height: 1.8; max-width: 40em; }
 .gl .gt.dim { color: var(--muted); }
 .gok { color: var(--accent-ink); font-weight: 600; }
+/* story suggestions (admins) */
+.sgl { list-style: none; margin: 8px 0 0; padding: 0; }
+.sgl li { padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent); line-height: 1.7; }
+.sgl .sm { font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+/* weekly review */
+.wkspan { font-size: var(--fs-l); font-weight: 600; margin: 14px 0 0; }
+.wkbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0 4px; }
+.wkbar .dn { margin-right: 2px; }
+.wkbar a.lab { text-decoration: none; color: var(--muted); }
+.wkbar a.lab[aria-current] { color: var(--accent-ink); border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.wkl { list-style: none; margin: 4px 0 0; padding: 0; font-size: var(--fs-s); color: var(--muted); }
+.wkl li { margin-top: 2px; line-height: 1.6; }
+.wkl .wd { font: var(--fs-xs) var(--font-mono); margin-right: 4px; }
+.wkn { list-style: none; margin: 10px 0 0; padding: 0; }
+.wkn li { padding: 6px 0; line-height: 1.7; }
 /* glossary review (admins) */
 .lab.pend { border-color: var(--accent); color: var(--accent-ink); }
 .grl .gra, .grform .gra { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
@@ -700,6 +715,8 @@ const BY = new Map(DATA.stories.map(s => [s.id, s]));
    from the calendar (#/day/DATE). DAY() is the day that the screen shows: its summary, its counts, its quiet mark. */
 const DAYS = DATA.days || [];
 const DAY_BY = new Map(DAYS.map(d => [d.date, d]));
+const WEEKS = DATA.weeks || [];      // the weekly reviews, newest first
+const WEEK_BY = new Map(WEEKS.map(w => [w.key, w]));
 let viewDate = null, calMonth = null;
 const DAY = () => (viewDate && DAY_BY.get(viewDate)) || DATA.day;
 const dayHref = d => (d === DATA.day.date ? '#/today' : '#/day/' + d);
@@ -758,6 +775,16 @@ const UI = {
     grBack: '下書きに戻す', grRestore: '戻す', grSaveConfirm: '保存して確認済みにする', grCancel: 'やめる', grTextEn: '英語の説明', grTextJa: '日本語の説明',
     grPending: '反映待ち', grRewritten: '直しました', grNone: 'この区分の項目は、ありません。', grStories: 'ストーリー{n}件', grNoText: '説明はありません。',
     glossConfirmed: '確認済み', glossRewritten: '確認のうえ直しました',
+    wkLead: '一週間（月曜から日曜）の動きを、まとめて振り返ります。週が終わった次の月曜の朝に、前の週の分が作られます。',
+    wkNone: '最初のふりかえりは、{date}の朝に作られます。', wkNoneGeneric: 'まだ、ふりかえりはありません。',
+    wkFew: 'この週は、ダイジェストが{n}日分しかないため、まとめていません。', wkSummary: 'その週の要点', wkMoved: '動きの大きかったストーリー',
+    wkNext: '来週の予定', wkNextNone: '次の予定が書かれたストーリーは、ありません。', wkPrev: '前の週', wkNextWeek: '次の週',
+    s_suggest: 'ストーリーの提案', sgLead: '毎朝、自動で調べた候補です。ストーリーが大きくなりすぎていないか、同じ話が2つに分かれていないか、見送った記事がストーリーに入るべきではないか、を見ます。言葉の重なりで見つけているので、当たりは半分ほどです。見るだけで、直す道具は、まだありません。',
+    sgLarge: '大きくなったストーリー', sgLargeD: '記事が多いストーリーです。経緯の行が、一部の記事しか根拠にしていないものは、いくつかの話が混ざっているかもしれません。',
+    sgPairs: '同じ話かもしれない組', sgPairsD: '題名と状態の言葉、国、日付が近いストーリーの組です。', sgNear: '見送った記事のうち、ストーリーに入るかもしれないもの',
+    sgNearD: '単発の記事のうち、見出しの言葉が、あるストーリーと重なるものです。', sgNone: '候補は、ありません。', sgCited: '経緯{lines}行が、記事{cited}件を根拠にしています',
+    sgScore: '近さ {s}', sgShared: '共通の言葉：{w}', sgTimes: '同じ記事が{n}件', sgNotYet: 'まだ、データがありません。次の実行のあとで、出ます。', sgDays: '日ごとの記事の数',
+    wkMeta: 'ダイジェストは{days}日分。動いたストーリーは{moved}件です。', wkNote: 'この要点は、その週に書いたものです。ストーリーは、いまの版で、その週の経緯の行を添えています。',
     dailyPast: 'この日の要点', calendar: 'カレンダー', calPrev: '前の月', calNext: '次の月', calToday: '今日', calLegend: 'ダイジェストのある日', dayPrev: '前の日', dayNext: '次の日',
     dayOpen: 'カレンダーを開く', pastNote: '過去の日のダイジェストです。要点は、その日に書いたものです。ストーリーは、いまの版で、その日の動きを添えています。',
     acName: '表示名', acNameD: 'アプリの中で使う名前です。', acSave: '保存', acSaved: '保存しました。', acNameBad: '表示名は、1字から60字までです。',
@@ -853,6 +880,16 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     grBack: 'Back to draft', grRestore: 'Put back', grSaveConfirm: 'Save and confirm', grCancel: 'Cancel', grTextEn: 'English text', grTextJa: 'Japanese text',
     grPending: 'Waiting to be published', grRewritten: 'Rewritten', grNone: 'Nothing in this group.', grStories: '{n} stories', grNoText: 'No explanation.',
     glossConfirmed: 'Confirmed', glossRewritten: 'Checked and rewritten',
+    wkLead: 'A look back over the week (Monday to Sunday). The review of a week is made on the morning of the Monday after it ends.',
+    wkNone: 'The first review will be made on the morning of {date}.', wkNoneGeneric: 'There is no review yet.',
+    wkFew: 'This week has digests for only {n} days, so it was not summarised.', wkSummary: 'The week in brief', wkMoved: 'The stories that moved most',
+    wkNext: 'What is scheduled next', wkNextNone: 'No story has a next step written.', wkPrev: 'Earlier week', wkNextWeek: 'Later week',
+    s_suggest: 'Story suggestions', sgLead: 'Candidates found automatically every morning: stories that have grown too large, stories that may be one, and items left alone that may belong to a story. They come from overlaps of words, so about half are right. This is a list to read. There is no tool to change anything yet.',
+    sgLarge: 'Stories that grew large', sgLargeD: 'Stories with many articles. When the lines of the timeline rest on only some of the articles, several topics may be mixed.',
+    sgPairs: 'Stories that may be one', sgPairsD: 'Pairs of stories that are close in the words of their titles and status, in countries and in dates.', sgNear: 'Items left alone that may belong to a story',
+    sgNearD: 'Single articles whose headline shares words with a story.', sgNone: 'There are no candidates.', sgCited: 'The {lines} timeline lines rest on {cited} articles',
+    sgScore: 'closeness {s}', sgShared: 'shared words: {w}', sgTimes: 'the same article {n} times', sgNotYet: 'There is no data yet. It appears after the next run.', sgDays: 'articles per day',
+    wkMeta: 'Digests for {days} days. Stories that moved: {moved}.', wkNote: 'This summary was written in that week. The stories are shown as they are now, with their lines for that week.',
     dailyPast: 'Summary of the day', calendar: 'Calendar', calPrev: 'Previous month', calNext: 'Next month', calToday: 'Today', calLegend: 'Days with a digest', dayPrev: 'Previous day', dayNext: 'Next day',
     dayOpen: 'Open the calendar', pastNote: 'This is the digest of a past day. The summary is the one written that day. The stories are shown as they are now, with what moved that day.',
     acName: 'Display name', acNameD: 'The name used inside the app.', acSave: 'Save', acSaved: 'Saved.', acNameBad: 'A display name has 1 to 60 characters.',
@@ -1141,7 +1178,7 @@ function route(keep) {
   if (!$('#ask').hidden) closeAsk();
   document.body.dataset.route = r.name;
   if (prevName !== 'story' && r.name === 'story') listY = window.scrollY;
-  const views = { today: listView, day: listView, browse: listView, story: storyView, countries: countriesView, places: r => (r.a ? placeView(r) : placesIndex()), library: libraryView, settings: settingsView, events: phView, glossary: glossaryView, weekly: phView };
+  const views = { today: listView, day: listView, browse: listView, story: storyView, countries: countriesView, places: r => (r.a ? placeView(r) : placesIndex()), library: libraryView, settings: settingsView, events: phView, glossary: glossaryView, weekly: weeklyView };
   if (['today', 'day', 'browse', 'library'].includes(r.name) || (r.name === 'countries' && r.a) || (r.name === 'places' && PLACES[r.a])) ctxHash = location.hash || '#/today';
   else if (r.name === 'story' && prevName === null && BY.get(r.a)) ctxHash = BY.get(r.a).shown_today ? '#/today' : '#/browse';
   const was = viewDate, ctx = r.name === 'story' ? ctxRoute() : r;      // a story opened from a past day keeps that day's list beside it
@@ -1193,12 +1230,12 @@ function catHref(id) {
   if (id) q.set('cat', id); else q.delete('cat');
   return '#/' + base + (q.toString() ? '?' + q : '');
 }
-const STAGES = { events: 'hold', weekly: '5' };     // 'hold' is a feature that is put on hold
+const STAGES = { events: 'hold' };     // 'hold' is a feature that is put on hold
 const stageShort = id => (STAGES[id] === 'hold' ? t('navHold') : t('navSoon'));
 function renderSide(r) {
   const c = r.name === 'story' ? ctxRoute() : r;
   const counts = catCounts(c.name === 'today' || c.name === 'day' ? 'today' : 'all'), active = (c.name === 'today' || c.name === 'day' || c.name === 'browse') ? (c.q.cat || '') : '';
-  const nav = [['today', todayPool().length], ['browse', DATA.stories.length], ['countries', Object.keys(DATA.countries).length], ['places', Object.values(PLACES).filter(p => p.n_stories > 0).length], ['events'], ['glossary', (DATA.glossary || []).length], ['weekly'], ['library', S.follow.length + S.save.length || ''], ['settings', '']];
+  const nav = [['today', todayPool().length], ['browse', DATA.stories.length], ['countries', Object.keys(DATA.countries).length], ['places', Object.values(PLACES).filter(p => p.n_stories > 0).length], ['events'], ['glossary', (DATA.glossary || []).length], ['weekly', WEEKS.filter(w => w.status !== 'few_days').length || ''], ['library', S.follow.length + S.save.length || ''], ['settings', '']];
   const navEls = nav.map(([id, n]) => h('a', { class: 'ni', href: '#/' + id, 'aria-current': (r.name === 'day' ? 'today' : r.name) === id || (r.name === 'story' && id === (ctxRoute().name === 'day' ? 'today' : ctxRoute().name)) ? 'page' : null, title: STAGES[id] ? (STAGES[id] === 'hold' ? t('stageHold') : t('navStage', { s: STAGES[id] })) : null },
     icon(id), h('span', { class: 'nl' }, t(id)), STAGES[id] ? h('span', { class: 'nstage' }, stageShort(id)) : h('span', { class: 'nc' }, n === '' ? '' : num(n))));
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
@@ -1858,7 +1895,72 @@ function glossaryView(r) {
   if (hit) { hit.setAttribute('aria-current', 'true'); hit.scrollIntoView({ block: 'center' }); }
 }
 
-/* ---------- placeholders (events and weekly are not built yet) ---------- */
+/* Story suggestions (admins, the real app only): read only. Candidates from news_digest/suggest.py, made every morning. */
+function suggestSection() {
+  const sg = DATA.story_suggestions;
+  if (!sg) return [h('p', { class: 'note' }, t('sgNotYet'))];
+  const story = st => { const s = BY.get(st.id); return h('a', { class: 'link', href: '#/story/' + st.id, ...(s ? lg(s.title) : {}) }, s ? T(s.title) : st.title); };
+  const srcName = id => { const s = (DATA.sources || []).find(x => x.id === id); return s ? srcLabel(s)[0] : id; };
+  const block = (title, desc, items) => [h('h2', { class: 'sec' }, title), h('p', { class: 'note' }, desc), items.length ? h('ul', { class: 'sgl' }, items) : h('p', { class: 'note' }, t('sgNone'))];
+  const large = (sg.large || []).map(x => h('li', {}, story(x), h('div', { class: 'sm' }, t('cnt_article', { n: x.n_articles }), ' · ', dShort(x.first_day) + '–' + dShort(x.last_day), ' · ', t('sgCited', { lines: x.n_lines, cited: x.cited_articles })),
+    h('div', { class: 'sm' }, t('sgDays') + '：' + Object.keys(x.per_day || {}).sort().map(d => dShort(d) + ' ' + num(x.per_day[d])).join('、') + ' · ' + (x.top_sources || []).map(([id, n]) => srcName(id) + ' ' + num(n)).join('、'))));
+  const pairs = (sg.pairs || []).map(x => h('li', {}, story(x.a), ' (' + num(x.a.n_articles) + ')  ⇄  ', story(x.b), ' (' + num(x.b.n_articles) + ')',
+    h('div', { class: 'sm' }, t('sgScore', { s: x.score.toFixed(2) }), ' · ', t('sgShared', { w: (x.shared_words || []).slice(0, 6).join(', ') }), (x.shared_countries || []).length ? ' · ' + countryText(x.shared_countries, 4) : '')));
+  const near = (sg.near || []).map(x => {
+    const a = (DATA.standalone || []).find(y => y.id === x.article_id);
+    return h('li', {}, a ? ext(a.url, a.title, a.lang) : h('span', {}, x.title), '  →  ', story(x.story),
+      h('div', { class: 'sm' }, (a ? srcLabel(a)[0] : x.source_id) + ' · ' + dShort(x.day) + ' · ' + t('sgScore', { s: x.score.toFixed(2) }) + ' · ' + t('sgShared', { w: (x.shared_words || []).slice(0, 5).join(', ') }) + (x.count > 1 ? ' · ' + t('sgTimes', { n: x.count }) : '')));
+  });
+  return [h('p', { class: 'note' }, t('sgLead')), ...block(t('sgLarge'), t('sgLargeD'), large), ...block(t('sgPairs'), t('sgPairsD'), pairs), ...block(t('sgNear'), t('sgNearD'), near)];
+}
+
+/* ---------- the weekly review (docs/weekly-review-design.md) ---------- */
+const addDays = (iso, n) => { const [y, m, d] = iso.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+const weekSpan = w => fmtDate(w.start, { year: 'numeric', month: 'long', day: 'numeric' }) + ' – ' + fmtDate(w.end, { year: 'numeric', month: 'long', day: 'numeric' });
+/* A story of the week: its title, the lines it got that week (its own timeline, as it is now), and its marks. */
+function weekRow(s, i, w) {
+  const lines = (s.timeline || []).filter(x => x.date >= w.start && x.date <= w.end && T(x.text));
+  return h('a', { class: 'row', href: '#/story/' + s.id, 'data-id': s.id },
+    h('span', { class: 'rk' }, i + 1),
+    h('div', {},
+      h('div', { class: 'rt', ...lg(s.title) }, s.top_score >= 3 && keyMark(false), T(s.title)),
+      lines.length ? h('ul', { class: 'wkl' }, lines.map(x => h('li', { ...lg(x.text) }, h('span', { class: 'wd' }, dShort(x.date)), ' ', T(x.text)))) : null,
+      h('div', { class: 'rm' }, h('span', { class: 'cs' }, countryText(s.countries, 3)), labelCounts(s), h('span', {}, t('cnt_article', { n: s.n_articles })))));
+}
+function weeklyView(r) {
+  const w = WEEK_BY.get(r.a) || WEEKS[0] || null;      // an unknown week shows the latest one
+  const first = DATA.settings && DATA.settings.weekly_first;
+  const head = [browseSeg('weekly'), h('h1', { class: 'ph1' }, t('weekly')), h('p', { class: 'pl' }, t('wkLead'))];
+  if (!w) {
+    showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, ...head,
+      h('p', { class: 'note' }, first ? t('wkNone', { date: fmtDate(addDays(first, 7), { month: 'long', day: 'numeric', weekday: 'short' }) }) : t('wkNoneGeneric')))));
+    return;
+  }
+  const i = WEEKS.indexOf(w);
+  const older = WEEKS[i + 1], newer = WEEKS[i - 1];
+  const step = (target, label, glyph) => target ? h('a', { class: 'dn', href: '#/weekly/' + target.key, 'aria-label': label, title: label }, glyph) : h('span', { class: 'dn off', 'aria-hidden': 'true' }, glyph);
+  const bar = h('div', { class: 'wkbar' }, step(older, t('wkPrev'), '‹'), step(newer, t('wkNextWeek'), '›'),
+    WEEKS.slice(0, 12).map(x => h('a', { class: 'lab', href: '#/weekly/' + x.key, 'aria-current': x.key === w.key ? 'page' : null, title: weekSpan(x) }, dShort(x.start) + '–' + dShort(x.end))));
+  const body = [];
+  if (w.status === 'few_days') {
+    body.push(h('p', { class: 'note' }, t('wkFew', { n: w.days })));
+  } else {
+    const stories = (w.story_ids || []).map(id => BY.get(id)).filter(Boolean);
+    const lang = pick(w.summary)[1];
+    body.push(h('h2', { class: 'sec' }, t('wkSummary')),
+      h('ul', { class: 'points digest', ...lg(w.summary) }, points(T(w.summary)).map(x => h('li', {}, termNodes(x, lang)))),
+      h('p', { class: 'note' }, t('wkMeta', { days: num(w.days), moved: num(w.moved_count) })),
+      h('h2', { class: 'sec' }, t('wkMoved')), h('div', { class: 'bare rows' }, stories.map((s, k) => weekRow(s, k, w))));
+    const next = stories.filter(s => T(s.next_step));
+    body.push(h('h2', { class: 'sec' }, t('wkNext')),
+      next.length ? h('ul', { class: 'wkn' }, next.map(s => h('li', {}, h('a', { class: 'link', href: '#/story/' + s.id, ...lg(s.title) }, T(s.title)), ' ', h('span', { ...lg(s.next_step) }, T(s.next_step)))))
+        : h('p', { class: 'note' }, t('wkNextNone')),
+      h('p', { class: 'note' }, t('wkNote')));
+  }
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, ...head, h('h2', { class: 'wkspan' }, weekSpan(w)), bar, ...body)));
+}
+
+/* ---------- placeholders (events are put on hold, and the look-back and the question box are not built yet) ---------- */
 function ghost(kind) {
   const bar = w => h('i', { style: 'width:' + w });
   const rows = kind === 'events' ? [0, 1, 2, 3].map(() => h('div', { class: 'gr' }, h('div', { class: 'bx' }), h('div', { class: 'gcol' }, bar('62%'), bar('38%'))))
@@ -1886,8 +1988,8 @@ function numInput(key, min, max, label) {
 /* ---------- account and admin (the real app only) ---------- */
 const ZONES = ['Africa/Cairo', 'America/Chicago', 'America/Denver', 'America/Los_Angeles', 'America/New_York', 'Asia/Kolkata', 'Asia/Seoul', 'Asia/Tokyo', 'Australia/Sydney', 'Europe/London', 'Europe/Paris', 'UTC'];
 const validZone = z => { try { new Intl.DateTimeFormat('en', { timeZone: z }); return true; } catch (e) { return false; } };
-const ADMIN_ONLY = ['cost', 'admin', 'glossreview', 'run'];
-const visibleSections = () => SECTIONS.filter(x => (!['account', 'run', 'glossreview'].includes(x[0]) || USER) && (!USER || USER.role === 'admin' || !ADMIN_ONLY.includes(x[0])));
+const ADMIN_ONLY = ['cost', 'admin', 'glossreview', 'suggest', 'run'];
+const visibleSections = () => SECTIONS.filter(x => (!['account', 'run', 'glossreview', 'suggest'].includes(x[0]) || USER) && (!USER || USER.role === 'admin' || !ADMIN_ONLY.includes(x[0])));
 const say = (box, msg, bad) => { box.textContent = msg; box.className = 'note' + (bad ? ' bad' : ''); };
 function accountSection() {
   const api = USER.api;
@@ -2160,6 +2262,7 @@ const SECTIONS = [
     srow(t('adJournals'), t('adJournalsD'), h('span', { class: 'none' }, '—'), t('notBuilt')),
     srow(t('adLangs'), t('adLangsD'), h('div', { class: 'chips2' }, LANGS.map(l => { const cv = coverage(l.code); return h('span', { class: 'chip', title: cv == null ? t('base') : t('coverage') + ' ' + cv + '%' }, h('span', { lang: l.code }, l.name), h('small', {}, cv == null ? t('base') : cv + '%')); })))]],
   ['glossreview', () => USER ? glossReviewSection() : []],
+  ['suggest', () => USER ? suggestSection() : []],
   ['run', () => USER ? runSection() : []],
   ['about', () => {
     const st = DATA.stats;
@@ -2283,7 +2386,7 @@ function assemble(parts, admin, extra) {      // the same as news_digest/publish
   const data = Object.assign({}, parts.core);
   const counts = data.parts || {};
   delete data.parts;
-  for (const key of ['stories', 'standalone', 'glossary', 'days']) {
+  for (const key of ['stories', 'standalone', 'glossary', 'days', 'weeks']) {
     let list = [];
     for (let i = 0; i < (counts[key] || 0); i++) list = list.concat(parts[key + '_' + i] || []);
     data[key] = list;
@@ -2348,10 +2451,11 @@ async function enter(user) {
     const me = meSnap.data();
     if (me.active !== true) return showMessage(W.stopped, outButton());
     const admin = me.role === 'admin';
-    const [appSnap, costsSnap, hiddenSnap, mapRes, prefsSnap, settingsSnap] = await Promise.all([
+    const [appSnap, costsSnap, hiddenSnap, suggestSnap, mapRes, prefsSnap, settingsSnap] = await Promise.all([
       getDocs(collection(db, 'app')),
       admin ? getDoc(doc(db, 'app_admin', 'costs')) : null,
       admin ? getDoc(doc(db, 'app_admin', 'glossary_hidden')) : null,      // the glossary entries an admin took out
+      admin ? getDoc(doc(db, 'app_admin', 'story_suggestions')) : null,    // stories and items that may need a person (read only)
       fetch('world_map.json', { cache: 'no-cache' }),
       getDoc(doc(db, 'users', user.uid, 'settings', 'prefs')),
       getDoc(doc(db, 'settings', 'app')),
@@ -2362,6 +2466,7 @@ async function enter(user) {
     const adminParts = {};
     if (admin && costsSnap && costsSnap.exists()) adminParts.costs = JSON.parse(costsSnap.data().json);
     if (admin) adminParts.glossary_hidden = hiddenSnap && hiddenSnap.exists() ? JSON.parse(hiddenSnap.data().json) : [];
+    if (admin) adminParts.story_suggestions = suggestSnap && suggestSnap.exists() ? JSON.parse(suggestSnap.data().json) : null;
     const data = assemble(parts, adminParts, mapRes.ok ? { map: await mapRes.json() } : {});
     applyPrefs(prefsSnap.exists() ? prefsSnap.data() : {});
     const shared = settingsSnap.exists() ? settingsSnap.data() : {};
