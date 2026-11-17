@@ -260,6 +260,14 @@ kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--l
 .tpst { margin-top: 2px; font-size: var(--fs-s); }
 .tpcut { margin-top: 0; }
 .sgl .tpstories { line-height: 1.7; }
+/* the AI's judgment and reason (story suggestions): a small label, then the reason. The label's text says what the AI recommends, the look is only a quiet hint
+   (merge: the accent, unsure: plain, separate: muted and dashed). No red and green, because "separate" is not bad and "merge" is not good. */
+.sgl .sgai { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin-top: 4px; font-size: var(--fs-s); line-height: 1.7; max-width: 40em; }
+.sgl .sgai .lab { height: auto; min-height: 20px; padding-block: 1px; white-space: normal; line-height: 1.5; font-size: var(--fs-xs); }
+.sgl .sgai[data-verdict="merge"] .lab { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.sgl .sgai[data-verdict="separate"] .lab { border-style: dashed; color: var(--muted); }
+.sgl .sgai .sgair { min-width: 0; overflow-wrap: anywhere; }
+.sgainote { margin-top: 2px; }
 @media (max-width: 859px) {
   .tpx, .tpadd { min-height: 32px; }
   .tpx { padding: 0 4px; }
@@ -842,6 +850,8 @@ const UI = {
     sgSameTopic: '同じトピック『{topic}』', sgApartTopics: '別々のトピックに入っています',
     sgScore: '近さ {s}', sgShared: '共通の言葉：{w}', sgTimes: '同じ記事が{n}件', sgNotYet: 'まだ、データがありません。次の実行のあとで、出ます。', sgDays: '日ごとの記事の数',
     sgApprove: '許可する', sgReject: '許可しない', sgKeep: 'このままにする', sgUndo: '戻す',
+    sgAiMerge: 'AI は併合を勧めています', sgAiSeparate: 'AI は別々のままを勧めています', sgAiUnsure: 'AI は迷っています', sgAiReason: 'AI の理由',
+    sgAiNote: 'AI の判断は、参考です。決めるのは、あなたです。',
     sgWhatPair: '許可すると、『{from}』の記事を、すべて『{into}』に移します。『{from}』は残り、「併合済み」の印が付きます。',
     sgWhatNear: '許可すると、この記事を、ストーリー『{story}』に入れます。',
     sgWhatLarge: 'ストーリーを分ける機能は、まだありません。「このままにする」を押すと、このストーリーの記事が10件増えるまで、この提案を隠します。',
@@ -908,7 +918,7 @@ const UI = {
     nFollow: '追っているストーリーの更新', nFollowD: '追っているストーリーに動きがあったときに知らせます。', nSudden: '急な動き', nSuddenD: '朝のダイジェストを待たずに知らせます。',
     sourcesNote_other: '{n}の出典から、これまでに{m}件の記事を集めました。', th_source: '出典', th_label: 'ラベル', th_kind: '種別', th_country: '国', th_lang: '言語', th_articles: '記事',
     costToday: '今日の費用', costStep: '工程', costMonth: '月の見込み', costKey: 'APIキーの期限', daysLeft_other: '（あと{n}日）',
-    step_screen: '選別', step_assign: 'ストーリーへの振り分け', step_assign_recheck: '続報の見直し（候補の選別）', step_langtest: '言語の確認', step_write: '要約の作成', step_daily_summary: '今日の要点', step_translate: '翻訳', step_glossary_extract: '用語の抽出', step_glossary_explain: '用語の説明', step_glossary_align: '用語の書き方の拾い出し', step_topics_propose: 'トピックの提案', step_timeline_merge: '経緯の統合',
+    step_screen: '選別', step_assign: 'ストーリーへの振り分け', step_assign_recheck: '続報の見直し（候補の選別）', step_langtest: '言語の確認', step_write: '要約の作成', step_daily_summary: '今日の要点', step_translate: '翻訳', step_glossary_extract: '用語の抽出', step_glossary_explain: '用語の説明', step_glossary_align: '用語の書き方の拾い出し', step_topics_propose: 'トピックの提案', step_timeline_merge: '経緯の統合', step_curate: 'AIの整理',
     adminNote: '管理者だけが使う設定です。まだ作っていません。', adMembers: 'メンバー', adMembersD: '読む人の追加と権限。', adJournals: '出典', adJournalsD: '読むニュースの出典の追加と選択。',
     adLangs: '言語', adLangsD: '内容を切り替えられる言語と、訳した文章の割合です。', notBuilt: 'まだありません', coverage: '訳した割合', base: '元の言語',
     aboutLine: 'News Digest 画面の試作', aDate: '日付', aCol: '収集した記事', aKept: 'ストーリーに入れた記事', aStories: 'ストーリーの数', aOther: 'その他の記事', aBuilt: 'データの作成',
@@ -983,6 +993,8 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     sgSameTopic: 'Same topic "{topic}"', sgApartTopics: 'In different topics',
     sgScore: 'closeness {s}', sgShared: 'shared words: {w}', sgTimes: 'the same article {n} times', sgNotYet: 'There is no data yet. It appears after the next run.', sgDays: 'articles per day',
     sgApprove: 'Approve', sgReject: 'Reject', sgKeep: 'Leave as it is', sgUndo: 'Undo',
+    sgAiMerge: 'AI recommends merging', sgAiSeparate: 'AI recommends keeping them apart', sgAiUnsure: 'AI is unsure', sgAiReason: 'AI\'s reason',
+    sgAiNote: 'The AI\'s judgment is advice. You decide.',
     sgWhatPair: 'Approving moves all the articles of "{from}" into "{into}". "{from}" is kept and marked as merged.',
     sgWhatNear: 'Approving puts this article into the story "{story}".',
     sgWhatLarge: 'Splitting a story is not available yet. "Leave as it is" hides this suggestion until the story has grown by 10 more articles.',
@@ -1050,7 +1062,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     nFollow: 'Updates to followed stories', nFollowD: 'Tells you when a followed story moves.', nSudden: 'Sudden developments', nSuddenD: 'Does not wait for the morning digest.',
     sourcesNote_one: '{n} source, {m} articles collected so far.', sourcesNote_other: '{n} sources, {m} articles collected so far.', th_source: 'Source', th_label: 'Label', th_kind: 'Kind', th_country: 'Country', th_lang: 'Language', th_articles: 'Articles',
     costToday: 'Today', costStep: 'Step', costMonth: 'Monthly estimate', costKey: 'API key expires', daysLeft_one: ' ({n} day left)', daysLeft_other: ' ({n} days left)',
-    step_screen: 'Screening', step_assign: 'Assigning to stories', step_assign_recheck: 'Rechecking earlier items', step_langtest: 'Language check', step_write: 'Writing', step_daily_summary: 'Daily summary', step_translate: 'Translation', step_glossary_extract: 'Listing glossary terms', step_glossary_explain: 'Explaining glossary terms', step_glossary_align: 'Finding how terms are written', step_topics_propose: 'Topic suggestions', step_timeline_merge: 'Timeline merge',
+    step_screen: 'Screening', step_assign: 'Assigning to stories', step_assign_recheck: 'Rechecking earlier items', step_langtest: 'Language check', step_write: 'Writing', step_daily_summary: 'Daily summary', step_translate: 'Translation', step_glossary_extract: 'Listing glossary terms', step_glossary_explain: 'Explaining glossary terms', step_glossary_align: 'Finding how terms are written', step_topics_propose: 'Topic suggestions', step_timeline_merge: 'Timeline merge', step_curate: 'AI curation',
     adminNote: 'Settings for administrators only. Not built yet.', adMembers: 'Members', adMembersD: 'Adding readers and their roles.', adJournals: 'Sources', adJournalsD: 'Adding and choosing the news sources to read.',
     adLangs: 'Languages', adLangsD: 'The languages content can switch to, and how much of it is translated.', notBuilt: 'Not built', coverage: 'Translated', base: 'Source language',
     aboutLine: 'News Digest screen mockup', aDate: 'Date', aCol: 'Articles collected', aKept: 'Articles in stories', aStories: 'Stories', aOther: 'Other articles', aBuilt: 'Data built',
@@ -2225,6 +2237,19 @@ function suggestSection() {
     if (same.length) return h('div', { class: 'sm sgtp', 'data-kind': 'same' }, same.map((tp, i) => [i ? ' · ' : '', fill(t('sgSameTopic'), { topic: topicNode(tp) })]));
     return x.apart_topics === true ? h('div', { class: 'sm sgtp', 'data-kind': 'apart' }, t('sgApartTopics')) : null;
   };
+  /* What the AI said (x.ai, from the scripts, admins only): a pair has a verdict and a reason, a proposal of a topic or of an addition has a reason.
+     Everything is optional and nothing is trusted. A verdict that is not one of the three gives no line (a reason alone would not say that it is the AI's),
+     a reason with no usable text gives the label alone. The reason is in the reader's language when it has been translated, else in English (with lang="en"). */
+  const AI_LABEL = { merge: 'sgAiMerge', separate: 'sgAiSeparate', unsure: 'sgAiUnsure' };
+  const aiVerdict = x => { const v = x && typeof x === 'object' && x.ai && typeof x.ai === 'object' ? x.ai.verdict : null; return typeof v === 'string' && Object.keys(AI_LABEL).includes(v) ? v : null; };
+  const aiReason = x => {      // {en, ja, ...} with the texts that are not blank, or null
+    const r = x && typeof x === 'object' && x.ai && typeof x.ai === 'object' && x.ai.reason && typeof x.ai.reason === 'object' ? x.ai.reason : null, o = {};
+    if (r) for (const l of LANGS) if (typeof r[l.code] === 'string' && r[l.code].trim()) o[l.code] = r[l.code].trim();
+    return T(o) ? o : null;
+  };
+  const aiLine = (attrs, label, x) => { const r = aiReason(x); return h('div', { class: 'sgai', ...attrs }, h('span', { class: 'lab' }, label), r && [' ', h('span', { class: 'sgair', ...lg(r) }, T(r))]); };
+  const pairAi = x => { const v = aiVerdict(x); return v ? aiLine({ 'data-verdict': v }, t(AI_LABEL[v]), x) : null; };
+  const reasonAi = x => (aiReason(x) ? aiLine({ 'data-kind': 'reason' }, t('sgAiReason'), x) : null);
   const fill = (text, nodes) => text.split(/\{(\w+)\}/).map((p, i) => (i % 2 ? (nodes[p] ? nodes[p]() : '{' + p + '}') : p));      // {from} and so on become nodes
   const srcName = id => { const s = (DATA.sources || []).find(x => x.id === id); return s ? srcLabel(s)[0] : id; };
   const pending = key => !!ui.live[key] && ui.live[key].at !== reviewed[key];
@@ -2250,7 +2275,8 @@ function suggestSection() {
   const act = (key, what, buttons) => (!key || ui.state !== 'ok' ? null : h('div', { class: 'sgact' },
     pending(key) ? h('p', { class: 'sgpend' }, t('sgPending')) : [what && h('p', { class: 'sgwhat' }, what), h('div', { class: 'gra' }, buttons)],
     ui.err[key] && h('p', { class: 'sgfail', role: 'alert' }, t('sgSaveFail'))));
-  const block = (head, desc, items, none) => [h('h2', { class: 'sec' }, head), h('p', { class: 'note' }, desc), items.length ? h('ul', { class: 'sgl' }, items) : h('p', { class: 'note' }, none || t('sgNone'))];
+  const block = (head, desc, items, none, extra) => [h('h2', { class: 'sec' }, head), h('p', { class: 'note' }, desc), ...(extra ? [extra] : []),
+    items.length ? h('ul', { class: 'sgl' }, items) : h('p', { class: 'note' }, none || t('sgNone'))];
   /* One line on what happened to a decided suggestion, by kind and status. */
   const decidedItem = x => {
     const i = x.info || {}, k = x.kind + '_' + x.status;
@@ -2274,6 +2300,7 @@ function suggestSection() {
       act(x.key, t('sgWhatLarge'), [button(x.key, 'reject', t('sgKeep'), Number.isInteger(x.n_articles) ? x.n_articles : undefined)])));      // sends n: the number of articles now
     const pairs = (sg.pairs || []).map(x => h('li', { 'data-key': x.key }, story(x.a), ' (' + num(x.a.n_articles) + ')  ⇄  ', story(x.b), ' (' + num(x.b.n_articles) + ')',
       h('div', { class: 'sm' }, t('sgScore', { s: x.score.toFixed(2) }), ' · ', t('sgShared', { w: (x.shared_words || []).slice(0, 6).join(', ') }), (x.shared_countries || []).length ? ' · ' + countryText(x.shared_countries, 4) : ''),
+      pairAi(x),
       pairTopics(x),
       x.from && x.into && act(x.key, t('sgWhatPair', { from: name(x.from), into: name(x.into) }), [button(x.key, 'approve', t('sgApprove')), button(x.key, 'reject', t('sgReject'))])));
     const near = (sg.near || []).map(x => {
@@ -2290,6 +2317,7 @@ function suggestSection() {
       return h('li', { 'data-key': x.key },
         h('b', { lang }, text),
         h('div', { class: 'sm tpstories' }, sts.map((st, i) => [i ? ' · ' : '', title(st)(), typeof st.n_articles === 'number' ? ' (' + t('cnt_article', { n: st.n_articles }) + ')' : ''])),
+        reasonAi(x),
         act(x.key, t('sgWhatTopic', { title: text }), [button(x.key, 'approve', t('sgApprove'), { title: text, lang, stories: sts.map(st => st.id).filter(id => typeof id === 'string') }), button(x.key, 'reject', t('sgReject'))]));
     });
     /* Existing topics: a story that may belong to one. Approving puts it in (the key is the one published). */
@@ -2297,10 +2325,11 @@ function suggestSection() {
       const st = x.story && typeof x.story === 'object' ? x.story : {}, tp = x.topic && typeof x.topic === 'object' ? x.topic : {};
       return h('li', { 'data-key': x.key }, title(st)(), '  →  ', topicNode(tp)(),
         typeof x.score === 'number' && h('div', { class: 'sm' }, t('sgScore', { s: x.score.toFixed(2) })),
+        reasonAi(x),
         act(x.key, t('sgWhatLink', { story: name(st), topic: topicText(tp) }), [button(x.key, 'approve', t('sgApprove')), button(x.key, 'reject', t('sgReject'))]));
     });
     const decided = (Array.isArray(sg.decided) ? sg.decided : []).filter(x => x && typeof x === 'object').map(decidedItem);
-    body.replaceChildren(...block(t('sgLarge'), t('sgLargeD'), large), ...block(t('sgPairs'), t('sgPairsD'), pairs), ...block(t('sgNear'), t('sgNearD'), near),
+    body.replaceChildren(...block(t('sgLarge'), t('sgLargeD'), large), ...block(t('sgPairs'), t('sgPairsD'), pairs, null, (sg.pairs || []).some(aiVerdict) ? h('p', { class: 'note sgainote' }, t('sgAiNote')) : null), ...block(t('sgNear'), t('sgNearD'), near),
       ...block(t('sgTopics'), t('sgTopicsD'), topics), ...block(t('sgLinks'), t('sgLinksD'), links),
       ...block(t('sgDecided'), t('sgDecidedD'), decided, t('sgDecNone')));
   }
