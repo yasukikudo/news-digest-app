@@ -857,6 +857,8 @@ const UI = {
     sgTopics: 'トピックの提案', sgTopicsD: 'いくつかのストーリーをまとめる、新しいトピックの案です。', sgLinks: 'トピックに入れる提案', sgLinksD: 'あるストーリーを、今あるトピックに入れる案です。',
     sgWhatTopic: '許可すると、トピック『{title}』を作り、これらのストーリーを入れます。', sgWhatLink: '許可すると、ストーリー『{story}』を、トピック『{topic}』に入れます。',
     sgUndoTopic: '戻すと、このトピックを消し、入れたストーリーすべてから外します。',
+    sgUndoJoin: '戻すと、このとき入れたストーリーだけを、トピックから外します。トピックは残ります。',
+    sgDecTopicJoin_other: 'トピック『{topic}』は、すでにあったので、ストーリー{n}件を、そこに入れました。',
     sgDecLink: 'ストーリー『{story}』を、トピック『{topic}』に入れました。', sgDecLinkNo: 'ストーリー『{story}』を、トピック『{topic}』に入れることは、許可しませんでした。',
     sgDecLinkSkip: 'ストーリー『{story}』と、トピック『{topic}』について、決定のとおりにはできませんでした。',
     sgDecTopic_other: 'トピック『{topic}』を作り、ストーリー{n}件を入れました。', sgDecTopicDone: 'トピック『{topic}』を作りました。',
@@ -996,6 +998,8 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     sgTopics: 'Topic suggestions', sgTopicsD: 'Proposed new topics that would gather several stories.', sgLinks: 'Suggestions to put a story into a topic', sgLinksD: 'Proposals to put a story into a topic that already exists.',
     sgWhatTopic: 'Approving creates the topic "{title}" and puts these stories into it.', sgWhatLink: 'Approving puts the story "{story}" into the topic "{topic}".',
     sgUndoTopic: 'Undoing deletes this topic and takes all of its stories out of it.',
+    sgUndoJoin: 'Undoing takes only the stories put in at that time out of the topic. The topic stays.',
+    sgDecTopicJoin_one: 'The topic "{topic}" was there already, so {n} story was put into it.', sgDecTopicJoin_other: 'The topic "{topic}" was there already, so {n} stories were put into it.',
     sgDecLink: 'Put the story "{story}" into the topic "{topic}".', sgDecLinkNo: 'Putting the story "{story}" into the topic "{topic}" was not approved.',
     sgDecLinkSkip: 'The decision about the story "{story}" and the topic "{topic}" could not be carried out.',
     sgDecTopic_one: 'Created the topic "{topic}" and put {n} story into it.', sgDecTopic_other: 'Created the topic "{topic}" and put {n} stories into it.', sgDecTopicDone: 'Created the topic "{topic}".',
@@ -2227,13 +2231,13 @@ function suggestSection() {
       move_applied: 'sgDecMove', move_rejected: 'sgDecMoveNo', move_skipped: 'sgDecMoveSkip',
       large_rejected: typeof i.n === 'number' ? 'sgDecLargeNo' : 'sgDecLargeNoN', large_skipped: 'sgDecLargeSkip',
       link_applied: 'sgDecLink', link_rejected: 'sgDecLinkNo', link_skipped: 'sgDecLinkSkip',
-      topic_applied: typeof i.added === 'number' ? 'sgDecTopic' : 'sgDecTopicDone', topic_rejected: 'sgDecTopicNo', topic_skipped: 'sgDecTopicSkip' }[k];
+      topic_applied: i.joined ? 'sgDecTopicJoin' : typeof i.added === 'number' ? 'sgDecTopic' : 'sgDecTopicDone', topic_rejected: 'sgDecTopicNo', topic_skipped: 'sgDecTopicSkip' }[k];
     const n = x.kind === 'merge' ? i.moved : x.kind === 'topic' ? i.added : i.n;
     return h('li', { 'data-key': x.key, 'data-kind': x.kind, 'data-status': x.status },
       h('p', { class: 'sgdone' }, text ? fill(t(text, { n }), nodes) : (x.key || ''), x.kind === 'move' && x.status === 'applied' && i.count > 1 && t('sgSameTitle', { n: i.count })),
       x.reason && h('div', { class: 'sm sgreason' }, UI.en['sgReason_' + x.reason] ? t('sgReason_' + x.reason) : t('sgReasonOther', { code: String(x.reason) })),
       x.day && h('div', { class: 'sm' }, dLong(x.day)),
-      act(x.key, x.kind === 'topic' && x.status === 'applied' ? t('sgUndoTopic') : null, [button(x.key, 'reset', t('sgUndo'))]));
+      act(x.key, x.kind === 'topic' && x.status === 'applied' ? t(i.joined ? 'sgUndoJoin' : 'sgUndoTopic') : null, [button(x.key, 'reset', t('sgUndo'))]));
   };
   function paint() {
     say(box, ui.state === 'loading' ? t('adLoading') : ui.state === 'fail' ? t('sgLoadFail') : '', ui.state === 'fail');
