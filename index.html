@@ -135,6 +135,8 @@ a.chip:hover { border-color: var(--accent); color: var(--accent-ink); }
 .key { display: inline-flex; align-items: center; gap: 4px; color: var(--mark); vertical-align: -2px; margin-right: 5px; }
 .key svg { width: 14px; height: 14px; }
 .key .kt { font-size: var(--fs-s); font-weight: 600; }
+.fm { display: inline-flex; align-items: center; color: var(--accent); vertical-align: -2px; margin-right: 5px; }
+.fm svg { width: 14px; height: 14px; stroke-width: 2.2; }
 .none { color: var(--muted); }
 .mono { font-family: var(--font-mono); }
 kbd { font: 11.5px var(--font-mono); padding: 1px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); }
@@ -837,6 +839,7 @@ const UI = {
     sgLarge: '大きくなったストーリー', sgLargeD: '記事が多いストーリーです。経緯の行が、一部の記事しか根拠にしていないものは、いくつかの話が混ざっているかもしれません。',
     sgPairs: '同じ話かもしれない組', sgPairsD: '題名と状態の言葉、国、日付が近いストーリーの組です。', sgNear: '見送った記事のうち、ストーリーに入るかもしれないもの',
     sgNearD: '単発の記事のうち、見出しの言葉が、あるストーリーと重なるものです。', sgNone: '候補は、ありません。', sgCited: '経緯{lines}行が、記事{cited}件を根拠にしています',
+    sgSameTopic: '同じトピック『{topic}』', sgApartTopics: '別々のトピックに入っています',
     sgScore: '近さ {s}', sgShared: '共通の言葉：{w}', sgTimes: '同じ記事が{n}件', sgNotYet: 'まだ、データがありません。次の実行のあとで、出ます。', sgDays: '日ごとの記事の数',
     sgApprove: '許可する', sgReject: '許可しない', sgKeep: 'このままにする', sgUndo: '戻す',
     sgWhatPair: '許可すると、『{from}』の記事を、すべて『{into}』に移します。『{from}』は残り、「併合済み」の印が付きます。',
@@ -905,7 +908,7 @@ const UI = {
     nFollow: '追っているストーリーの更新', nFollowD: '追っているストーリーに動きがあったときに知らせます。', nSudden: '急な動き', nSuddenD: '朝のダイジェストを待たずに知らせます。',
     sourcesNote_other: '{n}の出典から、これまでに{m}件の記事を集めました。', th_source: '出典', th_label: 'ラベル', th_kind: '種別', th_country: '国', th_lang: '言語', th_articles: '記事',
     costToday: '今日の費用', costStep: '工程', costMonth: '月の見込み', costKey: 'APIキーの期限', daysLeft_other: '（あと{n}日）',
-    step_screen: '選別', step_assign: 'ストーリーへの振り分け', step_assign_recheck: '続報の見直し（候補の選別）', step_langtest: '言語の確認', step_write: '要約の作成', step_daily_summary: '今日の要点', step_translate: '翻訳', step_glossary_extract: '用語の抽出', step_glossary_explain: '用語の説明', step_glossary_align: '用語の書き方の拾い出し', step_topics_propose: 'トピックの提案',
+    step_screen: '選別', step_assign: 'ストーリーへの振り分け', step_assign_recheck: '続報の見直し（候補の選別）', step_langtest: '言語の確認', step_write: '要約の作成', step_daily_summary: '今日の要点', step_translate: '翻訳', step_glossary_extract: '用語の抽出', step_glossary_explain: '用語の説明', step_glossary_align: '用語の書き方の拾い出し', step_topics_propose: 'トピックの提案', step_timeline_merge: '経緯の統合',
     adminNote: '管理者だけが使う設定です。まだ作っていません。', adMembers: 'メンバー', adMembersD: '読む人の追加と権限。', adJournals: '出典', adJournalsD: '読むニュースの出典の追加と選択。',
     adLangs: '言語', adLangsD: '内容を切り替えられる言語と、訳した文章の割合です。', notBuilt: 'まだありません', coverage: '訳した割合', base: '元の言語',
     aboutLine: 'News Digest 画面の試作', aDate: '日付', aCol: '収集した記事', aKept: 'ストーリーに入れた記事', aStories: 'ストーリーの数', aOther: 'その他の記事', aBuilt: 'データの作成',
@@ -977,6 +980,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     sgLarge: 'Stories that grew large', sgLargeD: 'Stories with many articles. When the lines of the timeline rest on only some of the articles, several topics may be mixed.',
     sgPairs: 'Stories that may be one', sgPairsD: 'Pairs of stories that are close in the words of their titles and status, in countries and in dates.', sgNear: 'Items left alone that may belong to a story',
     sgNearD: 'Single articles whose headline shares words with a story.', sgNone: 'There are no candidates.', sgCited: 'The {lines} timeline lines rest on {cited} articles',
+    sgSameTopic: 'Same topic "{topic}"', sgApartTopics: 'In different topics',
     sgScore: 'closeness {s}', sgShared: 'shared words: {w}', sgTimes: 'the same article {n} times', sgNotYet: 'There is no data yet. It appears after the next run.', sgDays: 'articles per day',
     sgApprove: 'Approve', sgReject: 'Reject', sgKeep: 'Leave as it is', sgUndo: 'Undo',
     sgWhatPair: 'Approving moves all the articles of "{from}" into "{into}". "{from}" is kept and marked as merged.',
@@ -1046,7 +1050,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     nFollow: 'Updates to followed stories', nFollowD: 'Tells you when a followed story moves.', nSudden: 'Sudden developments', nSuddenD: 'Does not wait for the morning digest.',
     sourcesNote_one: '{n} source, {m} articles collected so far.', sourcesNote_other: '{n} sources, {m} articles collected so far.', th_source: 'Source', th_label: 'Label', th_kind: 'Kind', th_country: 'Country', th_lang: 'Language', th_articles: 'Articles',
     costToday: 'Today', costStep: 'Step', costMonth: 'Monthly estimate', costKey: 'API key expires', daysLeft_one: ' ({n} day left)', daysLeft_other: ' ({n} days left)',
-    step_screen: 'Screening', step_assign: 'Assigning to stories', step_assign_recheck: 'Rechecking earlier items', step_langtest: 'Language check', step_write: 'Writing', step_daily_summary: 'Daily summary', step_translate: 'Translation', step_glossary_extract: 'Listing glossary terms', step_glossary_explain: 'Explaining glossary terms', step_glossary_align: 'Finding how terms are written', step_topics_propose: 'Topic suggestions',
+    step_screen: 'Screening', step_assign: 'Assigning to stories', step_assign_recheck: 'Rechecking earlier items', step_langtest: 'Language check', step_write: 'Writing', step_daily_summary: 'Daily summary', step_translate: 'Translation', step_glossary_extract: 'Listing glossary terms', step_glossary_explain: 'Explaining glossary terms', step_glossary_align: 'Finding how terms are written', step_topics_propose: 'Topic suggestions', step_timeline_merge: 'Timeline merge',
     adminNote: 'Settings for administrators only. Not built yet.', adMembers: 'Members', adMembersD: 'Adding readers and their roles.', adJournals: 'Sources', adJournalsD: 'Adding and choosing the news sources to read.',
     adLangs: 'Languages', adLangsD: 'The languages content can switch to, and how much of it is translated.', notBuilt: 'Not built', coverage: 'Translated', base: 'Source language',
     aboutLine: 'News Digest screen mockup', aDate: 'Date', aCol: 'Articles collected', aKept: 'Articles in stories', aStories: 'Stories', aOther: 'Other articles', aBuilt: 'Data built',
@@ -1157,6 +1161,22 @@ function keyMark(withText, tip) {
   const s = svgEl('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': 1.8, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true' });
   s.append(svgEl('path', { d: 'M6 21V3' }), svgEl('path', { d: 'M6 4h12l-3.5 4.5L18 13H6', fill: 'currentColor' }));
   return h('span', { class: 'key', title: tip || t('keyTip') }, s, h('span', { class: withText ? 'kt' : 'sr' }, t('key')));
+}
+/* The mark of a followed story, in the title line of its row (the accent colour is the followed state, as on the Follow button).
+   Every list of stories builds its rows with rowAttrs and rowTitle, and flag() calls paintFollowMarks, so a change shows at once without a repaint. */
+const isFollowed = id => S.follow.includes(id);
+function followMark() {
+  return h('span', { class: 'fm', lang: S.lang, title: t('followed') }, icon('check', 14), h('span', { class: 'sr' }, t('followed')));
+}
+const rowAttrs = s => ({ class: 'row', href: '#/story/' + s.id, 'data-id': s.id, 'data-followed': isFollowed(s.id) ? '1' : null });
+const rowTitle = s => h('div', { class: 'rt', ...lg(s.title) }, isFollowed(s.id) && followMark(), s.top_score >= 3 && keyMark(false), T(s.title));
+function paintFollowMarks() {      // the rows now in the document, changed in place (a topic row is not a story row)
+  document.querySelectorAll('a.row[data-id]:not(.trow)').forEach(r => {
+    const on = isFollowed(r.dataset.id), mark = r.querySelector('.rt > .fm'), rt = r.querySelector('.rt');
+    if (on) r.setAttribute('data-followed', '1'); else r.removeAttribute('data-followed');
+    if (on && !mark && rt) rt.prepend(followMark());
+    else if (!on && mark) mark.remove();
+  });
 }
 /* Countries as plain text in the lists: the names joined by the language's own separator, with "and n more". */
 function countryText(codes, max) {
@@ -1428,10 +1448,10 @@ function visible(def, ui) {
   return a.slice().sort(by[def.q.sort] || by.rank);
 }
 function row(s, withCat) {
-  return h('a', { class: 'row', href: '#/story/' + s.id, 'data-id': s.id },
+  return h('a', rowAttrs(s),
     h('span', { class: 'rk' }, viewDate ? DAY().story_ids.indexOf(s.id) + 1 : s.rank),
     h('div', {},
-      h('div', { class: 'rt', ...lg(s.title) }, s.top_score >= 3 && keyMark(false), T(s.title)),
+      rowTitle(s),
       (line => h('div', { class: 'rs', ...lg(line ? line.text : (T(s.status_line) ? s.status_line : s.one_line)) }, line ? T(line.text) : (T(s.status_line) || T(s.one_line))))(
         viewDate && (s.timeline || []).find(x => x.date === viewDate && T(x.text))),
       h('div', { class: 'rm' }, h('span', { class: 'cs' }, withCat ? catName(s.category) + t('listDot') : '', countryText(s.countries, 3)), labelCounts(s), h('span', {}, t('cnt_article', { n: s.n_articles })))));
@@ -1615,6 +1635,7 @@ function flag(kind, s) {
     S[kind] = S[kind].includes(s.id) ? S[kind].filter(x => x !== s.id) : S[kind].concat(s.id);
     store.set(kind, S[kind]);
     document.querySelectorAll('.js-' + kind).forEach(x => paintFlag(x, kind));
+    if (kind === 'follow') paintFollowMarks();
     renderSide(parse());
   } });
   paintFlag(b, kind);
@@ -2197,6 +2218,13 @@ function suggestSection() {
   const title = st => () => { const s = st && BY.get(st.id); return s ? h('a', { class: 'link', href: '#/story/' + st.id, ...lg(s.title) }, T(s.title)) : h('span', {}, name(st)); };      // a link only when the story is in the data
   const topicNode = tp => () => { const x = tp && TOPIC_BY.get(tp.id); return x ? h('a', { class: 'link', href: topicHref(tp.id), ...lg(x.title) }, T(x.title)) : h('span', {}, (tp && (tp.title || tp.id)) || ''); };      // a link only when the topic is in the data
   const topicText = tp => { const x = tp && TOPIC_BY.get(tp.id); return x ? T(x.title) : (tp && (tp.title || tp.id)) || ''; };
+  /* What the topics say about a pair, as one more line. Both fields come from the scripts and may be missing (older data): then there is no line.
+     Topics both stories are in come first. "In different topics" is shown only when there is none of those. */
+  const pairTopics = x => {
+    const same = (Array.isArray(x.same_topics) ? x.same_topics : []).filter(tp => tp && typeof tp === 'object' && typeof tp.id === 'string');
+    if (same.length) return h('div', { class: 'sm sgtp', 'data-kind': 'same' }, same.map((tp, i) => [i ? ' · ' : '', fill(t('sgSameTopic'), { topic: topicNode(tp) })]));
+    return x.apart_topics === true ? h('div', { class: 'sm sgtp', 'data-kind': 'apart' }, t('sgApartTopics')) : null;
+  };
   const fill = (text, nodes) => text.split(/\{(\w+)\}/).map((p, i) => (i % 2 ? (nodes[p] ? nodes[p]() : '{' + p + '}') : p));      // {from} and so on become nodes
   const srcName = id => { const s = (DATA.sources || []).find(x => x.id === id); return s ? srcLabel(s)[0] : id; };
   const pending = key => !!ui.live[key] && ui.live[key].at !== reviewed[key];
@@ -2246,6 +2274,7 @@ function suggestSection() {
       act(x.key, t('sgWhatLarge'), [button(x.key, 'reject', t('sgKeep'), Number.isInteger(x.n_articles) ? x.n_articles : undefined)])));      // sends n: the number of articles now
     const pairs = (sg.pairs || []).map(x => h('li', { 'data-key': x.key }, story(x.a), ' (' + num(x.a.n_articles) + ')  ⇄  ', story(x.b), ' (' + num(x.b.n_articles) + ')',
       h('div', { class: 'sm' }, t('sgScore', { s: x.score.toFixed(2) }), ' · ', t('sgShared', { w: (x.shared_words || []).slice(0, 6).join(', ') }), (x.shared_countries || []).length ? ' · ' + countryText(x.shared_countries, 4) : ''),
+      pairTopics(x),
       x.from && x.into && act(x.key, t('sgWhatPair', { from: name(x.from), into: name(x.into) }), [button(x.key, 'approve', t('sgApprove')), button(x.key, 'reject', t('sgReject'))])));
     const near = (sg.near || []).map(x => {
       const a = (DATA.standalone || []).find(y => y.id === x.article_id);
@@ -2286,10 +2315,10 @@ const weekSpan = w => fmtDate(w.start, { year: 'numeric', month: 'long', day: 'n
 /* A story of the week: its title, the lines it got that week (its own timeline, as it is now), and its marks. */
 function weekRow(s, i, w) {
   const lines = (s.timeline || []).filter(x => x.date >= w.start && x.date <= w.end && T(x.text));
-  return h('a', { class: 'row', href: '#/story/' + s.id, 'data-id': s.id },
+  return h('a', rowAttrs(s),
     h('span', { class: 'rk' }, i + 1),
     h('div', {},
-      h('div', { class: 'rt', ...lg(s.title) }, s.top_score >= 3 && keyMark(false), T(s.title)),
+      rowTitle(s),
       lines.length ? h('ul', { class: 'wkl' }, lines.map(x => h('li', { ...lg(x.text) }, h('span', { class: 'wd' }, dShort(x.date)), ' ', T(x.text)))) : null,
       h('div', { class: 'rm' }, h('span', { class: 'cs' }, countryText(s.countries, 3)), labelCounts(s), h('span', {}, t('cnt_article', { n: s.n_articles })))));
 }
