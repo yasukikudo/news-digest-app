@@ -92,8 +92,9 @@ svg { flex: none; }
 .tabbar, .navbar, .actionbar, .hero, .catchips, .bseg { display: none; }
 
 /* sidebar */
-.side { display: flex; flex-direction: column; gap: 22px; padding: 16px 10px 12px; overflow-y: auto; background: var(--ground); border-right: 1px solid var(--line); }
-.brand { display: flex; align-items: center; gap: 10px; padding: 2px 10px; }
+.side { display: flex; flex-direction: column; gap: 22px; padding: 0 10px 12px; overflow-y: auto; background: var(--ground); border-right: 1px solid var(--line); }
+/* The logo row stays at the top of the sidebar while the menu scrolls under it. The padding and the negative margin keep the old spacing (16px above, 24px to the menu). */
+.brand { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 10px; margin-bottom: -10px; padding: 16px 10px 12px; background: var(--ground); }
 .brand b { font-size: 15px; letter-spacing: .01em; display: block; line-height: 1.25; }
 .brand small { display: block; font-size: var(--fs-xs); color: var(--muted); line-height: 1.3; }
 .side h2 { font-size: var(--fs-xs); font-weight: 600; color: var(--muted); padding: 0 10px 5px; letter-spacing: .05em; }
@@ -641,6 +642,123 @@ a.dn:hover { background: var(--hover); }
 .runstat .ng { color: color-mix(in srgb, #b3261e 82%, var(--ink)); font-weight: 600; }
 .runtoday { margin: 10px 0 0; }
 .ulist { margin-top: 4px; }
+/* Topic groups, the filing note and the topic page */
+/* Today list, grouped by topic. A group is a section: a title row (fold arrow, topic mark, title, today's count) that stays at the top while the group is read,
+   a short line of what moved today, then the stories, pushed in and joined by a thin guide line. Quiet colours: the band is the grey of the app's quiet panels
+   (the accent is for the current place and for links), and the topic is marked by a small icon, not by a label. The group without a topic has the same band. */
+.tg-g { --tg-fold: 32px; --tg-pad: 8px; --tg-band: color-mix(in srgb, var(--ink) 4.5%, var(--pane)); }
+.tg-g + .tg-g { margin-top: 6px; }
+.tg-gtop { position: sticky; top: 54px; z-index: 2; display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px 0 var(--tg-pad); background: var(--tg-band); border-top: 1px solid var(--line); cursor: pointer; }
+.tg-g:first-child .tg-gtop { border-top: 0; }
+.tg-fold { display: inline-flex; flex: none; align-items: center; justify-content: center; width: var(--tg-fold); height: 32px; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--muted); }
+.tg-fold:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--ink); }
+.tg-fold svg { transition: transform .15s; }
+.tg-g.closed .tg-fold svg { transform: rotate(-90deg); }
+.tg-gt { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; margin: 0; padding: 6px 0; font-size: 16px; font-weight: 650; line-height: 1.4; }
+.tg-gt a { color: var(--ink); text-decoration: none; border-radius: 3px; }
+.tg-gt a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tg-gi { display: inline-flex; flex: none; color: var(--accent-ink); }
+.tg-go { margin-left: 5px; color: var(--muted); font-weight: 400; }
+.tg-g.plain .tg-gt { font-weight: 600; color: color-mix(in srgb, var(--ink) 80%, var(--muted)); }
+.tg-gc { flex: none; font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tg-glw { padding: 0 16px 12px calc(var(--tg-pad) + var(--tg-fold) + 8px); background: var(--tg-band); }      /* the padding is on the wrapper: a clamped box would show the third line in its own padding */
+.tg-gl { margin: 0; font-size: var(--fs-s); line-height: 1.65; color: color-mix(in srgb, var(--ink) 72%, var(--muted)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tg-gb[hidden] { display: none; }
+.tg-gb { margin-left: calc(var(--tg-pad) + var(--tg-fold) / 2 - 1px); border-top: 1px solid var(--line); border-left: 2px solid color-mix(in srgb, var(--ink) 16%, var(--line)); }
+.tg-gb .row { grid-template-columns: minmax(0, 1fr); padding: 13px 16px 13px 18px; }
+.tg-gb .row:last-child { border-bottom: 0; }
+.tg-gb .rk { display: none; }
+.tg-gbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px 8px 18px; font-size: var(--fs-xs); color: var(--muted); border-bottom: 1px solid var(--line); }
+.tg-gbar .link { font-size: var(--fs-xs); color: var(--muted); }
+.tg-tchip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; height: 18px; padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; font-size: var(--fs-xs); line-height: 1; color: color-mix(in srgb, var(--ink) 72%, var(--muted)); }
+.tg-tchip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tg-tchip svg { color: var(--muted); }
+.tg-mark { display: inline-flex; align-items: center; height: 18px; margin-right: 6px; padding: 0 6px; border: 1px solid var(--accent); border-radius: 4px; font-size: var(--fs-xs); font-weight: 600; line-height: 1; color: var(--accent-ink); vertical-align: 1px; white-space: nowrap; }
+/* The note about this morning's automatic filing: closed, plain, like a note for the person who looks after the data. */
+.tg-filing { margin: 0; border: 0; border-bottom: 1px solid var(--line); font-size: var(--fs-s); }
+.tg-filing > summary { display: flex; align-items: baseline; gap: 6px; padding: 10px 16px 10px 12px; cursor: pointer; list-style: none; color: var(--muted); line-height: 1.6; }
+.tg-filing > summary::-webkit-details-marker { display: none; }
+.tg-filing > summary::before { content: ""; flex: none; width: 6px; height: 6px; margin: 0 3px 0 1px; align-self: center; border-right: 1.6px solid var(--muted); border-bottom: 1.6px solid var(--muted); transform: rotate(-45deg); }
+.tg-filing[open] > summary::before { transform: rotate(45deg); }
+.tg-filing > summary b { flex: none; font-weight: 600; color: var(--ink); }
+.tg-fp { display: inline-block; }
+.tg-fmsg { text-wrap: balance; }
+.tg-filing[open] > summary { color: var(--ink); }
+.tg-fbody { padding: 0 16px 12px 18px; }
+.tg-fnote { margin: 0 0 8px; color: var(--muted); line-height: 1.7; }
+.tg-fh { margin: 12px 0 2px; font-size: var(--fs-xs); font-weight: 600; letter-spacing: .05em; color: var(--muted); }
+.tg-fl { list-style: none; margin: 0; padding: 0; }
+.tg-fl > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 2px 10px; padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+.tg-fmain { min-width: 0; line-height: 1.6; }
+.tg-fhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
+.tg-fn { font-size: var(--fs-xs); color: var(--muted); }
+.tg-fl a { color: var(--accent-ink); text-decoration: none; overflow-wrap: anywhere; border-radius: 3px; }
+.tg-fl a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tg-fl .tg-flink { font-weight: 600; }
+.tg-arrow { margin: 0 6px; color: var(--muted); }
+.tg-fs { grid-column: 1 / -1; list-style: none; margin: 1px 0 0; padding: 0; font-size: var(--fs-xs); line-height: 1.7; }
+.tg-fs li { padding-left: 12px; position: relative; }
+.tg-fs li::before { content: ""; position: absolute; left: 2px; top: .8em; width: 4px; height: 1.5px; background: var(--muted); }
+.tg-undo { height: 24px; padding: 0 9px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); font-size: var(--fs-xs); color: var(--ink); white-space: nowrap; }
+.tg-undo:hover { background: var(--hover); border-color: color-mix(in srgb, var(--ink) 25%, var(--line)); }
+.tg-fmsg { grid-column: 1 / -1; margin: 2px 0 0; font-size: var(--fs-s); line-height: 1.6; color: var(--accent-ink); }
+.tg-fmsg:empty { display: none; }
+.tg-fwhy { grid-column: 1 / -1; font-size: var(--fs-xs); line-height: 1.7; color: var(--muted); }
+.tg-fdone { align-self: start; font-size: var(--fs-xs); line-height: 24px; color: var(--muted); white-space: nowrap; }
+.tg-fl > li[data-status="reset"] .tg-fmain, .tg-fl > li[data-status="reset"] .tg-fs, .tg-fl > li[data-status="reset"] .tg-fwhy { opacity: .6; }
+.listpane.show-map .tg-groupseg, .listpane.show-map .tg-filing { display: none; }
+/* The topic page */
+.tg-scope { max-width: 40em; margin-top: 8px; }
+.tg-k { margin-right: 10px; font-weight: 600; color: color-mix(in srgb, var(--ink) 72%, var(--muted)); }
+.tg-sech { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 38px 0 14px; }
+.tg-sech .sec { margin: 0; }
+.lab.tg-ai { border-style: dashed; color: var(--muted); }
+.tg-now { max-width: 40em; padding: 15px 20px; border: 1px solid var(--line); border-left: 3px solid color-mix(in srgb, var(--accent) 70%, var(--surface)); border-radius: 8px; background: var(--well); }
+.tg-now p { margin: 0; font-size: var(--fs-read); line-height: 1.9; }
+.tg-st { display: grid; justify-items: start; gap: 0; margin-top: 4px; font-size: var(--fs-s); line-height: 1.7; max-width: 40em; }
+.tg-st a { position: relative; padding-left: 12px; color: var(--accent-ink); text-decoration: none; border-radius: 3px; }
+.tg-st a::before { content: ""; position: absolute; left: 1px; top: .85em; width: 5px; height: 1.5px; background: var(--muted); }
+.tg-st a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.tg-more { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 2px 0 0 24px; }
+.tg-more .sd { margin: 0; }
+.tg-tl li:focus { outline: none; }
+.tg-old { margin-top: 44px; }
+.tg-old .tg-oldnote { margin: 8px 0 0; }
+@media (max-width: 859px) {
+  .tg-g { --tg-fold: 40px; --tg-pad: 4px; }
+  .tg-gtop { top: calc(env(safe-area-inset-top, 0px) + 61px); min-height: 50px; }
+  .tg-fold { height: 40px; }
+  .tg-gt { font-size: 17px; }
+  .tg-glw { padding-bottom: 14px; }
+  .tg-gl { font-size: var(--fs-m); }
+  .tg-gb .row { padding: 14px 16px 14px 16px; }
+  .tg-gbar { padding: 4px 16px 4px 16px; }
+  .tg-gbar .link { min-height: 40px; font-size: var(--fs-s); }
+  .tg-filing { font-size: var(--fs-m); }
+  .tg-filing > summary { padding: 12px 16px 12px 12px; }
+  .tg-undo { min-height: 36px; padding: 0 12px; font-size: var(--fs-s); }
+  .tg-fs { font-size: var(--fs-s); }
+  .tg-fs li { padding: 3px 0 3px 12px; }
+  .tg-st { font-size: var(--fs-m); line-height: 1.6; }
+  .tg-st a { padding-block: 5px; }
+  .tg-st a::before { top: 1.05em; }
+  .tg-more { margin-left: 0; }
+  .tg-more .btn { min-height: 44px; }
+  .tg-now p { font-size: var(--fs-read); }
+}
+/* BACK start */
+.sideback { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 32px; height: 32px; margin-left: auto; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--muted); }
+.sideback:hover { background: var(--hover); color: var(--ink); }
+.sideback.off { visibility: hidden; }
+.backbtn { gap: 4px; padding: 0 12px 0 8px; }
+.backrow { margin: 0 0 16px; }
+.vsep { width: 1px; height: 18px; margin: 0 4px; background: var(--line); }
+.navbar .backlink { cursor: pointer; }
+@media (max-width: 859px) {
+  .backrow, .sideback { display: none; }
+  .navbar + .page .pagein { padding-top: 14px; }
+}
+/* BACK end */
 </style>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#3a4f8a">
@@ -774,6 +892,7 @@ const BY = new Map(DATA.stories.map(s => [s.id, s]));
 const TOPICS = (Array.isArray(DATA.topics) ? DATA.topics : []).filter(x => x && typeof x.id === 'string' && x.title && typeof x.title === 'object')
   .sort((a, b) => String(b.last_day || '').localeCompare(String(a.last_day || '')) || (b.n_stories || 0) - (a.n_stories || 0) || b.id.localeCompare(a.id));
 const TOPIC_BY = new Map(TOPICS.map(x => [x.id, x]));
+if (TOPICS.length) S.group = 'topic';      // Today opens grouped by topic when there is a topic to group by (S is made above, before the topics are read)
 const storyTopics = s => (Array.isArray(s.topics) ? s.topics.filter(x => typeof x === 'string') : []);
 /* The days that have a digest, for the calendar. DATA.day is today. viewDate is null for today, or the date of a past day that was opened
    from the calendar (#/day/DATE). DAY() is the day that the screen shows: its summary, its counts, its quiet mark. */
@@ -879,6 +998,13 @@ const UI = {
     topics: 'トピック', tpLead: 'いくつかのストーリーをまとめた、広い話題です。押すと、入っているストーリーと経緯が出ます。', tpNone: 'まだ、トピックはありません。',
     tpCount_other: 'ストーリー{n}件', tpLast: '{day}に動きました', tpLines: 'このトピックに入っているストーリーの経緯を、新しい順にまとめています。',
     tpCut: 'いちばん新しい{n}件を表示しています。全部で{total}件です。',
+    tgByTopic: 'トピック別', tgOther: 'その他のストーリー', tgTopicsN_other: 'トピック {n}件', tgFoldAll: 'すべてたたむ', tgOpenAll: 'すべて開く', tgCloseOne: '『{name}』をたたむ', tgOpenOne: '『{name}』を開く', tgMoved_other: '今日 {n}件が動きました', tgMovedDay_other: 'この日 {n}件が動きました', tgMovedShort_other: '今日 {n}件', tgMovedDayShort_other: 'この日 {n}件',
+    tgAlsoIn: 'このストーリーは、トピック『{topic}』にも入っています', tgMark: '今日',
+    tgFilingTitle: '今朝の整理', tgFTopics_other: 'AI が{n}つのトピックを作り', tgFStoriesOnly_other: 'AI が{n}件のストーリーを入れました', tgFStories_other: '{n}件のストーリーを入れました', tgFJoin: '、',
+    tgFilingNote: 'AI が自動で振り分けた内容です。間違いは、管理者が取り消せます。', tgFNew: '新しく作ったトピック', tgFLink: 'ストーリー → トピック',
+    tgUndo: '取り消す', tgUndoOf: '『{name}』の振り分けを取り消す', tgUndone: '取り消し済み', tgUndoSent: '取り消しを送りました', tgAllUndone: 'AI の振り分けは、すべて取り消されました',
+    tgScope: 'このトピックの範囲', tgNow: 'いま', tgAiNow: 'AI が書きました', tgAiTl: 'AI が書きました', tgMore: 'さらに表示', tgMoreN_other: 'あと{n}件',
+    tgOldTl: '各ストーリーの経緯を、そのまま見る',
     tpAdd: 'トピックに入れる', tpRemove: '外す', tpRemoveOf: 'トピック『{topic}』から外す', tpClose: '閉じる',
     tpWait: '反映待ち', tpWaitRemove: '外す予定', tpWaitAdd: 'トピック『{topic}』に入れる', tpWaitNew: '新しいトピック『{topic}』を作る', tpWaitOther: 'トピック『{topic}』について、決定を送りました',
     tpFull: 'このストーリーは、トピック3つに入っています。これ以上は入れられません。',
@@ -1023,6 +1149,13 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     topics: 'Topics', tpLead: 'Broad subjects that gather several stories. Open one to see its stories and its timeline.', tpNone: 'There are no topics yet.',
     tpCount_one: '{n} story', tpCount_other: '{n} stories', tpLast: 'Last moved {day}', tpLines: 'The timeline lines of the stories in this topic, newest first.',
     tpCut: 'Showing the newest {n} lines of {total}.',
+    tgByTopic: 'By topic', tgOther: 'Other stories', tgTopicsN_one: '{n} topic', tgTopicsN_other: '{n} topics', tgFoldAll: 'Fold all', tgOpenAll: 'Open all', tgCloseOne: 'Fold "{name}"', tgOpenOne: 'Open "{name}"', tgMoved_one: '{n} story moved today', tgMoved_other: '{n} stories moved today', tgMovedDay_one: '{n} story moved that day', tgMovedDay_other: '{n} stories moved that day', tgMovedShort_one: '{n} today', tgMovedShort_other: '{n} today', tgMovedDayShort_one: '{n} that day', tgMovedDayShort_other: '{n} that day',
+    tgAlsoIn: 'This story is also in the topic "{topic}"', tgMark: 'Today',
+    tgFilingTitle: "This morning's filing", tgFTopics_one: 'The AI created {n} topic', tgFStoriesOnly_one: 'The AI filed {n} story', tgFStoriesOnly_other: 'The AI filed {n} stories', tgFTopics_other: 'The AI created {n} topics', tgFStories_one: 'filed {n} story', tgFStories_other: 'filed {n} stories', tgFJoin: ' and ',
+    tgFilingNote: 'The AI filed these automatically. An admin can undo a mistake.', tgFNew: 'New topics', tgFLink: 'Story → topic',
+    tgUndo: 'Undo', tgUndoOf: 'Undo the filing of "{name}"', tgUndone: 'Undone', tgUndoSent: 'Undo sent', tgAllUndone: "All of the AI's filing was undone",
+    tgScope: 'What this topic covers', tgNow: 'Now', tgAiNow: 'Written by the AI', tgAiTl: 'Written by the AI', tgMore: 'Show more', tgMoreN_one: '{n} more', tgMoreN_other: '{n} more',
+    tgOldTl: 'See each story\'s timeline as it is',
     tpAdd: 'Add to a topic', tpRemove: 'Remove', tpRemoveOf: 'Take this story out of the topic "{topic}"', tpClose: 'Close',
     tpWait: 'Waiting for the next run', tpWaitRemove: 'To be taken out', tpWaitAdd: 'To be put into the topic "{topic}"', tpWaitNew: 'The new topic "{topic}" is to be created', tpWaitOther: 'A decision about the topic "{topic}" was sent',
     tpFull: 'This story is in 3 topics, the most it can be in. Take it out of one to add another.',
@@ -1322,6 +1455,42 @@ const wideQuery = matchMedia('(min-width: 860px)');
 const isWide = () => wideQuery.matches;
 const cur = { sig: null, split: null, list: null, detail: null };
 let ctxHash = '#/today', prevName = null, listY = 0;
+/* BACK start: the Back button. The browser keeps the history, so Back is history.back(). Each entry of the history gets a number (nd) the first time the
+   app sees it, so that the app knows whether there is an earlier page of its own to go back to. A page that is opened by itself (a link, a new tab) has no
+   earlier page: Back then goes to the page above it (the list of its kind). A step that only replaces the page (next story, a redirect) keeps its entry. */
+let navIdx = history.state && Number.isInteger(history.state.nd) ? history.state.nd : -1;
+function stampNav() {
+  const st = history.state;
+  if (st && Number.isInteger(st.nd)) { navIdx = st.nd; return; }      // an entry the app knows already: Back, Forward or a reload
+  navIdx += 1;
+  try { history.replaceState(Object.assign({}, st, { nd: navIdx }), ''); } catch (e) { /* no number: Back goes to the page above */ }
+}
+const canBack = () => navIdx > 0;
+function goBack(fallback) { if (canBack()) history.back(); else location.hash = fallback; }
+function replaceHash(hash) {      // shows another page in the place of this one: Back does not come back here
+  try { history.replaceState(history.state, '', hash); } catch (e) { location.replace(hash); return; }
+  route();
+}
+/* The page above a page, for Back when there is nothing to go back to. Only the pages that are reached from another page have one. */
+function pageAbove(r) {
+  if (r.name === 'story') return ctxHash;
+  if (r.name === 'topic') return '#/topics';
+  if (r.name === 'countries' && r.a) return '#/countries';
+  if (r.name === 'places' && r.a) return '#/places';
+  if (r.name === 'weekly' && r.a) return '#/weekly';
+  return null;
+}
+const backLink = fallback => h('a', { class: 'backlink', href: fallback, onclick: e => { e.preventDefault(); goBack(fallback); } }, icon('back', 22), t('back'));
+const backBtn = fallback => h('button', { type: 'button', class: 'btn backbtn', title: t('back'), onclick: () => goBack(fallback) }, icon('back', 15), t('back'));
+/* A page made with showPage gets a bar on top on a phone (CSS hides it on a wide screen) and, when there is an earlier page, a button in the page on a wide screen. */
+function addBack(r) {
+  const up = pageAbove(r), pg = document.querySelector('#view > .page');
+  if (!up || r.name === 'story' || !pg) return;
+  pg.before(h('div', { class: 'navbar' }, backLink(up)));
+  const inner = pg.querySelector('.pagein');
+  if (inner && canBack()) inner.prepend(h('div', { class: 'backrow' }, backBtn(up)));
+}
+/* BACK end */
 function seedDemo(r) {
   if (!('demo' in r.q) || USER || S.follow.length || S.save.length) return;
   const top = DATA.stories.filter(s => s.shown_today).map(s => s.id);
@@ -1338,9 +1507,10 @@ function mergedTo(id) {
   return to !== id && !isMerged(to) && BY.has(to) ? to : null;
 }
 function route(keep) {
+  stampNav();      // BACK
   const r = parse();
-  if (r.name === 'day' && (!DAY_BY.has(r.a) || r.a === DATA.day.date)) { location.replace('#/today'); return; }      // no digest that day, or today
-  if (r.name === 'story' && r.a) { const to = mergedTo(r.a); if (to) { location.replace('#/story/' + encodeURIComponent(to)); return; } }      // replace, so that Back does not come back here
+  if (r.name === 'day' && (!DAY_BY.has(r.a) || r.a === DATA.day.date)) { replaceHash('#/today'); return; }      // no digest that day, or today
+  if (r.name === 'story' && r.a) { const to = mergedTo(r.a); if (to) { replaceHash('#/story/' + encodeURIComponent(to)); return; } }      // replace, so that Back does not come back here
   seedDemo(r);
   if (!$('#ask').hidden) closeAsk();
   document.body.dataset.route = r.name;
@@ -1354,6 +1524,7 @@ function route(keep) {
   document.title = 'News Digest';
   renderSide(r); renderTabs(r);
   (views[r.name] || listView)(r);
+  addBack(r);      // BACK
   if (!keep) window.scrollTo(0, prevName === 'story' && r.name !== 'story' ? listY : 0);
   prevName = r.name;
 }
@@ -1415,7 +1586,8 @@ function renderSide(r) {
       .concat(fol.length > 5 ? [h('a', { class: 'fi', href: '#/library/follow' }, h('span', { class: 'nl' }, t('seeAll')), h('span', { class: 'nc' }, num(fol.length)))] : [])
     : [h('p', { class: 'fnote' }, t('followEmpty'))];
   $('#side').replaceChildren(
-    h('div', { class: 'brand' }, brandMark(), h('div', {}, h('b', {}, 'News Digest'), h('small', {}, dLong(DATA.day.date)))),
+    h('div', { class: 'brand' }, brandMark(), h('div', {}, h('b', {}, 'News Digest'), h('small', {}, dLong(DATA.day.date))),
+      h('button', { type: 'button', class: 'sideback' + (canBack() ? '' : ' off'), title: t('back'), 'aria-label': t('back'), tabindex: canBack() ? null : '-1', 'aria-hidden': canBack() ? null : 'true', onclick: () => history.back() }, icon('back', 18))),      // BACK: always in its place (hidden when there is nothing to go back to), so that the menu does not move
     h('nav', { 'aria-label': t('navMain') }, navEls),
     calendarBox(),
     h('div', {}, h('h2', {}, t('categories')), h('nav', { 'aria-label': t('categories') }, catEls)),
@@ -1560,17 +1732,20 @@ function buildList(def, asH1) {
   const sub = h('small');
   const el = h('section', { class: 'listpane', 'aria-label': def.title });
   const grouped = () => def.kind === 'today' && S.group === 'cat' && !def.q.cat;
+  const topicGrouped = () => def.kind === 'today' && S.group === 'topic';
+  const syncIds = () => { api.ids = [...rows.querySelectorAll('[data-id]')].filter(n => !n.closest('[hidden]')).map(n => n.dataset.id); };      // j and k follow the order on the screen and skip folded groups
   function fill() {
     const a = visible(def, ui);
     sub.textContent = [def.q.cat && catName(def.q.cat), def.kind === 'today' && def.q.country && cname(def.q.country)].filter(Boolean).map(x => x + ' · ').join('') + t('cnt_story', { n: a.length });
     const withCat = !def.q.cat && !grouped() && def.kind !== 'today';
     const nodes = [];
     if (!a.length) nodes.push(h('p', { class: 'noresult' }, t('noResult'), def.kind === 'browse' && [' ', t('lookbackNoResult'), ' ', h('span', { class: 'stage' }, t('stageBuild', { s: '2c' }))]));
+    else if (topicGrouped()) nodes.push(...tgTopicGroups(a, syncIds));
     else if (grouped()) CAT_ORDER.forEach(id => { const g = a.filter(s => s.category === id); if (g.length) nodes.push(h('h3', { class: 'gh' }, catName(id) + '  ' + num(g.length)), g.map(s => row(s, false))); });
     else nodes.push(a.map(s => row(s, withCat)));
     if (def.kind === 'today' && isQuiet()) nodes.push(h('p', { class: 'end' }, h('a', { class: 'link', href: '#/browse' }, t('quietMore'))));
     rows.replaceChildren(...nodes.flat());
-    api.ids = a.map(s => s.id);
+    syncIds();
     api.select(api.sel);
   }
   const api = { el, ids: [], sel: null, select(id) {
@@ -1578,7 +1753,7 @@ function buildList(def, asH1) {
     rows.querySelectorAll('[data-id]').forEach(n => { if (n.dataset.id === id) { n.setAttribute('aria-current', 'true'); if (isWide()) n.scrollIntoView({ block: 'nearest' }); } else n.removeAttribute('aria-current'); });
   } };
   const top = h('div', { class: 'lh-top' }, h(asH1 ? 'h1' : 'div', { class: 'lt' }, def.title, sub));
-  if (def.kind === 'today') top.append(seg([['rank', t('byRank')], ['cat', t('byCat')]], S.group, v => { S.group = v; fill(); }, t('today')));
+  if (def.kind === 'today') top.append(tgGroupSeg(fill));
   const head = h('header', { class: 'lh' + (def.kind === 'today' ? ' today-head' : '') });
   if (def.kind === 'browse') head.append(browseSeg('browse'));
   head.append(top);
@@ -1597,6 +1772,7 @@ function buildList(def, asH1) {
   if (def.kind === 'today' && def.q.country) {
     el.append(h('div', { class: 'filterbar' }, h('a', { class: 'chip on', href: countryHref(def.q.country), 'aria-label': t('filterClear') + ': ' + cname(def.q.country) }, cname(def.q.country), icon('close', 11))));
   }
+  tgBeforeRows(def, el, fill);
   el.append(rows);
   if (foldOn(def)) { const f = foldBox(); if (f) el.append(f); }
   if (def.kind === 'today' && MAP) el.append(h('div', { class: 'mapview' }, mapCard(todayPool().filter(s => !def.q.cat || s.category === def.q.cat), def.q.country)));
@@ -1608,7 +1784,7 @@ function browseTools(def, ui, fill) {
   const input = h('input', { class: 'lsearch', type: 'search', placeholder: t('search'), 'aria-label': t('search'), value: ui.q, oninput: e => {
     ui.q = e.target.value.trim(); fill();
     const q = new URLSearchParams(def.q); if (ui.q) q.set('q', ui.q); else q.delete('q');
-    history.replaceState(null, '', '#/browse' + (q.toString() ? '?' + q : '')); ctxHash = location.hash;
+    history.replaceState(history.state, '', '#/browse' + (q.toString() ? '?' + q : '')); ctxHash = location.hash;
   } });
   const cs = Object.entries(DATA.countries).sort((a, b) => b[1].n_stories - a[1].n_stories || cname(a[0]).localeCompare(cname(b[0]), S.lang));
   const country = h('select', { 'aria-label': t('countries'), onchange: e => nav('country', e.target.value) }, h('option', { value: '' }, t('allCountries')),
@@ -1920,9 +2096,10 @@ function storyView(r) {
 const storyPins = s => (s.places || []).filter(id => PLACES[id]).map(id => ({ x: PLACES[id].x, y: PLACES[id].y, name: pname(id) }));
 function storyNodes(s, def) {
   const ids = cur.list.ids, i = ids.indexOf(s.id);
-  const go = d => { const n = ids[i + d]; if (n) location.hash = '#/story/' + n; };
-  const navbar = h('div', { class: 'navbar' }, h('a', { href: ctxHash }, icon('back', 22), def.title));
+  const go = d => { const n = ids[i + d]; if (n) replaceHash('#/story/' + n); };      // BACK: the next story takes the place of this one, so Back leads to the page before the stories
+  const navbar = h('div', { class: 'navbar' }, backLink(ctxHash));      // BACK: was the link to the list, named after the list
   const tool = h('div', { class: 'dtool' },
+    canBack() && [backBtn(ctxHash), h('span', { class: 'vsep', 'aria-hidden': 'true' })],      // BACK
     h('button', { type: 'button', class: 'btn icon', 'aria-label': t('prev'), title: t('prev'), disabled: i <= 0, onclick: () => go(-1) }, icon('up')),
     h('button', { type: 'button', class: 'btn icon', 'aria-label': t('nextStory'), title: t('nextStory'), disabled: i < 0 || i >= ids.length - 1, onclick: () => go(1) }, icon('down')),
     h('span', { class: 'pos' }, i >= 0 ? num(i + 1) + ' / ' + num(ids.length) : ''),
@@ -2059,7 +2236,7 @@ function topicBlock(s) {
   return box;
 }
 const topicRow = x => h('a', { class: 'row trow', href: topicHref(x.id), 'data-id': x.id },
-  h('div', {}, h('div', { class: 'rt', ...lg(x.title) }, T(x.title)),
+  h('div', {}, h('div', { class: 'rt', ...lg(x.title) }, T(x.title)), tgStatusLine(x),
     h('div', { class: 'rm' }, h('span', {}, t('tpCount', { n: topicCount(x) })), x.last_day && h('span', {}, t('tpLast', { day: fmtDate(x.last_day, { month: 'long', day: 'numeric' }) })))));
 function topicsView() {
   document.title = t('topics') + ' | News Digest';
@@ -2084,6 +2261,7 @@ function topicView(r) {
   }
   lines.sort((a, b) => String(b.e.date).localeCompare(String(a.e.date)));
   const period = x.first_day && x.last_day ? (x.first_day === x.last_day ? dShort(x.last_day) : dShort(x.first_day) + ' – ' + dShort(x.last_day)) : '';
+  if (tgTopicPage(x, stories, lines, period)) return;      // the page with scope, now and the topic's own timeline. Without those (an older topic) the plain page below.
   document.title = T(x.title) + ' | News Digest';
   showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, browseSeg('topics'),
     h('p', { class: 'crumb' }, h('a', { class: 'link', href: '#/topics' }, t('topics'))),
@@ -2095,6 +2273,218 @@ function topicView(r) {
       h('ol', { class: 'tl tplines' }, lines.slice(0, TOPIC_LINES).map(({ e, s }) => h('li', {}, h('div', { class: 'd' }, dLong(e.date)), h('p', lg(e.text), termify(e.text)),
         h('div', { class: 'tpst' }, h('a', { class: 'link', href: '#/story/' + encodeURIComponent(s.id), ...lg(s.title) }, T(s.title)))))),
       lines.length > TOPIC_LINES && h('p', { class: 'note tpcut' }, t('tpCut', { n: TOPIC_LINES, total: lines.length }))])));
+}
+
+/* Prototype: the app centred on topics. Needs DATA.topics (with scope, status, today_line and timeline: see topic_text.json) and DATA.morning_filing. */
+const TG_ABBR = /(?:^|\s)(?:[A-Z]|[A-Z]\.[A-Z]|Mr|Mrs|Ms|Dr|St|No|vs|Jr|Sr|Gen|Sen|Rep|Gov|Lt|Col|Prof)$/;      // what a full stop after these words does not end
+const tgFirstSentence = text => {
+  const s = String(text || '').trim(), end = /[。！？]|[.!?](?=\s|$)/g;
+  for (let m; (m = end.exec(s));) {
+    if (m[0] === '.' && TG_ABBR.test(s.slice(0, m.index))) continue;      // "U.S. forces struck a port." is one sentence
+    return s.slice(0, m.index + 1).trim();
+  }
+  return s;
+};
+const tgMovedToday = () => new Set(todayPool().map(s => s.id));
+const tgLink = (id, s) => h('a', { href: '#/story/' + encodeURIComponent(id), ...lg(s.title) }, T(s.title));
+
+/* The switch [by topic / by rank / by field]. It is built twice (the list header on a wide screen, a bar above the list on a phone), so a click paints both. */
+function tgGroupSeg(fill) {
+  const box = seg([...(TOPICS.length ? [['topic', t('tgByTopic')]] : []), ['rank', t('byRank')], ['cat', t('byCat')]], S.group === 'topic' && !TOPICS.length ? 'rank' : S.group, v => {
+    S.group = v;
+    document.querySelectorAll('[data-tg-group] button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    fill();
+  }, t('today'));
+  box.setAttribute('data-tg-group', '');
+  return box;
+}
+/* Today list by topic. `a` is already in the order of the screen (best rank first), so a group stands where its best story stands. A story sits under its
+   main topic (the first of story.topics). Stories without a topic come last. Every group can be folded (kept in the browser). Returns a flat list of nodes.
+   `sync` is called after a fold, so that the keys j and k skip the stories that are folded away. */
+const TG_CLOSED = new Set(ids(store.get('tgClosed', [])));
+function tgTopicGroups(a, sync) {
+  const groups = [], by = new Map(), other = [];
+  for (const s of a) {
+    const id = storyTopics(s).find(i => TOPIC_BY.has(i));
+    if (!id) { other.push(s); continue; }
+    if (!by.has(id)) { const g = { id, list: [] }; by.set(id, g); groups.push(g); }
+    by.get(id).list.push(s);
+  }
+  const secs = [];
+  const bar = tgGroupBar(groups.length, secs, sync);
+  groups.forEach(g => secs.push(tgGroup(g.id, g.list, secs, bar, sync)));
+  if (other.length) secs.push(tgGroup(null, other, secs, bar, sync));
+  bar.paint();
+  return [bar.el, ...secs.map(x => x.el)];
+}
+/* One group: the header (fold button, topic mark, title, count, today's line) and the body (the story rows). */
+function tgGroup(topicId, list, secs, bar, sync) {
+  const tp = topicId ? TOPIC_BY.get(topicId) : null, key = topicId || '_other';
+  const body = h('div', { class: 'tg-gb', id: 'tgg-' + key }, list.map(s => tgRow(s, topicId)));
+  const name = tp ? T(tp.title) : t('tgOther');
+  const btn = h('button', { type: 'button', class: 'tg-fold', 'aria-controls': 'tgg-' + key }, icon('down', 18));
+  const line = tp && !viewDate && tp.today_line ? T(tp.today_line) : '';
+  const top = h('div', { class: 'tg-gtop' }, btn,
+    h('h3', { class: 'tg-gt', ...(tp ? lg(tp.title) : {}) }, tp && h('span', { class: 'tg-gi', 'aria-hidden': 'true' }, icon('topics', 16)),
+      tp ? h('a', { href: topicHref(tp.id) }, T(tp.title), h('span', { class: 'tg-go', 'aria-hidden': 'true' }, '›')) : h('span', {}, name)),
+    h('span', { class: 'tg-gc', title: t(viewDate ? 'tgMovedDay' : 'tgMoved', { n: list.length }) }, t(viewDate ? 'tgMovedDayShort' : 'tgMovedShort', { n: list.length })));
+  const sec = h('section', { class: 'tg-g' + (tp ? '' : ' plain'), 'aria-label': name }, top, line && h('div', { class: 'tg-glw' }, h('p', { class: 'tg-gl', ...lg(tp.today_line) }, line)), body);
+  const api = { el: sec, key, get closed() { return sec.classList.contains('closed'); }, set(closed) {
+    sec.classList.toggle('closed', closed); body.hidden = closed;
+    btn.setAttribute('aria-expanded', String(!closed)); btn.setAttribute('aria-label', t(closed ? 'tgOpenOne' : 'tgCloseOne', { name }));
+    if (closed) TG_CLOSED.add(key); else TG_CLOSED.delete(key);
+  } };
+  api.set(TG_CLOSED.has(key));
+  const toggle = () => { api.set(!api.closed); store.set('tgClosed', [...TG_CLOSED]); sync(); bar.paint(); };
+  btn.addEventListener('click', toggle);
+  top.addEventListener('click', e => { if (!e.target.closest('a, button')) toggle(); });      // the whole band is a target, but not the title link
+  return api;
+}
+/* The line above the groups: how many topics, and one button that folds or opens all groups. */
+function tgGroupBar(nTopics, secs, sync) {
+  const btn = h('button', { type: 'button', class: 'link' });
+  const label = h('span', {});
+  const el = h('div', { class: 'tg-gbar' }, label, btn);
+  const api = { el, paint() {
+    const anyOpen = secs.some(x => !x.closed);
+    label.textContent = t('tgTopicsN', { n: nTopics });
+    btn.textContent = t(anyOpen ? 'tgFoldAll' : 'tgOpenAll');
+  } };
+  btn.addEventListener('click', () => {
+    const close = secs.some(x => !x.closed);
+    secs.forEach(x => x.set(close)); store.set('tgClosed', [...TG_CLOSED]); sync(); api.paint();
+  });
+  return api;
+}
+/* The normal story row, plus a small chip for each other topic the story is in (a span, because a row is a link already) and, on a topic page, the mark "today". */
+function tgRow(s, groupId, opt) {
+  const el = row(s, !!(opt && opt.cat));
+  const more = storyTopics(s).filter(id => id !== groupId && TOPIC_BY.has(id));
+  const rm = el.querySelector('.rm');
+  if (rm && more.length) rm.append(...more.map(id => h('span', { class: 'tg-tchip', title: t('tgAlsoIn', { topic: topicName(id) }) }, icon('topics', 11), h('span', {}, topicName(id)))));
+  const rt = el.querySelector('.rt');
+  if (rt && opt && opt.today) rt.prepend(h('span', { class: 'tg-mark' }, t('tgMark')));
+  return el;
+}
+/* Above the list: the group switch (phone only, by CSS) and the note about this morning's filing. */
+function tgBeforeRows(def, el, fill) {
+  if (def.kind !== 'today') return;
+  el.append(h('div', { class: 'viewseg tg-groupseg' }, tgGroupSeg(fill)));
+  const f = tgFilingBlock();
+  if (f) el.append(f);
+}
+/* "This morning's filing" (DATA.morning_filing, from the log of decisions): what the AI put into topics by itself today, each with its reason. Everyone sees it.
+   An admin can undo a line. That is one document, story_review/{key} with "reset", the same way as every other decision on this screen. The key comes from the
+   published data and is never built here. The scripts take the filing back at their next run. Until they have read the document (its `at` is not the one in
+   DATA.story_suggestions.reviewed) the line says "undo sent" and has no button. A line that was undone already says so. The reason is in the reader's language
+   when it has been translated, else in English. */
+function tgFilingBlock() {
+  const mf = DATA.morning_filing;
+  if (viewDate || !mf || mf.date !== DATA.day.date || !Array.isArray(mf.items)) return null;
+  const items = mf.items.filter(i => i && typeof i === 'object' && typeof i.key === 'string' && (i.kind === 'topic' || i.kind === 'link') && (i.status === 'applied' || i.status === 'reset'));
+  if (!items.length) return null;
+  const active = items.filter(i => i.status === 'applied'), made = active.filter(i => i.kind === 'topic'), filed = new Set();
+  active.forEach(i => (i.kind === 'topic' ? (Array.isArray(i.stories) ? i.stories : []) : [i.story]).forEach(id => { if (typeof id === 'string' && BY.has(id)) filed.add(id); }));
+  const join = t('tgFJoin'), parts = [made.length > 0 && t('tgFTopics', { n: made.length }), filed.size > 0 && t(made.length > 0 ? 'tgFStories' : 'tgFStoriesOnly', { n: filed.size })].filter(Boolean);
+  if (!parts.length) { if (!items.some(i => i.status === 'reset')) return null; parts.push(t('tgAllUndone')); }
+  const sum = parts.map((p, i) => [i ? (join.trim() === join ? '' : ' ') : null, h('span', { class: 'tg-fp' }, i < parts.length - 1 ? p + join.trimEnd() : p)]);      // each part stays in one piece when the line breaks
+  const admin = !!USER && USER.role === 'admin' && !!USER.api && typeof USER.api.saveStoryReview === 'function';
+  const ui = { live: { ...WRITTEN }, busy: {}, err: {}, loadFail: false };
+  const sent = key => { const d = ui.live[key]; return !!d && typeof d === 'object' && d.decision === 'reset' && d.at !== reviewedAt()[key]; };
+  const topicNode = i => { const x = TOPIC_BY.get(i.topic), name = (i.titles && i.titles.topic) || i.topic || ''; return x ? h('a', { class: 'tg-flink', href: topicHref(x.id), ...lg(x.title) }, T(x.title)) : h('span', { class: 'tg-flink' }, name); };
+  const storyNode = (id, name) => { const s = BY.get(id); return s ? tgLink(id, s) : h('span', {}, name || id); };
+  const nameOf = i => { if (i.kind === 'topic') { const x = TOPIC_BY.get(i.topic); return x ? T(x.title) : (i.titles && i.titles.topic) || ''; } const s = BY.get(i.story); return s ? T(s.title) : (i.titles && i.titles.story) || ''; };
+  const why = i => { const r = i.reason && typeof i.reason === 'object' ? i.reason : null, text = r ? T(r) : ''; return text ? h('div', { class: 'tg-fwhy', ...(r ? lg(r) : {}) }, text) : null; };
+  const tail = i => {
+    if (i.status === 'reset') return h('span', { class: 'tg-fdone' }, t('tgUndone'));
+    if (sent(i.key)) return h('span', { class: 'tg-fdone' }, t('tgUndoSent'), ' ', h('span', { class: 'tpmark' }, t('tpWait')));
+    return admin ? h('button', { type: 'button', class: 'tg-undo', 'data-act': 'reset', disabled: !!ui.busy[i.key], 'aria-label': t('tgUndoOf', { name: nameOf(i) }), onclick: () => undo(i) }, t('tgUndo')) : null;
+  };
+  const li = (i, main, sub) => h('li', { 'data-key': i.key, 'data-kind': i.kind, 'data-status': i.status === 'reset' ? 'reset' : sent(i.key) ? 'sent' : 'applied' },
+    h('div', { class: 'tg-fmain' }, main), tail(i), why(i), ui.err[i.key] && h('p', { class: 'tg-fmsg', role: 'alert' }, t('tpSaveFail')), sub);
+  const madeLine = i => {
+    const sts = (Array.isArray(i.stories) ? i.stories : []).filter(id => typeof id === 'string' && BY.has(id)).map(id => BY.get(id));
+    return li(i, h('div', { class: 'tg-fhead' }, topicNode(i), h('span', { class: 'tg-fn' }, t('tpCount', { n: sts.length }))), h('ul', { class: 'tg-fs' }, sts.map(s => h('li', {}, tgLink(s.id, s)))));
+  };
+  const linkLine = i => li(i, [storyNode(i.story, i.titles && i.titles.story), h('span', { class: 'tg-arrow', 'aria-hidden': 'true' }, '→'), topicNode(i)]);
+  const body = h('div', { class: 'tg-fbody' });
+  const paint = () => {
+    const a = items.filter(i => i.kind === 'topic'), b = items.filter(i => i.kind === 'link');
+    body.replaceChildren(h('p', { class: 'tg-fnote' }, t('tgFilingNote')), ...(ui.loadFail ? [h('p', { class: 'tg-fnote', role: 'status' }, t('tpLoadFail'))] : []),
+      ...(a.length ? [h('h4', { class: 'tg-fh' }, t('tgFNew')), h('ul', { class: 'tg-fl' }, a.map(madeLine))] : []),
+      ...(b.length ? [h('h4', { class: 'tg-fh' }, t('tgFLink')), h('ul', { class: 'tg-fl' }, b.map(linkLine))] : []));
+  };
+  async function undo(i) {
+    if (ui.busy[i.key]) return;
+    ui.busy[i.key] = true; delete ui.err[i.key]; paint();
+    let doc = null;
+    try {
+      const got = await USER.api.saveStoryReview(i.key, 'reset');
+      const own = { decision: 'reset', at: new Date().toISOString() };
+      doc = got && typeof got === 'object' && typeof got.at === 'string' ? { ...own, ...got } : own;      // what was written, so "undo sent" shows at once
+    } catch (e) { doc = null; }
+    delete ui.busy[i.key];
+    if (doc) { WRITTEN[i.key] = doc; ui.live[i.key] = doc; } else ui.err[i.key] = true;
+    paint();
+    const row = body.querySelector('li[data-key="' + i.key + '"]'), next = row && row.querySelector(doc ? '.tg-fdone' : '.tg-undo');
+    if (next) { if (doc) next.tabIndex = -1; next.focus({ preventScroll: true }); }      // the button is gone after a send: the keyboard goes to what replaced it
+  }
+  paint();
+  if (admin) {
+    Promise.resolve().then(() => USER.api.listStoryReview()).then(d => {
+      const live = d && typeof d === 'object' ? { ...d } : {};
+      for (const [k, w] of Object.entries(WRITTEN)) if (!live[k] || String(live[k].at) < String(w.at)) live[k] = w;      // a read that began earlier cannot hide what this screen wrote
+      ui.live = live; paint();
+    }, () => { ui.loadFail = true; paint(); });
+  }
+  return h('details', { class: 'tg-filing' }, h('summary', {}, h('b', {}, t('tgFilingTitle')), ' ', h('span', {}, sum)), body);
+}
+/* The topics list: the first sentence of the status, muted, under the title. */
+function tgStatusLine(x) {
+  const s = x.status ? tgFirstSentence(T(x.status)) : '';
+  return s ? h('div', { class: 'rs', ...lg(x.status) }, s) : null;
+}
+/* The topic page: scope, period and numbers, "Now" (the status), the topic's own timeline (newest 12, the rest on a button), the stories, and the timelines of
+   the stories as they are in a closed block. `stories`, `lines` and `period` come from topicView. Returns false when there is nothing the AI wrote (then topicView draws the plain page). */
+function tgTopicPage(x, stories, lines, period) {
+  const moved = tgMovedToday(), movedN = stories.filter(s => moved.has(s.id)).length;
+  const scope = x.scope ? T(x.scope) : '', status = x.status ? T(x.status) : '';
+  const tl = (Array.isArray(x.timeline) ? x.timeline : []).filter(e => e && e.date && e.text && T(e.text)).slice().sort((p, q) => String(q.date).localeCompare(String(p.date)));
+  if (!scope && !status && !tl.length) return false;      // an older topic, or one the AI has not written yet: the plain page
+  const item = e => {
+    const sts = (e.story_ids || []).map(id => BY.get(id)).filter(Boolean);
+    return h('li', {}, h('div', { class: 'd' }, dLong(e.date)), h('p', lg(e.text), termify(e.text)),
+      sts.length > 0 && h('div', { class: 'tg-st' }, sts.map(s => tgLink(s.id, s))));
+  };
+  const SHOW = 12;
+  const ol = h('ol', { class: 'tl tplines tg-tl' }, tl.slice(0, SHOW).map(item));
+  let moreBox = null;
+  if (tl.length > SHOW) {
+    const btn = h('button', { type: 'button', class: 'btn' }, t('tgMore'));
+    moreBox = h('div', { class: 'tg-more' }, btn, h('span', { class: 'sd' }, t('tgMoreN', { n: tl.length - SHOW })));
+    btn.addEventListener('click', () => {
+      const added = tl.slice(SHOW).map(item);
+      ol.append(...added); moreBox.remove();
+      added[0].tabIndex = -1; added[0].focus({ preventScroll: true });
+    });
+  }
+  const head = (title, label, extra) => h('div', { class: 'tg-sech' }, h('h2', { class: 'sec' }, title, extra), label && h('span', { class: 'lab tg-ai' }, label));
+  document.title = T(x.title) + ' | News Digest';
+  showPage(h('div', { class: 'page' }, h('div', { class: 'pagein' }, browseSeg('topics'),
+    h('p', { class: 'crumb' }, h('a', { class: 'link', href: '#/topics' }, t('topics'))),
+    h('h1', { class: 'ph1' }, h('span', lg(x.title), T(x.title))),
+    scope && h('p', { class: 'sd tg-scope', ...lg(x.scope) }, h('span', { class: 'tg-k' }, t('tgScope')), ' ', scope),
+    h('p', { class: 'sd' }, [period, t('tpCount', { n: stories.length }), movedN > 0 && t('tgMoved', { n: movedN })].filter(Boolean).join(' · ')),
+    status && [head(t('tgNow'), t('tgAiNow')), h('div', { class: 'tg-now' }, h('p', lg(x.status), termify(x.status)))],
+    tl.length > 0 && [head(t('timeline'), t('tgAiTl'), h('span', {}, num(tl.length))), ol, moreBox],
+    head(t('stories'), null, h('span', {}, num(stories.length))),
+    stories.length ? h('div', { class: 'bare rows' }, stories.map(s => tgRow(s, x.id, { cat: true, today: moved.has(s.id) }))) : h('p', { class: 'sd' }, t('noResult')),
+    lines.length > 0 && h('details', { class: 'tlgrp tg-old' }, h('summary', {}, t('tgOldTl'), h('span', {}, num(lines.length))),
+      h('p', { class: 'sd tg-oldnote' }, t('tpLines')),
+      h('ol', { class: 'tl tplines' }, lines.slice(0, TOPIC_LINES).map(({ e, s }) => h('li', {}, h('div', { class: 'd' }, dLong(e.date)), h('p', lg(e.text), termify(e.text)),
+        h('div', { class: 'tpst' }, h('a', { class: 'link', href: '#/story/' + encodeURIComponent(s.id), ...lg(s.title) }, T(s.title)))))),
+      lines.length > TOPIC_LINES && h('p', { class: 'note tpcut' }, t('tpCut', { n: TOPIC_LINES, total: lines.length }))))));
+  return true;
 }
 
 /* ---------- countries ---------- */
@@ -2119,7 +2509,8 @@ function countriesView(r) {
   };
   const stories = code ? DATA.stories.filter(s => s.countries.includes(code)) : [];
   const alt = code && S.lang !== 'en' ? (DATA.countries[code] || {}).en : '';
-  const node = code ? h('div', {}, h('div', { class: 'navbar' }, h('a', { href: '#/countries' }, icon('back', 22), t('countries'))),
+  const node = code ? h('div', {}, h('div', { class: 'navbar' }, backLink('#/countries')),      // BACK
+
     h('div', { class: 'cs-head' }, h('h1', {}, cname(code)), h('p', {}, [alt, codeLabel(code), t('cnt_story', { n: stories.length })].filter(Boolean).join(' · '))),
     h('div', { class: 'cstories bare', style: 'border-top:0' }, stories.map(s => row(s, true)))) : h('p', { class: 'noresult' }, t('pickCountry'));
   showSplit('countries', build, code, () => [node], !!r.a);
@@ -2715,7 +3106,7 @@ function step(d) {
   if (!idsNow.length || (r.name !== 'story' && !['today', 'day', 'browse'].includes(r.name))) return;
   const i = r.name === 'story' ? idsNow.indexOf(r.a) : -1;
   const n = idsNow[Math.max(0, Math.min(idsNow.length - 1, i + d))];
-  if (n) location.hash = '#/story/' + n;
+  if (n) { if (r.name === 'story') replaceHash('#/story/' + n); else location.hash = '#/story/' + n; }      // BACK: from story to story, replace
 }
 const visibleBtn = sel => [...document.querySelectorAll(sel)].find(b => b.offsetParent !== null);
 document.addEventListener('keydown', e => {
@@ -2810,7 +3201,8 @@ function assemble(parts, admin, extra) {      // the same as news_digest/publish
   const data = Object.assign({}, parts.core);
   const counts = data.parts || {};
   delete data.parts;
-  for (const key of ['stories', 'standalone', 'glossary', 'days', 'weeks']) {
+  for (const key of ['stories', 'standalone', 'glossary', 'days', 'weeks', 'topics']) {
+    if (key === 'topics' && !('topics' in counts)) continue;      // data published before the topics were a list of their own keeps the topics it has in core
     let list = [];
     for (let i = 0; i < (counts[key] || 0); i++) list = list.concat(parts[key + '_' + i] || []);
     data[key] = list;
