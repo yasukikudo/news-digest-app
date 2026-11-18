@@ -5,7 +5,7 @@
 <p align="center">A personal morning digest of international politics and political economy news, grouped into continuing stories, readable on a phone or a desktop.</p>
 
 <p align="center">
-  <img src="docs/screenshots/hero.png" alt="News Digest on a wide screen in dark mode, with a list of stories and a world map, and two phones in front: the day's brief with the story list, and one story with its timeline and a glossary card. The content is invented sample data." width="100%">
+  <img src="docs/screenshots/hero.png" alt="News Digest on a wide screen in dark mode, with Today grouped by topic next to a world map, and two phones in front: Today grouped by topic, with the note about this morning's filing, and one topic page with what it covers, where it stands now and its own timeline. The content is invented sample data." width="100%">
 </p>
 
 ## What it does
