@@ -673,6 +673,10 @@ a.dn:hover { background: var(--hover); }
 .tg-tchip { display: inline-flex; align-items: center; gap: 4px; max-width: 100%; height: 18px; padding: 0 6px; border: 1px solid var(--line); border-radius: 4px; font-size: var(--fs-xs); line-height: 1; color: color-mix(in srgb, var(--ink) 72%, var(--muted)); }
 .tg-tchip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tg-tchip svg { color: var(--muted); }
+.tg-ptopic { margin-left: 6px; max-width: calc(100% - 6px); vertical-align: 1px; text-decoration: none; }
+.tg-ptopic:hover { border-color: var(--accent); color: var(--accent-ink); }
+.home li a.tg-ptopic { display: inline-flex; padding: 0 6px; }      /* the Today pane makes the links in its lists blocks (.home li a): not this one */
+.home li a.tg-ptopic > span { display: block; color: inherit; font-size: inherit; }
 .tg-mark { display: inline-flex; align-items: center; height: 18px; margin-right: 6px; padding: 0 6px; border: 1px solid var(--accent); border-radius: 4px; font-size: var(--fs-xs); font-weight: 600; line-height: 1; color: var(--accent-ink); vertical-align: 1px; white-space: nowrap; }
 /* The note about this morning's automatic filing: closed, plain, like a note for the person who looks after the data. */
 .tg-filing { margin: 0; border: 0; border-bottom: 1px solid var(--line); font-size: var(--fs-s); }
@@ -735,6 +739,7 @@ a.dn:hover { background: var(--hover); }
   .tg-gbar { padding: 4px 16px 4px 16px; }
   .tg-gbar .link { min-height: 40px; font-size: var(--fs-s); }
   .tg-filing { font-size: var(--fs-m); }
+  .tg-ptopic { height: 24px; padding: 0 9px; margin-left: 4px; max-width: calc(100% - 4px); }
   .tg-filing > summary { padding: 12px 16px 12px 12px; }
   .tg-undo { min-height: 36px; padding: 0 12px; font-size: var(--fs-s); }
   .tg-fs { font-size: var(--fs-s); }
@@ -999,7 +1004,7 @@ const UI = {
     tpCount_other: 'ストーリー{n}件', tpLast: '{day}に動きました', tpLines: 'このトピックに入っているストーリーの経緯を、新しい順にまとめています。',
     tpCut: 'いちばん新しい{n}件を表示しています。全部で{total}件です。',
     tgByTopic: 'トピック別', tgOther: 'その他のストーリー', tgTopicsN_other: 'トピック {n}件', tgFoldAll: 'すべてたたむ', tgOpenAll: 'すべて開く', tgCloseOne: '『{name}』をたたむ', tgOpenOne: '『{name}』を開く', tgMoved_other: '今日 {n}件が動きました', tgMovedDay_other: 'この日 {n}件が動きました', tgMovedShort_other: '今日 {n}件', tgMovedDayShort_other: 'この日 {n}件',
-    tgAlsoIn: 'このストーリーは、トピック『{topic}』にも入っています', tgMark: '今日',
+    tgAlsoIn: 'このストーリーは、トピック『{topic}』にも入っています', tgMark: '今日', dayTopicOf: 'トピック『{topic}』のページを開く',
     tgFilingTitle: '今朝の整理', tgFTopics_other: 'AI が{n}つのトピックを作り', tgFStoriesOnly_other: 'AI が{n}件のストーリーを入れました', tgFStories_other: '{n}件のストーリーを入れました', tgFJoin: '、',
     tgFilingNote: 'AI が自動で振り分けた内容です。間違いは、管理者が取り消せます。', tgFNew: '新しく作ったトピック', tgFLink: 'ストーリー → トピック',
     tgUndo: '取り消す', tgUndoOf: '『{name}』の振り分けを取り消す', tgUndone: '取り消し済み', tgUndoSent: '取り消しを送りました', tgAllUndone: 'AI の振り分けは、すべて取り消されました',
@@ -1150,7 +1155,7 @@ mapAlt: '今日のストーリーが出てくる国の世界地図', mapAltStory
     tpCount_one: '{n} story', tpCount_other: '{n} stories', tpLast: 'Last moved {day}', tpLines: 'The timeline lines of the stories in this topic, newest first.',
     tpCut: 'Showing the newest {n} lines of {total}.',
     tgByTopic: 'By topic', tgOther: 'Other stories', tgTopicsN_one: '{n} topic', tgTopicsN_other: '{n} topics', tgFoldAll: 'Fold all', tgOpenAll: 'Open all', tgCloseOne: 'Fold "{name}"', tgOpenOne: 'Open "{name}"', tgMoved_one: '{n} story moved today', tgMoved_other: '{n} stories moved today', tgMovedDay_one: '{n} story moved that day', tgMovedDay_other: '{n} stories moved that day', tgMovedShort_one: '{n} today', tgMovedShort_other: '{n} today', tgMovedDayShort_one: '{n} that day', tgMovedDayShort_other: '{n} that day',
-    tgAlsoIn: 'This story is also in the topic "{topic}"', tgMark: 'Today',
+    tgAlsoIn: 'This story is also in the topic "{topic}"', tgMark: 'Today', dayTopicOf: 'Open the topic "{topic}"',
     tgFilingTitle: "This morning's filing", tgFTopics_one: 'The AI created {n} topic', tgFStoriesOnly_one: 'The AI filed {n} story', tgFStoriesOnly_other: 'The AI filed {n} stories', tgFTopics_other: 'The AI created {n} topics', tgFStories_one: 'filed {n} story', tgFStories_other: 'filed {n} stories', tgFJoin: ' and ',
     tgFilingNote: 'The AI filed these automatically. An admin can undo a mistake.', tgFNew: 'New topics', tgFLink: 'Story → topic',
     tgUndo: 'Undo', tgUndoOf: 'Undo the filing of "{name}"', tgUndone: 'Undone', tgUndoSent: 'Undo sent', tgAllUndone: "All of the AI's filing was undone",
@@ -1647,8 +1652,22 @@ function points(text) {
 }
 /* A real quiet day has a summary written for it. The Settings switch only simulates one, so it keeps two points. */
 const dayPoints = () => { const p = points(T(DAY().summary)); return S.quiet && !DAY().quiet ? p.slice(0, 2) : p; };
-const pointList = (items, extra) => h('ul', { class: 'points', ...extra }, items.map(x => h('li', {}, termNodes(x, pick(DAY().summary)[1]))));
-const digestList = () => pointList(dayPoints(), { ...lg(DAY().summary), class: 'points digest' });
+/* The topic of each point (DAY().summary_topics: one id for each line of the English text, "" for none; docs/topic-reflection-design.md). It is used only when the text
+   on the screen splits into as many points (a translation may not) and only for topics that are on the screen. Null when there is nothing to show. */
+const dayTopics = () => {
+  const ids = DAY().summary_topics;
+  if (!Array.isArray(ids) || ids.length !== points(T(DAY().summary)).length) return null;
+  const out = ids.map(id => (typeof id === 'string' && TOPIC_BY.has(id) ? id : ''));
+  return out.some(Boolean) ? (S.quiet && !DAY().quiet ? out.slice(0, 2) : out) : null;      // the same cut as dayPoints
+};
+/* The mark at the end of a point: a small chip with the name of the topic, a link to its page (the same chip as on a story row). */
+const dayTopicMark = (id, listLang) => {
+  const l = pick(TOPIC_BY.get(id).title)[1];      // the language of the name; the list it stands in may be in another one (the day has no text in the language of the screen)
+  return h('a', { class: 'tg-tchip tg-ptopic', href: topicHref(id), title: t('dayTopicOf', { topic: topicName(id) }), ...(l === listLang ? null : { lang: l }) },
+    icon('topics', 11), h('span', {}, topicName(id)));
+};
+const pointList = (items, extra, topics) => h('ul', { class: 'points', ...extra }, items.map((x, i) => h('li', {}, termNodes(x, pick(DAY().summary)[1]), topics && topics[i] && dayTopicMark(topics[i], pick(DAY().summary)[1]))));
+const digestList = () => pointList(dayPoints(), { ...lg(DAY().summary), class: 'points digest' }, dayTopics());
 function dateBlock(cls) {
   const d = Number(DAY().date.split('-')[2]);
   return h('div', { class: 'dateblock ' + (cls || '') }, h('span', { class: 'dnum' }, d),
@@ -1700,14 +1719,14 @@ function dayNav(withCal) {
 }
 const pastNote = () => (viewDate ? h('p', { class: 'pastnote' }, t('pastNote')) : null);
 function hero(def) {
-  const p = dayPoints(), head = p.slice(0, 3), rest = p.slice(3);
+  const p = dayPoints(), tp = dayTopics(), head = p.slice(0, 3), rest = p.slice(3);
   const wrap = h('section', { class: 'hero-sum', 'aria-label': viewDate ? t('dailyPast') : t('daily'), ...lg(DAY().summary) });
-  const moreBox = h('div', { id: 'sum-rest', hidden: !S.sumOpen }, pointList(rest));
+  const moreBox = h('div', { id: 'sum-rest', hidden: !S.sumOpen }, pointList(rest, null, tp && tp.slice(3)));
   const btn = h('button', { type: 'button', class: 'link', 'aria-controls': 'sum-rest' });
   const paint = () => { moreBox.hidden = !S.sumOpen; btn.textContent = S.sumOpen ? t('collapse') : t('readMore'); btn.setAttribute('aria-expanded', String(S.sumOpen)); };
   btn.addEventListener('click', () => { S.sumOpen = !S.sumOpen; paint(); });
   paint();
-  put(wrap, [h('h2', {}, viewDate ? t('dailyPast') : t('daily')), p.length ? pointList(head) : null, rest.length ? moreBox : null, rest.length ? btn : null]);
+  put(wrap, [h('h2', {}, viewDate ? t('dailyPast') : t('daily')), p.length ? pointList(head, null, tp && tp.slice(0, 3)) : null, rest.length ? moreBox : null, rest.length ? btn : null]);
   return h('header', { class: 'hero' },
     h('div', { class: 'hero-top' }, h('b', { class: 'brandline' }, brandMark(24), 'News Digest'), langSeg(true)),
     dateBlock('hero-date'),
